@@ -87,7 +87,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
   info grep
 
   # tldr (man pages simplificadas — exemplos práticos!)
-  sudo apt install -y tldr
+  pkg install -y tldr
   # Ou via npm: npm install -g tldr
 
   tldr tar
@@ -159,10 +159,10 @@ import { PageContainer } from "@/components/layout/PageContainer";
         <CodeBlock
           title="Mais documentação no terminal"
           code={`# Man pages em português (se disponíveis)
-  sudo apt install -y manpages-pt-br
+  pkg install -y manpages-pt-br
 
   # Man pages de desenvolvimento (funções C, chamadas de sistema)
-  sudo apt install -y manpages-dev manpages-posix-dev
+  pkg install -y manpages-dev manpages-posix-dev
 
   # Atualizar o banco de dados do man
   sudo mandb
@@ -181,7 +181,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
   # Caminho: /usr/local/share/man/man1/
 
   # Instalar man pages do POSIX
-  sudo apt install -y manpages-posix`}
+  pkg install -y manpages-posix`}
         />
 
         <h2>Troubleshooting</h2>
@@ -189,7 +189,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
           title="Problemas comuns com man pages"
           code={`# "No manual entry for xxx"
   # Instalar man pages:
-  sudo apt install -y man-db manpages manpages-dev
+  pkg install -y man-db manpages manpages-dev
   # Atualizar banco:
   sudo mandb
 
@@ -205,7 +205,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
   # Ou: export MANPAGER="less -R"
 
   # Buscar documentação online
-  # Ubuntu manpages: manpages.ubuntu.com
+  # Termux manpages: manpages.termux.dev
   # Linux man pages: man7.org
   # Arch Wiki: wiki.archlinux.org (excelente para qualquer distro)`}
         />

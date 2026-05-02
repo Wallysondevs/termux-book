@@ -6,7 +6,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
     return (
       <PageContainer
         title="Gerenciamento de Disco"
-        subtitle="Guia completo de gerenciamento de disco no Ubuntu: espaço, uso, limpeza, montagem, quotas, SMART e monitoramento."
+        subtitle="Guia completo de gerenciamento de disco no Termux: espaço, uso, limpeza, montagem, quotas, SMART e monitoramento."
         difficulty="iniciante"
         timeToRead="20 min"
       >
@@ -34,7 +34,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
   du -ah / 2>/dev/null | sort -rh | head -20
 
   # Ferramenta interativa (ncdu)
-  sudo apt install -y ncdu
+  pkg install -y ncdu
   ncdu /                   # Navegar visualmente
   # Setas para navegar, d para deletar, q para sair
 
@@ -48,14 +48,14 @@ import { PageContainer } from "@/components/layout/PageContainer";
 
         <h2>2. Limpar Espaço em Disco</h2>
         <CodeBlock
-          title="Liberar espaço no Ubuntu"
+          title="Liberar espaço no Termux"
           code={`# === PACOTES ===
   # Limpar cache do apt
-  sudo apt clean          # Remove todos os .deb do cache
-  sudo apt autoclean      # Remove .deb de pacotes obsoletos
+  pkg clean          # Remove todos os .deb do cache
+  pkg autoclean      # Remove .deb de pacotes obsoletos
 
   # Remover pacotes não usados
-  sudo apt autoremove --purge
+  pkg autoclean --purge
 
   # === LOGS ===
   # Logs antigos do journalctl
@@ -81,7 +81,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
 
   # === KERNELS ANTIGOS ===
   dpkg -l linux-image-* | grep ^ii
-  sudo apt autoremove --purge
+  pkg autoclean --purge
 
   # === LIXEIRA ===
   rm -rf ~/.local/share/Trash/*
@@ -131,7 +131,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
         <CodeBlock
           title="Monitorar saúde do disco"
           code={`# Instalar smartmontools
-  sudo apt install -y smartmontools
+  pkg install -y smartmontools
 
   # Verificar saúde
   sudo smartctl -H /dev/sda

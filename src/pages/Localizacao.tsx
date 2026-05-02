@@ -6,13 +6,13 @@ import { PageContainer } from "@/components/layout/PageContainer";
     return (
       <PageContainer
         title="Localização, Idioma e Fuso Horário"
-        subtitle="Configurar idioma do sistema, layout de teclado, fuso horário, formatos de data/moeda e locale no Ubuntu para português brasileiro."
+        subtitle="Configurar idioma do sistema, layout de teclado, fuso horário, formatos de data/moeda e locale no Termux para português brasileiro."
         difficulty="iniciante"
         timeToRead="25 min"
       >
         <p>
           A <strong>localização</strong> (locale) define como o sistema exibe datas, números,
-          moeda, idioma de menus e mensagens de erro. No Ubuntu, isso é controlado por variáveis
+          moeda, idioma de menus e mensagens de erro. No Termux, isso é controlado por variáveis
           de ambiente que seguem o padrão POSIX. Configurar corretamente a localização garante
           que o sistema funcione em português brasileiro, com formato de data dd/mm/aaaa,
           moeda R$ e teclado ABNT2.
@@ -64,8 +64,8 @@ import { PageContainer } from "@/components/layout/PageContainer";
   source /etc/default/locale
 
   # Instalar pacote de idioma completo (GUI + corretor ortográfico)
-  sudo apt install -y language-pack-pt language-pack-gnome-pt
-  sudo apt install -y hunspell-pt-br    # Corretor ortográfico`}
+  pkg install -y language-pack-pt language-pack-gnome-pt
+  pkg install -y hunspell-pt-br    # Corretor ortográfico`}
         />
 
         <AlertBox type="info" title="UTF-8 é essencial">
@@ -115,7 +115,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
   sudo timedatectl set-time "2024-07-15 14:30:00"
 
   # Instalar e configurar o chrony (NTP mais moderno)
-  sudo apt install -y chrony
+  pkg install -y chrony
   sudo systemctl enable chrony
   chronyc tracking    # Ver status de sincronização
   chronyc sources     # Ver servidores NTP em uso`}
@@ -199,20 +199,20 @@ import { PageContainer } from "@/components/layout/PageContainer";
 
         <h2>5. Configurar Idioma de Aplicativos</h2>
         <CodeBlock
-          title="Instalar e gerenciar idiomas no Ubuntu"
+          title="Instalar e gerenciar idiomas no Termux"
           code={`# Instalar suporte completo ao português brasileiro
-  sudo apt install -y language-pack-pt
-  sudo apt install -y language-pack-gnome-pt   # Para GNOME
-  sudo apt install -y libreoffice-l10n-pt-br   # LibreOffice em PT-BR
-  sudo apt install -y thunderbird-locale-pt-br # Thunderbird em PT-BR
-  sudo apt install -y firefox-locale-pt        # Firefox em PT-BR
+  pkg install -y language-pack-pt
+  pkg install -y language-pack-gnome-pt   # Para GNOME
+  pkg install -y libreoffice-l10n-pt-br   # LibreOffice em PT-BR
+  pkg install -y thunderbird-locale-pt-br # Thunderbird em PT-BR
+  pkg install -y firefox-locale-pt        # Firefox em PT-BR
 
   # Verificar idiomas instalados
   check-language-support -l pt_BR
   # Lista pacotes que ainda faltam instalar
 
   # Instalar todos os pacotes de idioma que faltam
-  sudo apt install -y $(check-language-support -l pt_BR)
+  pkg install -y $(check-language-support -l pt_BR)
 
   # Forçar um aplicativo a rodar em idioma específico
   LANG=en_US.UTF-8 firefox         # Firefox em inglês
@@ -258,7 +258,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
 
   # Mensagens do sistema em inglês mesmo com locale pt_BR
   # Solução: Instalar pacotes de tradução
-  sudo apt install -y language-pack-pt language-pack-gnome-pt
+  pkg install -y language-pack-pt language-pack-gnome-pt
   sudo update-locale LANG=pt_BR.UTF-8
   # Reiniciar`}
         />

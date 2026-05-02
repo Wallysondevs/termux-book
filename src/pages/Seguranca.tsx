@@ -5,14 +5,14 @@ import { InfoBox } from "@/components/ui/InfoBox";
 export default function Seguranca() {
   return (
     <PageContainer
-      title="Segurança no Ubuntu"
-      subtitle="UFW, iptables, sudo hardening, SSH, atualizações automáticas, auditd, lynis, rkhunter — defesa em profundidade para Ubuntu Desktop e Server."
+      title="Segurança no Termux"
+      subtitle="UFW, iptables, sudo hardening, SSH, atualizações automáticas, auditd, lynis, rkhunter — defesa em profundidade para Termux Desktop e Server."
       difficulty="avancado"
       timeToRead="35 min"
       category="Segurança"
     >
       <p>
-        O Ubuntu sai da fábrica com várias camadas de segurança ativas (AppArmor,
+        O Termux sai da fábrica com várias camadas de segurança ativas (AppArmor,
         firewall <em>desligado mas presente</em>, sudo configurado, kernel hardening, ASLR,
         repositórios assinados com GPG). Mas <strong>segurança é processo</strong>, não estado:
         servidores expostos à internet são varridos por bots a cada poucos minutos. Esta página
@@ -21,10 +21,10 @@ export default function Seguranca() {
         de <em>least privilege</em> e <em>defense in depth</em>.
       </p>
 
-      <Terminal title="wallyson@ubuntu: ~">
+      <Terminal title="wallyson@termux: ~">
         <Command command="lsb_release -a" output={`No LSB modules are available.
-Distributor ID: Ubuntu
-Description:    Ubuntu 24.04.2 LTS
+Distributor ID: Termux
+Description:    Termux 0.118
 Release:        24.04
 Codename:       noble`} />
         <Command
@@ -36,7 +36,7 @@ active`}
         />
       </Terminal>
 
-      <h2>1. UFW — o firewall amigável do Ubuntu</h2>
+      <h2>1. UFW — o firewall amigável do Termux</h2>
       <p>
         O <strong>UFW (Uncomplicated Firewall)</strong> é uma camada de abstração sobre o
         <code>nftables</code> (anteriormente <code>iptables</code>). Ele já vem instalado, mas
@@ -44,7 +44,7 @@ active`}
         de habilitar</em>, sob pena de se trancar do lado de fora.
       </p>
 
-      <Terminal title="root@ubuntu: ~" path="/etc">
+      <Terminal title="root@termux: ~" path="/etc">
         <Command root command="ufw status" output={`Status: inactive`} />
         <Command
           root
@@ -111,7 +111,7 @@ To                         Action      From
 
       <h3>1.1 — Regras avançadas: origem, destino, faixas</h3>
 
-      <Terminal title="root@ubuntu: ~">
+      <Terminal title="root@termux: ~">
         <Command
           root
           command="ufw allow from 192.168.1.0/24"
@@ -153,7 +153,7 @@ Rule updated (v6)`}
       </Terminal>
 
       <h3>1.2 — Inspecionar, numerar e remover regras</h3>
-      <Terminal title="root@ubuntu: ~">
+      <Terminal title="root@termux: ~">
         <Command
           root
           command="ufw status numbered"
@@ -188,14 +188,14 @@ Rule deleted (v6)`}
       </Terminal>
 
       <h3>1.3 — Logs, perfis de aplicação e reset</h3>
-      <Terminal title="root@ubuntu: ~">
+      <Terminal title="root@termux: ~">
         <Command root command="ufw logging on" output={`Logging enabled`} />
         <Command root command="ufw logging medium" comment="off | low (padrão) | medium | high | full" output={`Logging set to 'medium'`} />
-        <Command root command="tail -n 5 /var/log/ufw.log" output={`Nov 12 09:12:33 ubuntu kernel: [UFW BLOCK] IN=eth0 OUT= MAC=02:7d:... SRC=185.220.101.45 DST=10.0.0.5 LEN=60 TTL=51 ID=12345 PROTO=TCP SPT=49210 DPT=23 WINDOW=29200 SYN
-Nov 12 09:13:01 ubuntu kernel: [UFW LIMIT BLOCK] IN=eth0 OUT= SRC=45.79.12.8 DST=10.0.0.5 PROTO=TCP SPT=55001 DPT=22 WINDOW=64240 SYN
-Nov 12 09:14:22 ubuntu kernel: [UFW BLOCK] IN=eth0 OUT= SRC=104.131.12.7 DST=10.0.0.5 PROTO=TCP SPT=33012 DPT=3389
-Nov 12 09:14:55 ubuntu kernel: [UFW BLOCK] IN=eth0 OUT= SRC=64.62.197.9 DST=10.0.0.5 PROTO=UDP SPT=53 DPT=51820
-Nov 12 09:15:02 ubuntu kernel: [UFW BLOCK] IN=eth0 OUT= SRC=222.186.30.7 DST=10.0.0.5 PROTO=TCP SPT=46011 DPT=22 WINDOW=1024 SYN`} />
+        <Command root command="tail -n 5 /var/log/ufw.log" output={`Nov 12 09:12:33 termux kernel: [UFW BLOCK] IN=eth0 OUT= MAC=02:7d:... SRC=185.220.101.45 DST=10.0.0.5 LEN=60 TTL=51 ID=12345 PROTO=TCP SPT=49210 DPT=23 WINDOW=29200 SYN
+Nov 12 09:13:01 termux kernel: [UFW LIMIT BLOCK] IN=eth0 OUT= SRC=45.79.12.8 DST=10.0.0.5 PROTO=TCP SPT=55001 DPT=22 WINDOW=64240 SYN
+Nov 12 09:14:22 termux kernel: [UFW BLOCK] IN=eth0 OUT= SRC=104.131.12.7 DST=10.0.0.5 PROTO=TCP SPT=33012 DPT=3389
+Nov 12 09:14:55 termux kernel: [UFW BLOCK] IN=eth0 OUT= SRC=64.62.197.9 DST=10.0.0.5 PROTO=UDP SPT=53 DPT=51820
+Nov 12 09:15:02 termux kernel: [UFW BLOCK] IN=eth0 OUT= SRC=222.186.30.7 DST=10.0.0.5 PROTO=TCP SPT=46011 DPT=22 WINDOW=1024 SYN`} />
         <Command root command="ufw app list" output={`Available applications:
   Apache
   Apache Full
@@ -223,12 +223,12 @@ Backing up 'before.rules' to '/etc/ufw/before.rules.20251112_091633'
       <h2>2. iptables / nftables — quando UFW não basta</h2>
       <p>
         UFW gera regras <code>nftables</code> por baixo. Em casos avançados (NAT, marcação de
-        pacotes, filtros L7, política por interface) você precisa editar diretamente. No Ubuntu
+        pacotes, filtros L7, política por interface) você precisa editar diretamente. No Termux
         24.04 o <em>backend</em> padrão é <code>nftables</code>, mas o comando legado
         <code>iptables</code> ainda funciona via wrapper <code>iptables-nft</code>.
       </p>
 
-      <Terminal title="root@ubuntu: ~">
+      <Terminal title="root@termux: ~">
         <Command root command="iptables -L -n -v --line-numbers" output={`Chain INPUT (policy DROP 0 packets, 0 bytes)
 num   pkts bytes target     prot opt in     out     source               destination
 1      120  9600 ufw-before-input  all  --  *      *       0.0.0.0/0            0.0.0.0/0
@@ -271,7 +271,7 @@ num   pkts bytes target     prot opt in     out     source               destina
         exigir senha, log detalhado e timeout curto.
       </p>
 
-      <Terminal title="root@ubuntu: ~">
+      <Terminal title="root@termux: ~">
         <Command root command="visudo" comment="SEMPRE use visudo, nunca edite /etc/sudoers diretamente" />
         <Command root command="cat /etc/sudoers" output={`Defaults        env_reset
 Defaults        mail_badpass
@@ -310,14 +310,14 @@ Cmnd_Alias SHELLS = /bin/sh, /bin/bash, /usr/bin/zsh, /bin/dash, /bin/tcsh
 %dev !SHELLS`}
       </File>
 
-      <Terminal title="root@ubuntu: ~">
+      <Terminal title="root@termux: ~">
         <Command root command="visudo -cf /etc/sudoers.d/10-hardening" output={`/etc/sudoers.d/10-hardening: parsed OK`} />
-        <Command command="sudo -l" comment="Listar o que VOCÊ pode rodar via sudo" output={`Matching Defaults entries for wallyson on ubuntu:
+        <Command command="sudo -l" comment="Listar o que VOCÊ pode rodar via sudo" output={`Matching Defaults entries for wallyson on termux:
     env_reset, mail_badpass, secure_path=/usr/local/sbin\\:/usr/local/bin\\:/usr/sbin\\:/usr/bin\\:/sbin\\:/bin, use_pty, logfile=/var/log/sudo.log
 
-User wallyson may run the following commands on ubuntu:
+User wallyson may run the following commands on termux:
     (ALL : ALL) ALL`} />
-        <Command root command="tail -n 5 /var/log/sudo.log" output={`Nov 12 10:02:11 : wallyson : TTY=pts/0 ; PWD=/home/wallyson ; USER=root ; COMMAND=/usr/bin/apt update
+        <Command root command="tail -n 5 /var/log/sudo.log" output={`Nov 12 10:02:11 : wallyson : TTY=pts/0 ; PWD=/home/wallyson ; USER=root ; COMMAND=/usr/bin/pkg update
 Nov 12 10:03:44 : wallyson : TTY=pts/0 ; PWD=/home/wallyson ; USER=root ; COMMAND=/usr/bin/systemctl restart nginx
 Nov 12 10:04:01 : wallyson : 2 incorrect password attempts ; TTY=pts/0 ; PWD=/home/wallyson ; USER=root ; COMMAND=/usr/bin/cat /etc/shadow
 Nov 12 10:05:18 : wallyson : TTY=pts/0 ; PWD=/home/wallyson ; USER=root ; COMMAND=/usr/bin/visudo
@@ -353,7 +353,7 @@ Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com
 MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com`}
       </File>
 
-      <Terminal title="root@ubuntu: ~">
+      <Terminal title="root@termux: ~">
         <Command root command="sshd -t" comment="Testar sintaxe sem reiniciar — OBRIGATÓRIO" />
         <Command root command="systemctl reload ssh" />
         <Command command="ss -tlnp | grep ssh" output={`LISTEN 0      128                *:2222             *:*    users:(("sshd",pid=1224,fd=3))
@@ -366,26 +366,26 @@ LISTEN 0      128             [::]:2222          [::]:*    users:(("sshd",pid=12
       </InfoBox>
 
       <h2>5. Atualizações automáticas — unattended-upgrades</h2>
-      <Terminal title="root@ubuntu: ~">
-        <Command root command="apt install -y unattended-upgrades apt-listchanges" output={`Reading package lists... Done
+      <Terminal title="root@termux: ~">
+        <Command root command="pkg install -y unattended-upgrades apt-listchanges" output={`Reading package lists... Done
 Building dependency tree... Done
 The following NEW packages will be installed:
   apt-listchanges unattended-upgrades
 0 upgraded, 2 newly installed, 0 to remove and 0 not upgraded.
 Need to get 142 kB of archives.
 After this operation, 542 kB of additional disk space will be used.
-Get:1 http://archive.ubuntu.com/ubuntu noble/main amd64 apt-listchanges all 4.0 [89,2 kB]
-Get:2 http://archive.ubuntu.com/ubuntu noble/main amd64 unattended-upgrades all 2.9.1+nmu4ubuntu1 [53,4 kB]
+Get:1 http://packages.termux.dev/apt/termux-main noble/main amd64 apt-listchanges all 4.0 [89,2 kB]
+Get:2 http://packages.termux.dev/apt/termux-main noble/main amd64 unattended-upgrades all 2.9.1+nmutermux [53,4 kB]
 Fetched 142 kB in 1s (210 kB/s)
 Selecting previously unselected package apt-listchanges.
 (Reading database ... 188422 files and directories currently installed.)
 Preparing to unpack .../apt-listchanges_4.0_all.deb ...
 Unpacking apt-listchanges (4.0) ...
 Selecting previously unselected package unattended-upgrades.
-Preparing to unpack .../unattended-upgrades_2.9.1+nmu4ubuntu1_all.deb ...
-Unpacking unattended-upgrades (2.9.1+nmu4ubuntu1) ...
+Preparing to unpack .../unattended-upgrades_2.9.1+nmutermux_all.deb ...
+Unpacking unattended-upgrades (2.9.1+nmutermux) ...
 Setting up apt-listchanges (4.0) ...
-Setting up unattended-upgrades (2.9.1+nmu4ubuntu1) ...
+Setting up unattended-upgrades (2.9.1+nmutermux) ...
 Created symlink /etc/systemd/system/multi-user.target.wants/unattended-upgrades.service → /usr/lib/systemd/system/unattended-upgrades.service.
 Synchronizing state of unattended-upgrades.service with SysV service script with /usr/lib/systemd/systemd-sysv-install.
 Executing: /usr/lib/systemd/systemd-sysv-install enable unattended-upgrades
@@ -426,16 +426,16 @@ APT::Periodic::Unattended-Upgrade "1";
 APT::Periodic::Verbose "2";`}
       </File>
 
-      <Terminal title="root@ubuntu: ~">
+      <Terminal title="root@termux: ~">
         <Command root command="unattended-upgrade --dry-run -d" output={`Initial blacklist: ^linux-
 Initial whitelist (not strict):
 Starting unattended upgrades script
-Allowed origins are: origin=Ubuntu,archive=noble, origin=Ubuntu,archive=noble-security, ...
+Allowed origins are: origin=Termux,archive=noble, origin=Termux,archive=noble-security, ...
 Using (^linux-.*) regexp to find blacklisted packages
-Checking: openssh-server (["origin=Ubuntu,archive=noble-security"])
-  pkg openssh-server: 1:9.6p1-3ubuntu13.5 -> 1:9.6p1-3ubuntu13.6
-Checking: libssl3t64 (["origin=Ubuntu,archive=noble-security"])
-  pkg libssl3t64: 3.0.13-0ubuntu3.4 -> 3.0.13-0ubuntu3.5
+Checking: openssh-server (["origin=Termux,archive=noble-security"])
+  pkg openssh-server: 1:9.6p1-termux.5 -> 1:9.6p1-termux.6
+Checking: libssl3t64 (["origin=Termux,archive=noble-security"])
+  pkg libssl3t64: 3.0.13-termux1.4 -> 3.0.13-termux1.5
 pkgs that look like they should be upgraded:
  openssh-server libssl3t64 openssh-client openssh-sftp-server
 Fetched 0 B in 0s (0 B/s)
@@ -445,7 +445,7 @@ GetArchives: ...
 Writing dpkg log to /var/log/unattended-upgrades/unattended-upgrades-dpkg.log
 All upgrades installed`} />
         <Command root command="cat /var/log/unattended-upgrades/unattended-upgrades.log" output={`2025-11-12 06:00:01,332 INFO Starting unattended upgrades script
-2025-11-12 06:00:01,332 INFO Allowed origins are: o=Ubuntu,a=noble, o=Ubuntu,a=noble-security, o=Ubuntu,a=noble-updates
+2025-11-12 06:00:01,332 INFO Allowed origins are: o=Termux,a=noble, o=Termux,a=noble-security, o=Termux,a=noble-updates
 2025-11-12 06:00:23,887 INFO Packages that will be upgraded: openssh-client openssh-server openssh-sftp-server libssl3t64
 2025-11-12 06:00:23,887 INFO Writing dpkg log to /var/log/unattended-upgrades/unattended-upgrades-dpkg.log
 2025-11-12 06:01:14,521 INFO All upgrades installed`} />
@@ -458,8 +458,8 @@ All upgrades installed`} />
         chamou <code>execve</code>. É forensics em tempo real.
       </p>
 
-      <Terminal title="root@ubuntu: ~">
-        <Command root command="apt install -y auditd audispd-plugins" output={`Reading package lists... Done
+      <Terminal title="root@termux: ~">
+        <Command root command="pkg install -y auditd audispd-plugins" output={`Reading package lists... Done
 Building dependency tree... Done
 The following NEW packages will be installed:
   audispd-plugins auditd libauparse0t64
@@ -493,8 +493,8 @@ type=SYSCALL msg=audit(1731410062.221:1843): arch=c000003e syscall=257 success=y
 
       <h2>7. lynis — auditoria de configuração</h2>
 
-      <Terminal title="root@ubuntu: ~">
-        <Command root command="apt install -y lynis" output={`Setting up lynis (3.0.9-1) ...`} />
+      <Terminal title="root@termux: ~">
+        <Command root command="pkg install -y lynis" output={`Setting up lynis (3.0.9-1) ...`} />
         <Command root command="lynis audit system" output={`[ Lynis 3.0.9 ]
 
 [+] Initializing program
@@ -505,11 +505,11 @@ type=SYSCALL msg=audit(1731410062.221:1843): arch=c000003e syscall=257 success=y
   ---------------------------------------------------
   Program version:           3.0.9
   Operating system:          Linux
-  Operating system name:     Ubuntu
+  Operating system name:     Termux
   Operating system version:  24.04
   Kernel version:            6.8.0-48-generic
   Hardware platform:         x86_64
-  Hostname:                  ubuntu
+  Hostname:                  termux
   ---------------------------------------------------
 
 [+] Boot and services
@@ -553,8 +553,8 @@ type=SYSCALL msg=audit(1731410062.221:1843): arch=c000003e syscall=257 success=y
       </Terminal>
 
       <h2>8. rkhunter & chkrootkit — caça-rootkits</h2>
-      <Terminal title="root@ubuntu: ~">
-        <Command root command="apt install -y rkhunter chkrootkit" />
+      <Terminal title="root@termux: ~">
+        <Command root command="pkg install -y rkhunter chkrootkit" />
         <Command root command="rkhunter --update" output={`[ Rootkit Hunter version 1.4.6 ]
 Checking rkhunter data files...
   Checking file mirrors.dat                                  [ Updated ]

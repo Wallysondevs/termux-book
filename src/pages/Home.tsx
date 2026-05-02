@@ -24,7 +24,7 @@ const LEARNING_PATH = [
   { num: "13", title: "Servidores no Celular", desc: "Nginx, Apache, PHP rodando no Android", icon: Server, path: "/nginx", color: "#8AE234" },
   { num: "14", title: "Bancos de Dados", desc: "MariaDB e PostgreSQL no Termux", icon: Database, path: "/mysql", color: "#FCE94F" },
   { num: "15", title: "Desenvolvimento", desc: "Vim, Git, Python, Node.js e clangd", icon: Code2, path: "/vim", color: "#8AE234" },
-  { num: "16", title: "proot-distro", desc: "Ubuntu, Arch e Debian dentro do Termux", icon: Container, path: "/docker", color: "#729FCF" },
+  { num: "16", title: "proot-distro", desc: "Termux, Arch e Debian dentro do Termux", icon: Container, path: "/docker", color: "#729FCF" },
   { num: "17", title: "Hacking Ético & Pentest", desc: "Nmap, Metasploit, recon — só em redes próprias", icon: Shield, path: "/seguranca", color: "#EF2929" },
   { num: "18", title: "Termux:X11 & GUI", desc: "Interface gráfica, XFCE e VNC", icon: Music, path: "/multimedia", color: "#5EBE5E" },
 ];
@@ -43,7 +43,7 @@ export default function Home() {
       <section className="relative overflow-hidden pt-12 pb-20 px-4">
         <div className="absolute inset-0 z-0">
           <div className="absolute inset-0 bg-gradient-to-br from-[#1F1F1F]/20 via-transparent to-[#5EBE5E]/10" />
-          <div className="absolute inset-0 ubuntu-dots opacity-30" />
+          <div className="absolute inset-0 termux-dots opacity-30" />
           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#0D0D0D]" />
         </div>
 

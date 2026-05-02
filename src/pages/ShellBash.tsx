@@ -5,13 +5,13 @@ import { PageContainer } from "@/components/layout/PageContainer";
   export default function ShellBash() {
     return (
       <PageContainer
-        title="Shell Bash — O Terminal do Ubuntu"
+        title="Shell Bash — O Terminal do Termux"
         subtitle="Guia completo do Bash: atalhos, histórico, expansões, globbing, jobs, personalização do prompt e recursos avançados do shell."
         difficulty="iniciante"
         timeToRead="25 min"
       >
         <p>
-          O <strong>Bash</strong> (Bourne Again SHell) é o shell padrão do Ubuntu — é o
+          O <strong>Bash</strong> (Bourne Again SHell) é o shell padrão do Termux — é o
           programa que interpreta seus comandos no terminal. Dominar o Bash vai além de
           saber comandos: é entender atalhos, histórico, expansões e recursos que multiplicam
           sua produtividade no terminal.
@@ -51,7 +51,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
   # === TAB (autocompletar) ===
   # Tab        → Autocompletar comando/arquivo
   # Tab Tab    → Listar todas as opções
-  # apt ins[Tab]  → apt install
+  # apt ins[Tab]  → pkg install
   # cd /e[Tab]    → cd /etc/`}
         />
 
@@ -149,7 +149,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
   disown %1
 
   # screen/tmux — sessões persistentes (melhor que nohup)
-  sudo apt install -y tmux
+  pkg install -y tmux
   tmux new -s minha-sessao
   # Ctrl+B, D = desacoplar
   tmux attach -t minha-sessao
@@ -221,7 +221,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
   # Verificar PATH:
   echo $PATH
   # Instalar:
-  sudo apt install nome-do-pacote
+  pkg install nome-do-pacote
   # Ou verificar se o script é executável:
   chmod +x script.sh
 

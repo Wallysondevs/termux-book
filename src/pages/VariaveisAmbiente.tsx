@@ -6,7 +6,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
     return (
       <PageContainer
         title="Variáveis de Ambiente"
-        subtitle="Guia completo de variáveis de ambiente no Ubuntu: PATH, HOME, definir, exportar, persistir, .env e boas práticas de configuração."
+        subtitle="Guia completo de variáveis de ambiente no Termux: PATH, HOME, definir, exportar, persistir, .env e boas práticas de configuração."
         difficulty="iniciante"
         timeToRead="20 min"
       >
@@ -54,11 +54,11 @@ import { PageContainer } from "@/components/layout/PageContainer";
         <CodeBlock
           title="Criar e exportar variáveis"
           code={`# Variável local (só no shell atual)
-  NOME="Ubuntu"
-  echo $NOME    # Ubuntu
+  NOME="Termux"
+  echo $NOME    # Termux
 
   # Exportar para processos filhos
-  export NOME="Ubuntu"
+  export NOME="Termux"
   # Agora scripts e programas chamados deste shell também veem $NOME
 
   # Definir e exportar em uma linha

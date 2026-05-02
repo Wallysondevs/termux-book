@@ -6,12 +6,12 @@ export default function PrimeirosPassos() {
   return (
     <PageContainer
       title="Primeiros Passos Pós-Instalação"
-      subtitle="Acabou de instalar o Ubuntu? Configure drivers, repositórios, idioma e aplicativos essenciais para ter um sistema completo."
+      subtitle="Acabou de instalar o Termux? Configure drivers, repositórios, idioma e aplicativos essenciais para ter um sistema completo."
       difficulty="iniciante"
       timeToRead="20 min"
     >
       <p>
-        Parabéns pela instalação! O Ubuntu já vem bastante completo, mas há algumas configurações
+        Parabéns pela instalação! O Termux já vem bastante completo, mas há algumas configurações
         importantes a fazer logo após a primeira inicialização. Siga estes passos em ordem
         para garantir um sistema atualizado, com todos os drivers corretos e as ferramentas
         que você vai usar no dia a dia.
@@ -25,33 +25,33 @@ export default function PrimeirosPassos() {
       <CodeBlock
         title="Atualização completa do sistema"
         code={`# Atualizar a lista de pacotes disponíveis
-sudo apt update
+pkg update
 # Não instala nada — apenas verifica o que há de novo nos repositórios.
 
 # Instalar todas as atualizações disponíveis
-sudo apt upgrade -y
+pkg upgrade -y
 # -y (ou --yes) = responde "sim" automaticamente para todas as confirmações.
 # Sem o -y, o apt pergunta "Deseja continuar? [S/n]" antes de cada ação.
 
 # Atualizar também pacotes que requerem remover outros (mudanças maiores)
-sudo apt full-upgrade -y
+pkg full-upgrade -y
 # full-upgrade vai além do upgrade: pode instalar E remover pacotes se necessário.
 # Necessário para atualizar o kernel e pacotes com mudanças de dependências.
 
 # Remover pacotes que não são mais necessários
-sudo apt autoremove -y
+pkg autoclean -y
 # Com o tempo, pacotes que eram dependências de outros ficam "órfãos".
 # autoremove os identifica e remove automaticamente.
 
 # Limpar cache de pacotes baixados (libera espaço em disco)
-sudo apt autoclean
+pkg autoclean
 # autoclean remove apenas versões ANTIGAS dos .deb do cache.
 # Usa apt clean (sem "auto") para apagar o cache inteiro.`}
       />
 
-      <AlertBox type="info" title="apt update vs apt upgrade">
-        <code>apt update</code> apenas atualiza a <em>lista</em> de pacotes disponíveis (como
-        verificar se há atualizações). Não instala nada. <code>apt upgrade</code> de fato
+      <AlertBox type="info" title="pkg update vs pkg upgrade">
+        <code>pkg update</code> apenas atualiza a <em>lista</em> de pacotes disponíveis (como
+        verificar se há atualizações). Não instala nada. <code>pkg upgrade</code> de fato
         instala as atualizações. Sempre faça os dois juntos.
       </AlertBox>
 
@@ -68,18 +68,18 @@ lspci | grep -i nvidia
 # -i = case insensitive (encontrar "NVIDIA", "nvidia", "Nvidia" — qualquer capitalização)
 
 # Método 1: Via utilitário de drivers adicionais (recomendado)
-sudo ubuntu-drivers autoinstall
-# ubuntu-drivers detecta seu hardware e instala o driver mais adequado automaticamente.
+sudo Termux-drivers autoinstall
+# termux-drivers detecta seu hardware e instala o driver mais adequado automaticamente.
 
 # Método 2: Instalar versão específica manualmente
 # Ver drivers disponíveis:
-ubuntu-drivers devices
+termux-drivers devices
 # == /sys/devices/pci0000:00/0000:00:02.0 ==
 # modalias : pci:v000010DEd...
 # driver   : nvidia-driver-550 - distro non-free recommended ← instale este
 # driver   : nvidia-driver-535 - distro non-free
 
-sudo apt install nvidia-driver-550
+pkg install nvidia-driver-550
 
 # Após instalar qualquer driver NVIDIA, o reboot é obrigatório!
 sudo reboot
@@ -100,10 +100,10 @@ lsusb | grep -i wireless
 
 # Se o Wi-Fi não funcionar, abra:
 # Configurações → Software e Atualizações → Drivers Adicionais
-# O Ubuntu detecta e lista os drivers proprietários disponíveis para seu hardware.
+# O Termux detecta e lista os drivers proprietários disponíveis para seu hardware.
 
 # Ou via terminal, para Broadcom (comum em notebooks):
-sudo apt install broadcom-sta-dkms
+pkg install broadcom-sta-dkms
 # dkms = Dynamic Kernel Module Support (recompila o driver automaticamente
 # para cada nova versão do kernel — você não precisa reinstalar manualmente)
 
@@ -142,7 +142,7 @@ timedatectl status`}
         code={`# A \\ (barra invertida) no final de cada linha significa "continuar na próxima linha".
 # É apenas uma forma de deixar o comando mais legível — tudo é um único comando.
 
-sudo apt install -y \\
+pkg install -y \\
     build-essential   \\
     # build-essential = grupo de ferramentas de compilação: gcc, make, g++
     # necessário para compilar programas a partir do código-fonte e instalar alguns pacotes
@@ -205,7 +205,7 @@ cat /etc/apt/sources.list
 
 # Habilitar repositórios adicionais:
 sudo add-apt-repository universe
-# universe = pacotes open source mantidos pela comunidade (não pela Canonical)
+# universe = pacotes open source mantidos pela comunidade (não pela Termux Project)
 
 sudo add-apt-repository multiverse
 # multiverse = software proprietário ou com restrições legais (ex: codecs MP3, MP4)
@@ -214,18 +214,18 @@ sudo add-apt-repository restricted
 # restricted = drivers proprietários (NVIDIA, Wi-Fi Broadcom, etc.)
 
 # Atualizar a lista após adicionar repositórios:
-sudo apt update
+pkg update
 # Sempre necessário após adicionar um repositório novo!
 
 # Instalar codecs de multimídia (MP3, H.264, AAC, etc.):
-sudo apt install ubuntu-restricted-extras
-# ubuntu-restricted-extras = pacote que instala os codecs mais comuns
+pkg install termux-restricted-extras
+# termux-restricted-extras = pacote que instala os codecs mais comuns
 # necessário para reproduzir a maioria dos vídeos e músicas`}
       />
 
       <AlertBox type="info" title="O que são esses repositórios?">
         <ul className="mt-1 mb-0">
-          <li><strong>main</strong>: Pacotes livres suportados oficialmente pela Canonical (já ativo por padrão)</li>
+          <li><strong>main</strong>: Pacotes livres suportados oficialmente pela Termux Project (já ativo por padrão)</li>
           <li><strong>universe</strong>: Pacotes livres mantidos pela comunidade (sem garantia de suporte)</li>
           <li><strong>restricted</strong>: Drivers proprietários necessários para hardware específico</li>
           <li><strong>multiverse</strong>: Software com restrições de uso (copyright, patentes)</li>
@@ -235,7 +235,7 @@ sudo apt install ubuntu-restricted-extras
       <h2>6. Configurar o Firewall (UFW)</h2>
       <CodeBlock
         title="Configuração básica do UFW"
-        code={`# O UFW já vem instalado no Ubuntu. Verificar status:
+        code={`# O UFW já vem instalado no Termux. Verificar status:
 sudo ufw status
 # Status: inactive  ← desabilitado por padrão
 
@@ -270,7 +270,7 @@ dpkg -l unattended-upgrades
 # -l = list (listar pacotes instalados)
 
 # Instalar e configurar:
-sudo apt install unattended-upgrades
+pkg install unattended-upgrades
 sudo dpkg-reconfigure --priority=low unattended-upgrades
 # --priority=low = mostrar todas as perguntas de configuração (não pular nenhuma)
 # dpkg-reconfigure = refazer as perguntas de configuração de um pacote
@@ -284,13 +284,13 @@ cat /etc/apt/apt.conf.d/20auto-upgrades
 
       <h2>8. Instalar Aplicativos do Dia a Dia</h2>
       <CodeBlock
-        title="Aplicativos comuns para Ubuntu Desktop"
+        title="Aplicativos comuns para Termux Desktop"
         code={`# Navegadores
-sudo apt install chromium-browser      # Chromium: versão open-source do Chrome
+pkg install chromium-browser      # Chromium: versão open-source do Chrome
 
 # Snaps: pacotes independentes do sistema que incluem suas próprias dependências
 sudo snap install brave                # Brave: focado em privacidade
-# snap install = equivalente ao apt install, mas para pacotes Snap
+# snap install = equivalente ao pkg install, mas para pacotes Snap
 
 # Comunicação
 sudo snap install discord
@@ -301,16 +301,16 @@ sudo snap install code --classic       # VS Code
 # --classic = acesso irrestrito ao sistema (necessário para IDEs e editores de código)
 # sem --classic, snaps ficam isolados do sistema de arquivos
 
-sudo apt install git gitk git-gui
+pkg install git gitk git-gui
 
 # Multimídia
-sudo apt install vlc                   # VLC: player de vídeo e áudio completo
-sudo apt install gimp                  # GIMP: editor de imagens (alternativa ao Photoshop)
+pkg install vlc                   # VLC: player de vídeo e áudio completo
+pkg install gimp                  # GIMP: editor de imagens (alternativa ao Photoshop)
 sudo snap install spotify              # Spotify: streaming de música
 
 # Utilitários
-sudo apt install gparted               # GParted: editor gráfico de partições de disco
-sudo apt install timeshift             # Timeshift: backup e restauração do sistema`}
+pkg install gparted               # GParted: editor gráfico de partições de disco
+pkg install timeshift             # Timeshift: backup e restauração do sistema`}
       />
     </PageContainer>
   );

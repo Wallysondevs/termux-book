@@ -5,7 +5,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
   export default function PHP() {
     return (
       <PageContainer
-        title="PHP no Ubuntu — LAMP & LEMP Stack"
+        title="PHP no Termux — LAMP & LEMP Stack"
         subtitle="Instalação completa do PHP, configuração com Apache (LAMP) e Nginx (LEMP), extensões, PHP-FPM, Composer e deploy de aplicações PHP."
         difficulty="intermediario"
         timeToRead="35 min"
@@ -13,7 +13,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
         <p>
           O <strong>PHP</strong> é uma das linguagens mais utilizadas para desenvolvimento web,
           alimentando mais de 75% dos sites do mundo, incluindo WordPress, Laravel, Drupal e
-          Magento. No Ubuntu, o PHP pode ser configurado com Apache (stack LAMP) ou Nginx
+          Magento. No Termux, o PHP pode ser configurado com Apache (stack LAMP) ou Nginx
           (stack LEMP), cada um com vantagens diferentes.
         </p>
 
@@ -33,10 +33,10 @@ import { PageContainer } from "@/components/layout/PageContainer";
         <CodeBlock
           title="Instalação básica do PHP"
           code={`# Atualizar repositórios
-  sudo apt update
+  pkg update
 
   # Instalar o PHP com extensões comuns
-  sudo apt install -y php php-cli php-common php-fpm
+  pkg install -y php php-cli php-common php-fpm
 
   # Verificar a versão instalada
   php -v
@@ -65,22 +65,22 @@ import { PageContainer } from "@/components/layout/PageContainer";
         <CodeBlock
           title="Extensões essenciais do PHP"
           code={`# Extensões para desenvolvimento web geral
-  sudo apt install -y php-mysql php-pgsql php-sqlite3  # Bancos de dados
-  sudo apt install -y php-xml php-mbstring php-json     # Processamento de dados
-  sudo apt install -y php-curl php-gd php-zip           # HTTP, imagens, compressão
-  sudo apt install -y php-intl php-bcmath               # Internacionalização, matemática
-  sudo apt install -y php-readline php-tokenizer        # CLI e parsing
+  pkg install -y php-mysql php-pgsql php-sqlite3  # Bancos de dados
+  pkg install -y php-xml php-mbstring php-json     # Processamento de dados
+  pkg install -y php-curl php-gd php-zip           # HTTP, imagens, compressão
+  pkg install -y php-intl php-bcmath               # Internacionalização, matemática
+  pkg install -y php-readline php-tokenizer        # CLI e parsing
 
   # Extensões para Laravel
-  sudo apt install -y php-xml php-mbstring php-curl php-zip php-bcmath \
+  pkg install -y php-xml php-mbstring php-curl php-zip php-bcmath \
     php-mysql php-pgsql php-redis php-gd php-intl
 
   # Extensões para WordPress
-  sudo apt install -y php-mysql php-xml php-mbstring php-curl \
+  pkg install -y php-mysql php-xml php-mbstring php-curl \
     php-gd php-zip php-imagick php-intl
 
   # Extensões de cache e performance
-  sudo apt install -y php-redis php-memcached php-apcu php-opcache
+  pkg install -y php-redis php-memcached php-apcu php-opcache
 
   # Pesquisar extensões disponíveis
   apt search php- | grep "^php8.3-"
@@ -99,7 +99,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
         <CodeBlock
           title="Configurar LAMP (Apache + PHP)"
           code={`# Instalar Apache + PHP módulo Apache + MySQL
-  sudo apt install -y apache2 libapache2-mod-php php-mysql mysql-server
+  pkg install -y apache2 libapache2-mod-php php-mysql mysql-server
 
   # Verificar que o módulo PHP está habilitado no Apache
   sudo a2enmod php8.3
@@ -146,7 +146,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
         <CodeBlock
           title="Configurar LEMP (Nginx + PHP-FPM)"
           code={`# Instalar Nginx + PHP-FPM + MySQL
-  sudo apt install -y nginx php-fpm php-mysql mysql-server
+  pkg install -y nginx php-fpm php-mysql mysql-server
 
   # Verificar que o PHP-FPM está rodando
   sudo systemctl status php8.3-fpm
@@ -284,10 +284,10 @@ import { PageContainer } from "@/components/layout/PageContainer";
           title="Múltiplas versões do PHP via PPA"
           code={`# Adicionar o repositório Ondrej (mantém todas as versões do PHP)
   sudo add-apt-repository ppa:ondrej/php
-  sudo apt update
+  pkg update
 
   # Instalar PHP 8.1 ao lado do 8.3
-  sudo apt install -y php8.1 php8.1-fpm php8.1-cli php8.1-mysql php8.1-xml php8.1-mbstring
+  pkg install -y php8.1 php8.1-fpm php8.1-cli php8.1-mysql php8.1-xml php8.1-mbstring
 
   # Alternar a versão padrão do CLI
   sudo update-alternatives --config php
@@ -311,7 +311,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
         <CodeBlock
           title="Instalar e configurar o Xdebug"
           code={`# Instalar o Xdebug
-  sudo apt install -y php-xdebug
+  pkg install -y php-xdebug
 
   # Configurar o Xdebug para debug remoto
   sudo tee /etc/php/8.3/mods-available/xdebug.ini > /dev/null << 'EOF'
@@ -346,7 +346,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
 
         <h2>Troubleshooting</h2>
         <CodeBlock
-          title="Problemas comuns com PHP no Ubuntu"
+          title="Problemas comuns com PHP no Termux"
           code={`# Erro: "PHP Fatal error: Allowed memory size exhausted"
   # Solução: Aumentar memory_limit no php.ini
   sudo sed -i 's/memory_limit = .*/memory_limit = 512M/' /etc/php/8.3/fpm/php.ini
@@ -364,7 +364,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
 
   # Erro: Extensão PHP não encontrada
   # Solução: Instalar e habilitar
-  sudo apt install -y php8.3-nome_extensao
+  pkg install -y php8.3-nome_extensao
   sudo phpenmod nome_extensao
   sudo systemctl restart php8.3-fpm
 

@@ -6,36 +6,36 @@ import { PageContainer } from "@/components/layout/PageContainer";
     return (
       <PageContainer
         title="Referências e Recursos"
-        subtitle="Links, livros, comunidades, canais e recursos essenciais para continuar aprendendo Ubuntu e Linux."
+        subtitle="Links, livros, comunidades, canais e recursos essenciais para continuar aprendendo Termux e Linux."
         difficulty="iniciante"
         timeToRead="10 min"
       >
         <p>
           Aprender Linux é uma jornada contínua. Esta página reúne os melhores recursos
-          para continuar aprofundando seus conhecimentos em Ubuntu, administração de
+          para continuar aprofundando seus conhecimentos no Termux, administração de
           sistemas e desenvolvimento no Linux.
         </p>
 
         <h2>1. Documentação Oficial</h2>
         <ul>
-          <li><strong>Ubuntu Documentation</strong> — help.ubuntu.com</li>
-          <li><strong>Ubuntu Server Guide</strong> — ubuntu.com/server/docs</li>
-          <li><strong>Ubuntu Wiki</strong> — wiki.ubuntu.com</li>
-          <li><strong>Man pages online</strong> — manpages.ubuntu.com</li>
-          <li><strong>Debian Wiki</strong> — wiki.debian.org (aplicável ao Ubuntu)</li>
+          <li><strong>Termux Documentation</strong> — help.termux.dev</li>
+          <li><strong>Termux Guide</strong> — termux.dev/server/docs</li>
+          <li><strong>Termux Wiki</strong> — wiki.termux.dev</li>
+          <li><strong>Man pages online</strong> — manpages.termux.dev</li>
+          <li><strong>Debian Wiki</strong> — wiki.debian.org (aplicável ao Termux)</li>
           <li><strong>Arch Wiki</strong> — wiki.archlinux.org (excelente para qualquer distro)</li>
           <li><strong>Linux Kernel Documentation</strong> — kernel.org/doc</li>
         </ul>
 
         <h2>2. Comunidades e Fóruns</h2>
         <ul>
-          <li><strong>Ask Ubuntu</strong> — askubuntu.com (perguntas e respostas)</li>
-          <li><strong>Ubuntu Forums</strong> — ubuntuforums.org</li>
-          <li><strong>Reddit r/Ubuntu</strong> — reddit.com/r/ubuntu</li>
+          <li><strong>Ask Termux</strong> — asTermux.com (perguntas e respostas)</li>
+          <li><strong>Termux Forums</strong> — termuxforums.org</li>
+          <li><strong>Reddit r/Termux</strong> — reddit.com/r/termux</li>
           <li><strong>Reddit r/linux</strong> — reddit.com/r/linux</li>
           <li><strong>Stack Overflow</strong> — stackoverflow.com (para programação)</li>
           <li><strong>Linux Questions</strong> — linuxquestions.org</li>
-          <li><strong>Ubuntu BR</strong> — ubuntubr.org (comunidade brasileira)</li>
+          <li><strong>Termux BR</strong> — termuxbr.org (comunidade brasileira)</li>
         </ul>
 
         <h2>3. Ferramentas de Aprendizado</h2>
@@ -46,7 +46,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
   man bash
 
   # tldr — exemplos práticos rápidos
-  sudo apt install -y tldr
+  pkg install -y tldr
   tldr tar
   tldr rsync
 
@@ -77,24 +77,24 @@ import { PageContainer } from "@/components/layout/PageContainer";
           <li><strong>Linux Essentials</strong> — Nível introdutório (LPI)</li>
           <li><strong>LPIC-1</strong> — Administrador Linux Junior (LPI)</li>
           <li><strong>LPIC-2</strong> — Administrador Linux Avançado (LPI)</li>
-          <li><strong>Ubuntu Certified Professional</strong> — Canonical</li>
+          <li><strong>Termux Certified Professional</strong> — Termux Project</li>
           <li><strong>Red Hat RHCSA/RHCE</strong> — Aplicável a qualquer distro</li>
           <li><strong>CompTIA Linux+</strong> — Vendor-neutral</li>
         </ul>
 
         <h2>6. Canais e Podcasts</h2>
         <ul>
-          <li><strong>Diolinux</strong> — YouTube (PT-BR, excelente para Ubuntu)</li>
+          <li><strong>Diolinux</strong> — YouTube (PT-BR, excelente para Termux)</li>
           <li><strong>Dio</strong> — YouTube (PT-BR, Linux e tech)</li>
           <li><strong>NetworkChuck</strong> — YouTube (EN, networking e Linux)</li>
           <li><strong>LearnLinuxTV</strong> — YouTube (EN, tutoriais detalhados)</li>
           <li><strong>Linux Unplugged</strong> — Podcast (EN, Jupiter Broadcasting)</li>
-          <li><strong>Ubuntu Podcast</strong> — Podcast oficial da comunidade</li>
+          <li><strong>Termux Podcast</strong> — Podcast oficial da comunidade</li>
         </ul>
 
         <AlertBox type="info" title="Dica de aprendizado">
           A melhor forma de aprender Linux é <strong>usando no dia a dia</strong>. Instale
-          o Ubuntu como seu sistema principal (ou dual boot), quebre coisas, conserte,
+          o Termux como seu sistema principal (ou dual boot), quebre coisas, conserte,
           automatize tarefas com scripts. A prática constante é o que transforma
           conhecimento teórico em habilidade real.
         </AlertBox>

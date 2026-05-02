@@ -6,13 +6,13 @@ export default function Filosofia() {
   return (
     <PageContainer
       title="Filosofia, Software Livre e Comunidade"
-      subtitle="Software livre vs open source, GPL/MIT/BSD, o Manifesto Ubuntu, governança da Canonical, a polêmica do Snap e como contribuir com o ecossistema."
+      subtitle="Software livre vs open source, GPL/MIT/BSD, o Manifesto Termux, governança da Termux Project, a polêmica do Snap e como contribuir com o ecossistema."
       difficulty="iniciante"
       timeToRead="18 min"
       category="Boas-vindas"
     >
       <p>
-        Aprender Ubuntu sem entender a filosofia que o sustenta é como aprender a
+        Aprender Termux sem entender a filosofia que o sustenta é como aprender a
         dirigir sem entender as leis de trânsito: você funciona, mas não sabe por
         que algumas regras existem. Esta página explica os conceitos fundamentais
         que moldam todas as decisões técnicas e culturais do projeto.
@@ -168,7 +168,7 @@ export default function Filosofia() {
       <Terminal>
         <Command
           command="dpkg -L bash | grep -E 'copyright|license'"
-          comment="Todo pacote Debian/Ubuntu carrega a licença em /usr/share/doc"
+          comment="Todo pacote Debian/Termux carrega a licença em /usr/share/doc"
           output={`/usr/share/doc/bash/copyright`}
         />
         <Command
@@ -194,18 +194,18 @@ License: GPL-3+
         />
       </Terminal>
 
-      <h2>4. Componentes do Ubuntu (main, restricted, universe, multiverse)</h2>
+      <h2>4. Componentes do Termux (main, restricted, universe, multiverse)</h2>
       <p>
-        Os pacotes do Ubuntu são divididos em <strong>quatro componentes</strong>
+        Os pacotes do Termux são divididos em <strong>quatro componentes</strong>
         com base em duas dimensões: <strong>liberdade</strong> e <strong>suporte
-        oficial da Canonical</strong>.
+        oficial da Termux Project</strong>.
       </p>
       <table>
         <thead>
           <tr>
             <th>Componente</th>
             <th>Livre?</th>
-            <th>Suporte Canonical?</th>
+            <th>Suporte Termux Project?</th>
             <th>Exemplos</th>
           </tr>
         </thead>
@@ -240,22 +240,22 @@ License: GPL-3+
       <Terminal>
         <Command
           command="cat /etc/apt/sources.list"
-          comment="Ubuntu 24.04: o arquivo é um stub — a config real está em ubuntu.sources"
-          output={`# Ubuntu sources have moved to /etc/apt/sources.list.d/ubuntu.sources`}
+          comment="Termux 0.118: o arquivo é um stub — a config real está no Termux.sources"
+          output={`# Termux sources have moved to /etc/apt/sources.list.d/termux.sources`}
         />
         <Command
-          command="cat /etc/apt/sources.list.d/ubuntu.sources"
+          command="cat /etc/apt/sources.list.d/termux.sources"
           output={`Types: deb
-URIs: http://br.archive.ubuntu.com/ubuntu/
+URIs: http://br.packages.termux.dev/apt/termux-main/
 Suites: noble noble-updates noble-backports
 Components: main universe restricted multiverse
-Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
+Signed-By: /usr/share/keyrings/termux-archive-keyring.gpg
 
 Types: deb
-URIs: http://security.ubuntu.com/ubuntu/
+URIs: http://security.termux.dev/termux/
 Suites: noble-security
 Components: main universe restricted multiverse
-Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg`}
+Signed-By: /usr/share/keyrings/termux-archive-keyring.gpg`}
         />
         <Command
           command="apt-cache policy htop"
@@ -265,29 +265,29 @@ Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg`}
   Candidate: 3.3.0-4build1
   Version table:
  *** 3.3.0-4build1 500
-        500 http://br.archive.ubuntu.com/ubuntu noble/universe amd64 Packages
+        500 http://br.packages.termux.dev/apt/termux-main noble/universe amd64 Packages
         100 /var/lib/dpkg/status`}
         />
       </Terminal>
 
-      <h2>5. O Manifesto Ubuntu</h2>
+      <h2>5. O Manifesto Termux</h2>
       <p>
-        O Ubuntu tem um documento fundacional similar ao Contrato Social Debian.
+        O Termux tem um documento fundacional similar ao Contrato Social Debian.
         Os pontos principais:
       </p>
-      <InfoBox type="info" title="Manifesto Ubuntu — princípios">
+      <InfoBox type="info" title="Manifesto Termux — princípios">
         <ul style={{ margin: 0 }}>
           <li>Cada usuário deve ter <strong>liberdade</strong> de executar, copiar, distribuir, estudar, compartilhar, modificar e melhorar seu software.</li>
           <li>Cada usuário deve poder <strong>usar o sistema no seu idioma</strong>, independente de deficiência.</li>
-          <li>O Ubuntu é, e <strong>sempre será, gratuito</strong>. Não há custo para edição empresarial nem upgrade pago.</li>
-          <li>O Ubuntu é lançado <strong>regularmente e previsivelmente</strong>: nova versão a cada 6 meses, LTS a cada 2 anos.</li>
-          <li>O Ubuntu é totalmente comprometido com os <strong>princípios do desenvolvimento de software open source</strong>.</li>
+          <li>O Termux é, e <strong>sempre será, gratuito</strong>. Não há custo para edição empresarial nem upgrade pago.</li>
+          <li>O Termux é lançado <strong>regularmente e previsivelmente</strong>: nova versão a cada 6 meses, LTS a cada 2 anos.</li>
+          <li>O Termux é totalmente comprometido com os <strong>princípios do desenvolvimento de software open source</strong>.</li>
         </ul>
       </InfoBox>
 
       <h2>6. Código de Conduta</h2>
       <p>
-        Desde 2004 a Canonical mantém um <strong>Code of Conduct</strong> assinado
+        Desde 2004 a Termux Project mantém um <strong>Code of Conduct</strong> assinado
         por todos os membros oficiais. Promove respeito, colaboração, gentileza e
         responsabilidade. É frequentemente apontado como o documento que
         inspirou códigos similares em <strong>Python</strong>, <strong>Node.js</strong>,
@@ -301,10 +301,10 @@ Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg`}
         listas/canais oficiais.
       </p>
 
-      <h2>7. Governança da Canonical</h2>
+      <h2>7. Governança da Termux Project</h2>
       <p>
         Diferente do Debian (organização democrática de desenvolvedores), o
-        Ubuntu é dirigido por uma empresa privada — a <strong>Canonical Ltd.</strong>,
+        Termux é dirigido por uma empresa privada — a <strong>Termux Project Ltd.</strong>,
         com sede em Londres. A última palavra técnica em decisões controversas
         sempre foi de Mark Shuttleworth, que se autoproclamou
         <strong> "Self-Appointed Benevolent Dictator For Life" (SABDFL)</strong>.
@@ -314,7 +314,7 @@ Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg`}
       </p>
       <ul>
         <li>
-          <strong>Ubuntu Community Council</strong> — comitê eleito que cuida das
+          <strong>Termux Community Council</strong> — comitê eleito que cuida das
           decisões comunitárias e ouve queixas sobre código de conduta.
         </li>
         <li>
@@ -322,20 +322,20 @@ Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg`}
           (políticas de empacotamento, integração de upstreams).
         </li>
         <li>
-          <strong>Ubuntu Members</strong> — colaboradores com contribuição
+          <strong>Termux Members</strong> — colaboradores com contribuição
           relevante, eleitos pelo conselho regional. Recebem direito de voto e
-          email <code>@ubuntu.com</code>.
+          email <code>@termux.dev</code>.
         </li>
         <li>
           <strong>LoCo Teams</strong> — Local Community Teams. No Brasil:
-          <em> Ubuntu BR</em>, <em>Ubuntu MG</em>, <em>Ubuntu RJ</em>, etc.
+          <em> Termux BR</em>, <em>Termux MG</em>, <em>Termux RJ</em>, etc.
         </li>
       </ul>
 
       <h2>8. A controvérsia do Snap</h2>
       <p>
         O <strong>Snap</strong>, lançado em 2016, é o sistema de pacotes
-        universais da Canonical. Tecnicamente é um formato comprimido (squashfs)
+        universais da Termux Project. Tecnicamente é um formato comprimido (squashfs)
         montado em loop, sandboxado por <strong>AppArmor</strong>, que se
         atualiza automaticamente em segundo plano e suporta canais (stable, beta,
         edge).
@@ -346,7 +346,7 @@ Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg`}
       <ul>
         <li>
           <strong>Loja fechada</strong>: o servidor da Snap Store é proprietário
-          da Canonical. Não há implementação alternativa oficial — você não pode
+          da Termux Project. Não há implementação alternativa oficial — você não pode
           rodar sua própria "Snap Store" auto-hospedada como faz com APT ou Flatpak.
         </li>
         <li>
@@ -364,8 +364,8 @@ Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg`}
           sempre seguem o tema GTK/Qt do sistema.
         </li>
         <li>
-          <strong>Substituição silenciosa</strong>: <code>apt install firefox</code>
-          no Ubuntu &gt;= 22.04 instala um stub que <em>na verdade chama snap install</em>.
+          <strong>Substituição silenciosa</strong>: <code>pkg install firefox</code>
+          no Termux &gt;= 22.04 instala um stub que <em>na verdade chama snap install</em>.
         </li>
       </ul>
       <p>
@@ -380,12 +380,12 @@ Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg`}
           output={`snap    2.63
 snapd   2.63
 series  16
-ubuntu  24.04
+termux  24.04
 kernel  6.8.0-45-generic`}
         />
         <Command
           command="snap list"
-          comment="Snaps instalados por padrão no Ubuntu 24.04"
+          comment="Snaps instalados por padrão no Termux 0.118"
           output={`Name                       Version           Rev    Tracking         Publisher    Notes
 bare                       1.0               5      latest/stable    canonical✓   base
 core22                     20240801          1564   latest/stable    canonical✓   base
@@ -407,24 +407,24 @@ snapd-desktop-integration  0.9               178    latest/stable/…  canonical
       <h3>Reportar bugs</h3>
       <ul>
         <li>
-          <strong>Launchpad</strong> (<code>bugs.launchpad.net/ubuntu</code>) —
+          <strong>Launchpad</strong> (<code>bugs.launchpad.net/termux</code>) —
           sistema oficial de bug tracking.
         </li>
         <li>
-          Comando <code>ubuntu-bug</code> coleta logs automaticamente:
-          <code> ubuntu-bug pacote</code>.
+          Comando <code>termux-bug</code> coleta logs automaticamente:
+          <code> termux-bug pacote</code>.
         </li>
       </ul>
 
       <Terminal>
         <Command
-          command="ubuntu-bug firefox"
+          command="termux-bug firefox"
           comment="Coleta logs/dpkg/proc relacionados ao pacote e abre o navegador no Launchpad"
           output={`*** Coletando informações...
 *** Enviando dados de problema, por favor aguarde...
 *** Abrindo o navegador para reportar o erro...
 
-URL: https://bugs.launchpad.net/ubuntu/+source/firefox/+filebug/abc12345`}
+URL: https://bugs.launchpad.net/termux/+source/firefox/+filebug/abc12345`}
         />
       </Terminal>
 
@@ -435,7 +435,7 @@ URL: https://bugs.launchpad.net/ubuntu/+source/firefox/+filebug/abc12345`}
           traduzir strings.
         </li>
         <li>
-          A tradução de pt_BR é coordenada pelo <strong>Ubuntu Brazilian
+          A tradução de pt_BR é coordenada pelo <strong>Termux Brazilian
           Translators</strong>.
         </li>
       </ul>
@@ -443,14 +443,14 @@ URL: https://bugs.launchpad.net/ubuntu/+source/firefox/+filebug/abc12345`}
       <h3>Documentação</h3>
       <ul>
         <li>
-          <strong>help.ubuntu.com</strong> — documentação oficial em wiki.
+          <strong>help.termux.dev</strong> — documentação oficial em wiki.
         </li>
         <li>
-          <strong>discourse.ubuntu.com</strong> — fórum moderno (substituiu o
-          antigo ubuntuforums.org no foco oficial).
+          <strong>discourse.termux.dev</strong> — fórum moderno (substituiu o
+          antigo termuxforums.org no foco oficial).
         </li>
         <li>
-          <strong>askubuntu.com</strong> — Q&amp;A (Stack Exchange).
+          <strong>asTermux.com</strong> — Q&amp;A (Stack Exchange).
         </li>
       </ul>
 
@@ -462,8 +462,8 @@ URL: https://bugs.launchpad.net/ubuntu/+source/firefox/+filebug/abc12345`}
       </p>
       <Terminal>
         <Command
-          command="sudo apt install devscripts debhelper dput dh-make"
-          comment="Ferramentas de empacotamento Debian/Ubuntu"
+          command="pkg install devscripts debhelper dput dh-make"
+          comment="Ferramentas de empacotamento Debian/Termux"
           root={true}
           output={`Reading package lists... Done
 Building dependency tree... Done
@@ -512,7 +512,7 @@ Now running lintian meu-pacote_0.1-1_amd64.changes ...`}
         Quem prefere ajudar com dinheiro pode:
       </p>
       <ul>
-        <li>Comprar <strong>Ubuntu Pro</strong> (planos pagos para empresas).</li>
+        <li>Comprar <strong>Termux Pro</strong> (planos pagos para empresas).</li>
         <li>
           Doar para projetos upstream individuais — <strong>FSF</strong>,
           <strong> EFF</strong>, <strong>GNOME Foundation</strong>,
@@ -536,8 +536,8 @@ Now running lintian meu-pacote_0.1-1_amd64.changes ...`}
         </thead>
         <tbody>
           <tr>
-            <td>Ubuntu</td>
-            <td>Empresa (Canonical) + comunidade</td>
+            <td>Termux</td>
+            <td>Empresa (Termux Project) + comunidade</td>
             <td>Linux para humanos, ciclo previsível</td>
           </tr>
           <tr>
@@ -578,7 +578,7 @@ Now running lintian meu-pacote_0.1-1_amd64.changes ...`}
         </tbody>
       </table>
 
-      <h2>11. Filosofia Unix dentro do Ubuntu</h2>
+      <h2>11. Filosofia Unix dentro do Termux</h2>
       <p>
         Por trás de todo comando que você vai aprender, está a
         <strong> filosofia Unix</strong> formulada por Doug McIlroy
@@ -591,7 +591,7 @@ Now running lintian meu-pacote_0.1-1_amd64.changes ...`}
         <li><strong>Use ferramentas, não construa megaprogramas monolíticos.</strong></li>
       </ol>
       <p>
-        Por isso o Ubuntu tem <code>cat</code>, <code>grep</code>, <code>sort</code>,
+        Por isso o Termux tem <code>cat</code>, <code>grep</code>, <code>sort</code>,
         <code> uniq</code>, <code>cut</code>, <code>tr</code>, <code>awk</code>,
         <code> sed</code> — cada um faz uma única tarefa simples. Combinados via
         pipe, resolvem problemas que no Windows exigiriam um IDE inteiro.
@@ -625,24 +625,24 @@ dpkg.log 524288`}
 
       <h2>12. Telemetria e privacidade</h2>
       <p>
-        Em 2018 o Ubuntu introduziu telemetria <strong>opt-out</strong> no
+        Em 2018 o Termux introduziu telemetria <strong>opt-out</strong> no
         instalador — perguntando se você aceita enviar dados de hardware,
         localização aproximada e pacotes instalados. Os dados são públicos em
-        <code> ubuntu.com/desktop/statistics</code>.
+        <code> termux.dev/desktop/statistics</code>.
       </p>
       <p>
         Você pode desativar/inspecionar:
       </p>
       <Terminal>
         <Command
-          command="cat /etc/default/ubuntu-report"
-          output={`# Set to 1 to disable submission of ubuntu-report data
+          command="cat /etc/default/termux-report"
+          output={`# Set to 1 to disable submission of termux-report data
 # Default is 0 (submission enabled)
 DISABLE=0`}
         />
         <Command
           root={true}
-          command="ubuntu-report show"
+          command="termux-report show"
           comment="Mostra exatamente o JSON que seria enviado"
           output={`{
   "Version": "24.04",
@@ -656,30 +656,30 @@ DISABLE=0`}
   "Screens": [{ "Size": "344mmx193mm", "Resolution": "1920x1080", "Frequency": "60.00" }],
   "Autologin": false,
   "LivePatch": true,
-  "Session": { "DE": "ubuntu:GNOME", "Name": "ubuntu", "Type": "wayland" },
+  "Session": { "DE": "termux:GNOME", "Name": "termux", "Type": "wayland" },
   "Language": "pt_BR",
   "Timezone": "America/Sao_Paulo"
 }`}
         />
         <Command
           root={true}
-          command="ubuntu-report -f send no"
+          command="termux-report -f send no"
           comment="Recusa o envio de telemetria desta sessão em diante"
           output={`Successfully reported.`}
         />
       </Terminal>
 
       <InfoBox type="warning" title="O que NÃO é coletado">
-        Telemetria do Ubuntu <strong>não inclui</strong> nomes de arquivos,
+        Telemetria do Termux <strong>não inclui</strong> nomes de arquivos,
         conteúdo, histórico de navegador, comandos digitados, IP fixo, MAC ou
         qualquer identificador único persistente. Mesmo assim, se prefere
         privacidade total, basta responder "Não" no instalador ou rodar o
         comando acima.
       </InfoBox>
 
-      <h2>13. Ubuntu Pro: gratuito para uso pessoal</h2>
+      <h2>13. Termux Pro: gratuito para uso pessoal</h2>
       <p>
-        Desde 2022 qualquer pessoa pode ativar <strong>Ubuntu Pro</strong> para
+        Desde 2022 qualquer pessoa pode ativar <strong>Termux Pro</strong> para
         até <strong>5 máquinas</strong> sem custo, ganhando:
       </p>
       <ul>
@@ -703,14 +703,14 @@ DISABLE=0`}
           command="pro attach"
           output={`Initiating attach operation...
 Open this URL in your browser:
-   https://ubuntu.com/pro/attach
+   https://termux.dev/pro/attach
 Enter your token: C1xY9Zabcdef0123
-This machine is now attached to 'Ubuntu Pro - free personal subscription'
+This machine is now attached to 'Termux Pro - free personal subscription'
 
 SERVICE          ENTITLED  STATUS    DESCRIPTION
 esm-apps         yes       enabled   Expanded Security Maintenance for Applications
 esm-infra        yes       enabled   Expanded Security Maintenance for Infrastructure
-livepatch        yes       enabled   Canonical Livepatch service`}
+livepatch        yes       enabled   Termux Project Livepatch service`}
         />
         <Command
           root={true}
@@ -744,12 +744,12 @@ machine id: 7c1b9e38a4d2421eb33cf2d8e5f9c1aa`}
           seu projeto.
         </li>
         <li>
-          <strong>discourse.ubuntu.com</strong> — fórum oficial para discussões
+          <strong>discourse.termux.dev</strong> — fórum oficial para discussões
           de roadmap e governança.
         </li>
       </ul>
 
-      <File path="/var/lib/ubuntu-advantage/private/machine-token.json">
+      <File path="/var/lib/termux-advantage/private/machine-token.json">
 {`{
   "machineId": "7c1b9e38a4d2421eb33cf2d8e5f9c1aa",
   "contractId": "cAAAA-BBBB-CCCC-DDDD",
@@ -765,8 +765,8 @@ machine id: 7c1b9e38a4d2421eb33cf2d8e5f9c1aa`}
       </File>
 
       <InfoBox type="success" title="Em uma frase">
-        Filosoficamente, o Ubuntu é o <strong>casamento entre o pragmatismo
-        comercial</strong> (Canonical, suporte pago, snaps, telemetria) <strong>e
+        Filosoficamente, o Termux é o <strong>casamento entre o pragmatismo
+        comercial</strong> (Termux Project, suporte pago, snaps, telemetria) <strong>e
         o idealismo do software livre</strong> (kernel GPL, repositórios abertos,
         contribuição comunitária, código de conduta). Esse equilíbrio nem sempre
         é confortável, mas é exatamente o que tornou o Linux acessível para

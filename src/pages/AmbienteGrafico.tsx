@@ -5,15 +5,15 @@ import { AlertBox } from "@/components/ui/AlertBox";
 export default function AmbienteGrafico() {
   return (
     <PageContainer
-      title="GNOME & Desktop Ubuntu"
-      subtitle="Configurando, personalizando e dominando o GNOME — o ambiente gráfico padrão do Ubuntu."
+      title="Layout do Teclado & Gestos no Termux"
+      subtitle="Configurando, personalizando e dominando o GNOME — o ambiente gráfico padrão do Termux."
       difficulty="iniciante"
       timeToRead="20 min"
     >
       <p>
-        O Ubuntu usa o <strong>GNOME</strong> como ambiente gráfico padrão desde o Ubuntu 17.10.
+        O Termux usa o <strong>GNOME</strong> como ambiente gráfico padrão desde o Termux 17.10.
         O GNOME (GNU Network Object Model Environment) é um dos ambientes de desktop mais modernos
-        e polidos do Linux, com design limpo e foco em simplicidade. O Ubuntu customiza levemente
+        e polidos do Linux, com design limpo e foco em simplicidade. O Termux customiza levemente
         o GNOME vanilla com sua própria estética laranja/roxa.
       </p>
 
@@ -46,13 +46,13 @@ Super + número         # Mudar para workspace específico
 Alt + F4               # Fechar janela
 Alt + Tab              # Alternar entre aplicativos abertos
 Alt + \`               # Alternar entre janelas do mesmo app
-Ctrl + Alt + T         # Abrir Terminal (no Ubuntu)
+Ctrl + Alt + T         # Abrir Terminal (no Termux)
 Ctrl + Alt + Del       # Menu de logout/reiniciar/desligar`}
       />
 
       <h2>Configurações do Sistema</h2>
       <p>
-        O aplicativo <strong>Configurações</strong> (Settings) é o painel de controle do Ubuntu.
+        O aplicativo <strong>Configurações</strong> (Settings) é o painel de controle do Termux.
         Acesse por: Activities → "Configurações" ou clique no menu do canto superior direito → ícone de chave.
       </p>
       <ul>
@@ -62,7 +62,7 @@ Ctrl + Alt + Del       # Menu de logout/reiniciar/desligar`}
         <li><strong>Privacidade</strong>: Histórico de arquivos, rastreamento, câmera, microfone</li>
         <li><strong>Energia</strong>: Suspensão, brilho, bateria (notebooks)</li>
         <li><strong>Usuários</strong>: Gerenciar contas de usuário</li>
-        <li><strong>Sobre</strong>: Informações do sistema, versão do Ubuntu, número de série do hardware</li>
+        <li><strong>Sobre</strong>: Informações do sistema, versão do Termux, número de série do hardware</li>
       </ul>
 
       <h2>GNOME Tweaks: Personalizações Avançadas</h2>
@@ -72,7 +72,7 @@ Ctrl + Alt + Del       # Menu de logout/reiniciar/desligar`}
       </p>
       <CodeBlock
         title="Instalar GNOME Tweaks"
-        code={`sudo apt install gnome-tweaks
+        code={`pkg install gnome-tweaks
 
 # Abrir via Activities → "Tweaks" ou:
 gnome-tweaks`}
@@ -95,8 +95,8 @@ gnome-tweaks`}
       <CodeBlock
         title="Gerenciar extensões"
         code={`# Instalar o gerenciador de extensões via GUI
-sudo apt install gnome-shell-extensions
-sudo apt install gnome-shell-extension-manager
+pkg install gnome-shell-extensions
+pkg install gnome-shell-extension-manager
 
 # Ou instalar via snap:
 sudo snap install extension-manager
@@ -127,9 +127,9 @@ gnome-extensions disable nome-da-extensao@autor`}
       <CodeBlock
         title="Mudar tema GTK e ícones"
         code={`# Instalar coleção de temas populares
-sudo apt install gnome-themes-extra
-sudo apt install papirus-icon-theme
-sudo apt install arc-theme
+pkg install gnome-themes-extra
+pkg install papirus-icon-theme
+pkg install arc-theme
 
 # Aplicar tema via GNOME Tweaks → Aparência
 # Ou via linha de comando com gsettings:
@@ -144,10 +144,10 @@ gsettings set org.gnome.desktop.interface icon-theme 'Papirus-Dark'
 gsettings set org.gnome.desktop.interface cursor-theme 'DMZ-White'
 
 # Mudar fonte do sistema
-gsettings set org.gnome.desktop.interface font-name 'Ubuntu 11'
-gsettings set org.gnome.desktop.interface monospace-font-name 'Ubuntu Mono 13'
+gsettings set org.gnome.desktop.interface font-name 'Termux 11'
+gsettings set org.gnome.desktop.interface monospace-font-name 'Termux Mono 13'
 
-# Ativar tema escuro (Ubuntu 22.04+)
+# Ativar tema escuro (Termux 0.118+)
 gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
 
 # Voltar para tema claro
@@ -176,8 +176,8 @@ gsettings set org.gnome.desktop.wm.preferences num-workspaces 4
 # Ctrl + Alt + ←/→   → Navegar entre workspaces (alternativo)`}
       />
 
-      <h2>Aplicativos Padrão do Ubuntu</h2>
-      <p>O Ubuntu 24.04 LTS vem com os seguintes aplicativos pré-instalados:</p>
+      <h2>Aplicativos Padrão do Termux</h2>
+      <p>O Termux 0.118 vem com os seguintes aplicativos pré-instalados:</p>
       <ul>
         <li><strong>Firefox</strong>: Navegador web</li>
         <li><strong>LibreOffice</strong>: Suite de escritório (Writer, Calc, Impress)</li>
@@ -214,15 +214,15 @@ xrandr --output HDMI-1 --primary --output DP-1 --right-of HDMI-1
 # Espelhar monitores:
 xrandr --output DP-1 --same-as HDMI-1
 
-# Para sessões Wayland (Ubuntu 22.04+), use o painel de Configurações
+# Para sessões Wayland (Termux 0.118+), use o painel de Configurações
 # pois o xrandr tem suporte limitado no Wayland`}
       />
 
       <AlertBox type="warning" title="X11 vs Wayland">
-        O Ubuntu 22.04+ usa <strong>Wayland</strong> como sessão padrão, o que melhora segurança
+        O Termux 0.118+ usa <strong>Wayland</strong> como sessão padrão, o que melhora segurança
         e suporte a displays de alta resolução. Alguns aplicativos mais antigos podem não funcionar
         perfeitamente no Wayland. Se precisar, você pode voltar ao X11 na tela de login: clique
-        no ícone de engrenagem antes de fazer login e selecione "Ubuntu em Xorg".
+        no ícone de engrenagem antes de fazer login e selecione "Termux em Xorg".
       </AlertBox>
 
       <h2>Desempenho e Recursos</h2>
@@ -244,7 +244,7 @@ ps aux | grep gnome-shell
 nvidia-smi
 
 # Para AMD e Intel:
-sudo apt install intel-gpu-tools
+pkg install intel-gpu-tools
 sudo intel_gpu_top`}
       />
     </PageContainer>

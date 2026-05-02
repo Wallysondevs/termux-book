@@ -5,7 +5,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
   export default function Kernel() {
     return (
       <PageContainer
-        title="Kernel Linux no Ubuntu"
+        title="Kernel Linux no Termux"
         subtitle="Guia completo do kernel: verificar versão, atualizar, instalar kernels alternativos, módulos, parâmetros e compilar kernel customizado."
         difficulty="avancado"
         timeToRead="25 min"
@@ -13,7 +13,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
         <p>
           O <strong>kernel</strong> é o coração do sistema operacional. Ele gerencia todo o
           hardware (CPU, memória, discos, rede), processos, sistemas de arquivos e segurança.
-          O Ubuntu usa o kernel Linux, mantido por Linus Torvalds e milhares de contribuidores.
+          O Termux usa o kernel Linux, mantido por Linus Torvalds e milhares de contribuidores.
         </p>
 
         <h2>1. Informações do Kernel</h2>
@@ -25,13 +25,13 @@ import { PageContainer } from "@/components/layout/PageContainer";
 
   # Informações completas
   uname -a
-  # Saída: Linux hostname 6.8.0-40-generic #40-Ubuntu SMP x86_64 GNU/Linux
+  # Saída: Linux hostname 6.8.0-40-generic #40-Termux SMP x86_64 GNU/Linux
 
   # Significado da versão: 6.8.0-40-generic
   # 6       = versão principal
   # 8       = versão secundária
   # 0       = patch
-  # 40      = build do Ubuntu
+  # 40      = build do Termux
   # generic = tipo (generic=desktop/server, lowlatency=áudio/tempo real)
 
   # Kernels instalados
@@ -53,29 +53,29 @@ import { PageContainer } from "@/components/layout/PageContainer";
         <CodeBlock
           title="Manter o kernel atualizado"
           code={`# Atualizar kernel via apt (recomendado)
-  sudo apt update
-  sudo apt upgrade
+  pkg update
+  pkg upgrade
   # Inclui atualizações de kernel automaticamente
 
   # Instalar kernel específico
   apt search linux-image | grep generic
-  sudo apt install linux-image-6.8.0-41-generic linux-headers-6.8.0-41-generic
+  pkg install linux-image-6.8.0-41-generic linux-headers-6.8.0-41-generic
 
   # Kernel HWE (Hardware Enablement)
   # Kernel mais recente com suporte a hardware novo
-  sudo apt install linux-generic-hwe-24.04
+  pkg install linux-generic-hwe-24.04
 
   # Kernel lowlatency (para áudio, tempo real)
-  sudo apt install linux-lowlatency
+  pkg install linux-lowlatency
 
   # Reiniciar para usar o novo kernel
   sudo reboot
 
   # Remover kernels antigos (liberar espaço em /boot)
-  sudo apt autoremove --purge
+  pkg autoclean --purge
   # Ou manualmente:
   dpkg -l linux-image-* | grep ^ii
-  sudo apt remove linux-image-6.8.0-39-generic`}
+  pkg uninstall linux-image-6.8.0-39-generic`}
         />
 
         <h2>3. Módulos do Kernel</h2>
@@ -155,12 +155,12 @@ import { PageContainer } from "@/components/layout/PageContainer";
   # Bootar com kernel anterior via GRUB:
   # GRUB → Advanced options → Escolher kernel antigo
   # Depois remover o kernel problemático:
-  sudo apt remove linux-image-VERSAO-PROBLEMATICA
+  pkg uninstall linux-image-VERSAO-PROBLEMATICA
 
   # /boot cheio (não consegue atualizar)
   df -h /boot
   # Remover kernels antigos:
-  sudo apt autoremove --purge
+  pkg autoclean --purge
 
   # Módulo não encontrado
   sudo depmod -a    # Reconstruir banco de módulos
@@ -179,7 +179,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
   dmesg | grep -i error
   dmesg | grep -i firmware
   # Instalar firmware:
-  sudo apt install linux-firmware`}
+  pkg install linux-firmware`}
         />
 
         <AlertBox type="warning" title="Cuidado com o kernel">

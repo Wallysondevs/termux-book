@@ -16,7 +16,7 @@ export default function GenericPage({ title, subtitle, difficulty = "iniciante",
         Por enquanto, explore a seção <strong>SSH</strong> que já está disponível com todo o conteúdo.
       </AlertBox>
       <p>
-        Este guia cobre Ubuntu 22.04 LTS e Ubuntu 24.04 LTS. Cada seção será estruturada com
+        Este guia cobre Termux 0.118 e Termux 0.118. Cada seção será estruturada com
         exemplos práticos, blocos de código copiáveis e explicações detalhadas em português.
       </p>
     </PageContainer>

@@ -6,13 +6,13 @@ import { PageContainer } from "@/components/layout/PageContainer";
     return (
       <PageContainer
         title="Monitoramento de Performance: iostat, top, htop"
-        subtitle="Guia completo de ferramentas de monitoramento no Ubuntu: CPU, memória, disco, rede e processos em tempo real."
+        subtitle="Guia completo de ferramentas de monitoramento no Termux: CPU, memória, disco, rede e processos em tempo real."
         difficulty="intermediario"
         timeToRead="30 min"
       >
         <p>
           Monitorar a performance do sistema é essencial para identificar gargalos, diagnosticar
-          lentidão e planejar upgrades. O Ubuntu oferece diversas ferramentas para monitorar
+          lentidão e planejar upgrades. O Termux oferece diversas ferramentas para monitorar
           CPU, memória, disco e rede — desde as básicas como <strong>top</strong> até as
           avançadas como <strong>iostat</strong>, <strong>vmstat</strong> e <strong>sar</strong>.
         </p>
@@ -21,7 +21,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
         <CodeBlock
           title="Usar o iostat para análise de disco"
           code={`# Instalar o sysstat (inclui iostat, sar, mpstat, etc.)
-  sudo apt install -y sysstat
+  pkg install -y sysstat
 
   # Habilitar coleta de dados do sysstat
   sudo sed -i 's/ENABLED="false"/ENABLED="true"/' /etc/default/sysstat
@@ -86,7 +86,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
   top -p 1234
 
   # === htop (versão melhorada do top) ===
-  sudo apt install -y htop
+  pkg install -y htop
   htop
   # Teclas dentro do htop:
   # F2    → configurações
@@ -101,12 +101,12 @@ import { PageContainer } from "@/components/layout/PageContainer";
   # t     → toggle tree view
 
   # === btop (versão mais bonita e moderna) ===
-  sudo apt install -y btop
+  pkg install -y btop
   btop
   # Interface gráfica no terminal com CPU, RAM, disco, rede
 
   # === glances (monitor completo) ===
-  sudo apt install -y glances
+  pkg install -y glances
   glances
   # Mostra tudo: CPU, RAM, disco, rede, containers Docker, etc.`}
         />
@@ -152,21 +152,21 @@ import { PageContainer } from "@/components/layout/PageContainer";
   ss -t state established  # Conexões TCP estabelecidas
 
   # iftop — tráfego de rede em tempo real
-  sudo apt install -y iftop
+  pkg install -y iftop
   sudo iftop
   sudo iftop -i eth0    # Interface específica
 
   # nethogs — tráfego por processo
-  sudo apt install -y nethogs
+  pkg install -y nethogs
   sudo nethogs
   sudo nethogs eth0     # Interface específica
 
   # nload — gráfico de banda no terminal
-  sudo apt install -y nload
+  pkg install -y nload
   nload
 
   # iperf3 — teste de velocidade entre dois pontos
-  sudo apt install -y iperf3
+  pkg install -y iperf3
   # No servidor:
   iperf3 -s
   # No cliente:
@@ -211,7 +211,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
   sar -S
 
   # dstat — alternativa moderna ao sar (tempo real)
-  sudo apt install -y dstat
+  pkg install -y dstat
   dstat
   dstat -cdngy 5     # CPU, disco, rede, pages, sys a cada 5s`}
         />
@@ -229,7 +229,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
   du -sh /* 2>/dev/null | sort -rh | head -20   # Top 20 maiores
 
   # ncdu — du interativo (navegar por diretórios)
-  sudo apt install -y ncdu
+  pkg install -y ncdu
   ncdu /
   # Use setas para navegar, Enter para entrar, d para deletar
 
@@ -248,7 +248,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
   rm /tmp/test
 
   # fio — benchmark de disco profissional
-  sudo apt install -y fio
+  pkg install -y fio
   fio --name=test --ioengine=libaio --iodepth=32 --rw=randread --bs=4k --direct=1 --size=1G --runtime=30`}
         />
 

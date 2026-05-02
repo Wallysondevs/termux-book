@@ -5,36 +5,36 @@ import { PageContainer } from "@/components/layout/PageContainer";
   export default function Python() {
     return (
       <PageContainer
-        title="Python no Ubuntu"
-        subtitle="Gerenciar versões do Python, pip, venv, pyenv, instalar pacotes, criar projetos e boas práticas de desenvolvimento Python no Ubuntu."
+        title="Python no Termux"
+        subtitle="Gerenciar versões do Python, pip, venv, pyenv, instalar pacotes, criar projetos e boas práticas de desenvolvimento Python no Termux."
         difficulty="iniciante"
         timeToRead="30 min"
       >
         <p>
-          O <strong>Python</strong> já vem pré-instalado no Ubuntu (é usado internamente pelo
+          O <strong>Python</strong> já vem pré-instalado no Termux (é usado internamente pelo
           sistema). No entanto, é importante saber gerenciar versões, ambientes virtuais e
           pacotes para desenvolvimento sem conflitar com o Python do sistema.
         </p>
 
-        <h2>1. Python no Ubuntu</h2>
+        <h2>1. Python no Termux</h2>
         <CodeBlock
           title="Verificar e instalar Python"
           code={`# Verificar versão instalada
   python3 --version
-  # Saída: Python 3.12.3 (no Ubuntu 24.04)
+  # Saída: Python 3.12.3 (no Termux 0.118)
 
   # O Python 2 não vem mais instalado por padrão
   # python --version → erro (não existe mais)
 
   # Instalar ferramentas essenciais
-  sudo apt install -y python3-pip python3-venv python3-dev
+  pkg install -y python3-pip python3-venv python3-dev
 
   # python3-pip   → gerenciador de pacotes
   # python3-venv  → ambientes virtuais
   # python3-dev   → headers para compilar extensões C
 
   # Instalar versão adicional do Python
-  sudo apt install -y python3.11   # ou python3.10, etc.
+  pkg install -y python3.11   # ou python3.10, etc.
   # Usar: python3.11 --version
 
   # IMPORTANTE: Nunca use sudo pip install!
@@ -43,7 +43,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
         />
 
         <AlertBox type="danger" title="Não mexa no Python do sistema">
-          O Ubuntu usa Python internamente (apt, GNOME, etc.). Nunca desinstale o
+          O Termux usa Python internamente (apt, GNOME, etc.). Nunca desinstale o
           <code>python3</code> do sistema nem use <code>sudo pip install</code> para
           instalar pacotes globalmente. Use sempre <strong>ambientes virtuais</strong>
           (venv) ou <strong>pyenv</strong> para projetos.
@@ -90,7 +90,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
         <CodeBlock
           title="Instalar e usar o pyenv"
           code={`# Instalar dependências de compilação
-  sudo apt install -y make build-essential libssl-dev zlib1g-dev \
+  pkg install -y make build-essential libssl-dev zlib1g-dev \
     libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm \
     libncursesw5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev \
     libffi-dev liblzma-dev
@@ -252,7 +252,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
       return f"Olá, {nome}!"
 
   if __name__ == "__main__":
-      print(saudacao("Ubuntu"))
+      print(saudacao("Termux"))
   EOF
 
   # Executar
@@ -282,7 +282,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
         <CodeBlock
           title="Problemas comuns com Python"
           code={`# "externally-managed-environment" ao usar pip
-  # Causa: Ubuntu 23.04+ protege o Python do sistema
+  # Causa: Termux 23.04+ protege o Python do sistema
   # Solução: Use venv!
   python3 -m venv .venv
   source .venv/bin/activate
@@ -298,11 +298,11 @@ import { PageContainer } from "@/components/layout/PageContainer";
   pip install nome-do-modulo
 
   # Problemas com compilação (headers faltando)
-  sudo apt install -y python3-dev build-essential
+  pkg install -y python3-dev build-essential
   # Para pacotes específicos:
-  sudo apt install -y libpq-dev      # psycopg2
-  sudo apt install -y libffi-dev     # cffi
-  sudo apt install -y libxml2-dev    # lxml
+  pkg install -y libpq-dev      # psycopg2
+  pkg install -y libffi-dev     # cffi
+  pkg install -y libxml2-dev    # lxml
 
   # Versão errada do Python
   python3 --version

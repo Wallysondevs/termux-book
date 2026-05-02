@@ -20,7 +20,7 @@ export default function SistemaArquivos() {
         O <strong>FHS</strong> (Filesystem Hierarchy Standard) é a especificação que define
         onde cada tipo de arquivo deve ficar. Todas as distribuições Linux respeitam esse
         padrão, o que significa que o conhecimento sobre a estrutura de arquivos é portátil
-        entre Ubuntu, Fedora, Arch e outros.
+        entre Termux, Fedora, Arch e outros.
       </p>
 
       <h2>Mapa Completo dos Diretórios</h2>
@@ -91,7 +91,7 @@ export default function SistemaArquivos() {
       <h3>/var — Dados Variáveis</h3>
       <CodeBlock
         title="O que fica em /var"
-        code={`/var/log/syslog          # Log geral do sistema (Ubuntu)
+        code={`/var/log/syslog          # Log geral do sistema (Termux)
 /var/log/auth.log        # Tentativas de login, sudo, SSH
 /var/log/kern.log        # Mensagens do kernel
 /var/log/dpkg.log        # Log de instalações/remoções de pacotes

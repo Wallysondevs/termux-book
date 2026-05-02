@@ -22,12 +22,12 @@ import { PageContainer } from "@/components/layout/PageContainer";
           code={`# Criar alias temporário (vale até fechar o terminal)
   alias ll='ls -lah'
   alias gs='git status'
-  alias update='sudo apt update && sudo apt upgrade -y'
+  alias update='pkg update && pkg upgrade -y'
 
   # Usar o alias
   ll       # Executa: ls -lah
   gs       # Executa: git status
-  update   # Executa: sudo apt update && sudo apt upgrade -y
+  update   # Executa: pkg update && pkg upgrade -y
 
   # Ver todos os aliases definidos
   alias
@@ -81,7 +81,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
   alias lt='ls -ltrh'    # Por data, mais recente por último
 
   # Sistema
-  alias update='sudo apt update && sudo apt upgrade -y'
+  alias update='pkg update && pkg upgrade -y'
   alias ports='sudo ss -tlnp'
   alias mem='free -h'
   alias disk='df -hT'

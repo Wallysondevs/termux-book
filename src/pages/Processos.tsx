@@ -6,7 +6,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
     return (
       <PageContainer
         title="Gerenciamento de Processos"
-        subtitle="Guia completo de processos no Ubuntu: ps, top, htop, kill, nice, jobs, sinais, prioridade e monitoramento avançado."
+        subtitle="Guia completo de processos no Termux: ps, top, htop, kill, nice, jobs, sinais, prioridade e monitoramento avançado."
         difficulty="iniciante"
         timeToRead="25 min"
       >
@@ -78,7 +78,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
   # c = mostrar comando completo
 
   # htop — monitor interativo (muito melhor!)
-  sudo apt install -y htop
+  pkg install -y htop
   htop
   # Atalhos do htop:
   # F5 = modo árvore
@@ -89,14 +89,14 @@ import { PageContainer } from "@/components/layout/PageContainer";
   # Setas + Enter = selecionar processo
 
   # btop — monitor moderno e bonito
-  sudo apt install -y btop
+  pkg install -y btop
   btop
   # Interface visual rica com gráficos de CPU, memória, rede e disco
 
   # Outras ferramentas de monitoramento
   watch -n 1 "ps aux --sort=-%cpu | head -10"   # Atualizar a cada 1s
   glances                  # Monitor avançado (pip install glances)
-  nmon                     # Monitor IBM (sudo apt install nmon)`}
+  nmon                     # Monitor IBM (pkg install nmon)`}
         />
 
         <h2>3. Sinais e Kill</h2>
@@ -192,7 +192,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
   disown %1
 
   # screen/tmux — sessões persistentes (melhor que nohup)
-  sudo apt install -y tmux
+  pkg install -y tmux
   tmux new -s minha-sessao
   # Ctrl+B, D = desacoplar
   tmux attach -t minha-sessao
@@ -204,7 +204,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
           title="Ferramentas avançadas de monitoramento"
           code={`# Uso de CPU por core em tempo real
   mpstat -P ALL 1
-  # (sudo apt install sysstat)
+  # (pkg install sysstat)
 
   # Estatísticas de I/O de disco
   iostat -x 1
@@ -218,7 +218,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
 
   # Processos consumindo I/O de disco
   sudo iotop
-  # (sudo apt install iotop-c)
+  # (pkg install iotop-c)
 
   # Rastrear chamadas de sistema (debug avançado)
   strace -p 1234                    # Rastrear processo existente

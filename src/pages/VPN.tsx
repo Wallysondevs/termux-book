@@ -5,7 +5,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
   export default function VPN() {
     return (
       <PageContainer
-        title="VPN no Ubuntu"
+        title="VPN no Termux"
         subtitle="Guia completo de VPN: instalar e configurar WireGuard, OpenVPN, conectar a VPNs corporativas, criar servidor VPN próprio."
         difficulty="intermediario"
         timeToRead="30 min"
@@ -27,7 +27,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
   # - Criptografia state-of-the-art (ChaCha20, Curve25519)
 
   # Instalar WireGuard
-  sudo apt install -y wireguard
+  pkg install -y wireguard
 
   # === CONFIGURAR SERVIDOR VPN ===
 
@@ -90,7 +90,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
         <CodeBlock
           title="Instalar e usar OpenVPN"
           code={`# Instalar cliente OpenVPN
-  sudo apt install -y openvpn
+  pkg install -y openvpn
 
   # Conectar usando arquivo .ovpn (fornecido pela empresa/provedor)
   sudo openvpn --config arquivo.ovpn
@@ -100,7 +100,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
   sudo openvpn --config arquivo.ovpn --daemon
 
   # Via NetworkManager (interface gráfica)
-  sudo apt install -y network-manager-openvpn-gnome
+  pkg install -y network-manager-openvpn-gnome
   # Reiniciar o NetworkManager:
   sudo systemctl restart NetworkManager
   # Configurações → Rede → VPN → Importar do arquivo
@@ -115,7 +115,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
 
         <h2>3. Conectar a VPNs Comerciais</h2>
         <CodeBlock
-          title="Usar provedores VPN no Ubuntu"
+          title="Usar provedores VPN no Termux"
           code={`# === NordVPN ===
   sh <(curl -sSf https://downloads.nordcdn.com/apps/linux/install.sh)
   nordvpn login
@@ -128,8 +128,8 @@ import { PageContainer } from "@/components/layout/PageContainer";
   # Instalar via repositório
   wget https://repo.protonvpn.com/debian/dists/stable/main/binary-all/protonvpn-stable-release_1.0.3-3_all.deb
   sudo dpkg -i protonvpn-stable-release_1.0.3-3_all.deb
-  sudo apt update
-  sudo apt install -y protonvpn-gnome-desktop
+  pkg update
+  pkg install -y protonvpn-gnome-desktop
   # Abrir: ProtonVPN (aplicativo gráfico)
 
   # === VPN do trabalho (via NetworkManager) ===
@@ -138,7 +138,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
   # Importe o arquivo de configuração fornecido pelo TI
 
   # Instalar suporte a L2TP/IPSec
-  sudo apt install -y network-manager-l2tp network-manager-l2tp-gnome
+  pkg install -y network-manager-l2tp network-manager-l2tp-gnome
 
   # Via terminal com NetworkManager
   nmcli connection import type openvpn file config.ovpn

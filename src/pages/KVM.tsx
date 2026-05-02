@@ -6,7 +6,7 @@ export default function KVM() {
   return (
     <PageContainer
       title="KVM, QEMU e libvirt"
-      subtitle="Virtualização nativa do kernel Linux: provisione, gerencie e snapshote VMs com virsh, virt-install e virt-manager no Ubuntu."
+      subtitle="Virtualização nativa do kernel Linux: provisione, gerencie e snapshote VMs com virsh, virt-install e virt-manager no Termux."
       difficulty="avancado"
       timeToRead="55 min"
       category="Containers"
@@ -22,7 +22,7 @@ export default function KVM() {
 
       <h2>Pré-requisitos: a CPU suporta?</h2>
 
-      <Terminal title="wallyson@ubuntu: ~">
+      <Terminal title="wallyson@termux: ~">
         <Command
           comment="Conta quantos núcleos suportam virtualização (vmx=Intel, svm=AMD)"
           command="egrep -c '(vmx|svm)' /proc/cpuinfo"
@@ -42,7 +42,7 @@ kvm                  1404928  1 kvm_intel
 irqbypass              12288  1 kvm`}
         />
         <Command
-          comment="Ferramenta da Canonical para checar tudo de uma vez (vem em cpu-checker)"
+          comment="Ferramenta da Termux Project para checar tudo de uma vez (vem em cpu-checker)"
           command="kvm-ok"
           output={`INFO: /dev/kvm exists
 KVM acceleration can be used`}
@@ -61,7 +61,7 @@ KVM acceleration can be used`}
       <Terminal>
         <Command
           root
-          command="apt update && apt install -y qemu-kvm libvirt-daemon-system libvirt-clients bridge-utils virtinst virt-manager ovmf cpu-checker"
+          command="pkg update && pkg install -y qemu-kvm libvirt-daemon-system libvirt-clients bridge-utils virtinst virt-manager ovmf cpu-checker"
           output={`Reading package lists... Done
 Building dependency tree... Done
 The following NEW packages will be installed:
@@ -73,7 +73,7 @@ The following NEW packages will be installed:
 Need to get 84,2 MB of archives.
 After this operation, 387 MB of additional disk space will be used.
 ...
-Setting up libvirt-daemon-system (10.0.0-2ubuntu8) ...
+Setting up libvirt-daemon-system (10.0.0-termux) ...
 Created symlink /etc/systemd/system/multi-user.target.wants/libvirtd.service → /lib/systemd/system/libvirtd.service.
 Created symlink /etc/systemd/system/sockets.target.wants/virtlockd.socket → /lib/systemd/system/virtlockd.socket.
 adduser: O usuário 'libvirt-qemu' já existe.`}
@@ -187,8 +187,8 @@ Disponível:         510,12 GiB`}
         <Command
           command="ls -lh /var/lib/libvirt/images/"
           output={`total 24G
--rw-------  1 libvirt-qemu kvm  20G abr 12 15:01 ubuntu-server.qcow2
--rw-------  1 libvirt-qemu kvm 4,1G abr 12 15:01 ubuntu-server-snap1.qcow2`}
+-rw-------  1 libvirt-qemu kvm  20G abr 12 15:01 termux-server.qcow2
+-rw-------  1 libvirt-qemu kvm 4,1G abr 12 15:01 termux-server-snap1.qcow2`}
         />
       </Terminal>
 
@@ -201,44 +201,44 @@ Disponível:         510,12 GiB`}
 
       <Terminal>
         <Command
-          comment="Baixa a ISO do Ubuntu Server (em /var/lib/libvirt/isos/)"
+          comment="Baixa a ISO do Termux Server (em /var/lib/libvirt/isos/)"
           root
-          command="wget -P /var/lib/libvirt/isos https://releases.ubuntu.com/24.04/ubuntu-24.04.1-live-server-amd64.iso"
-          output={`--2025-04-12 15:10:01--  https://releases.ubuntu.com/24.04/ubuntu-24.04.1-live-server-amd64.iso
-Resolvendo releases.ubuntu.com (releases.ubuntu.com)... 185.125.190.40
-Conectando-se a releases.ubuntu.com (releases.ubuntu.com)|185.125.190.40|:443... conectado.
+          command="wget -P /var/lib/libvirt/isos https://releases.termux.dev/24.04/termux-24.04.1-live-server-amd64.iso"
+          output={`--2025-04-12 15:10:01--  https://releases.termux.dev/24.04/termux-24.04.1-live-server-amd64.iso
+Resolvendo releases.termux.dev (releases.termux.dev)... 185.125.190.40
+Conectando-se a releases.termux.dev (releases.termux.dev)|185.125.190.40|:443... conectado.
 A requisição HTTP foi enviada, aguardando resposta... 200 OK
 Tamanho: 2715254784 (2,5G) [application/x-iso9660-image]
-Salvando em: '/var/lib/libvirt/isos/ubuntu-24.04.1-live-server-amd64.iso'
+Salvando em: '/var/lib/libvirt/isos/termux-24.04.1-live-server-amd64.iso'
 
-ubuntu-24.04.1-live-server-amd64.iso       100%[==============================>]   2,53G  47,2MB/s    em 55s
+termux-24.04.1-live-server-amd64.iso       100%[==============================>]   2,53G  47,2MB/s    em 55s
 
-2025-04-12 15:10:56 (47,2 MB/s) - '/var/lib/libvirt/isos/ubuntu-24.04.1-live-server-amd64.iso' salvo`}
+2025-04-12 15:10:56 (47,2 MB/s) - '/var/lib/libvirt/isos/termux-24.04.1-live-server-amd64.iso' salvo`}
         />
 
         <Command
           command={`virt-install \\
-  --name ubuntu-noble \\
+  --name termux-noble \\
   --memory 4096 \\
   --vcpus 4 \\
   --cpu host-passthrough \\
   --disk size=40,format=qcow2,bus=virtio \\
-  --cdrom /var/lib/libvirt/isos/ubuntu-24.04.1-live-server-amd64.iso \\
-  --os-variant ubuntu24.04 \\
+  --cdrom /var/lib/libvirt/isos/termux-24.04.1-live-server-amd64.iso \\
+  --os-variant termux.04 \\
   --network network=br0,model=virtio \\
   --graphics spice \\
   --boot uefi`}
           output={`Iniciando a instalação...
-Alocando 'ubuntu-noble.qcow2'                                         |  40 GB  00:00:01
+Alocando 'termux-noble.qcow2'                                         |  40 GB  00:00:01
 Criando o domínio...                                                  |    0 B  00:00:00
 Aguardando que a instalação seja concluída.`}
         />
 
         <Command
-          comment="Lista todas as variantes de SO conhecidas (aceita ubuntu24.04, debian12, fedora40, etc)"
-          command="virt-install --osinfo list | grep ubuntu24"
-          output={`ubuntu24.04
-ubuntu24.10`}
+          comment="Lista todas as variantes de SO conhecidas (aceita termux.04, debian12, fedora40, etc)"
+          command="virt-install --osinfo list | grep termux"
+          output={`termux.04
+termux.10`}
         />
       </Terminal>
 
@@ -267,7 +267,7 @@ ubuntu24.10`}
           command="virsh list --all"
           output={` Id   Nome           Estado
 -------------------------------
- 1    ubuntu-noble   em execução
+ 1    termux-noble   em execução
  -    debian-test    desligar`}
         />
         <Command command="virsh start debian-test" output={`Domínio 'debian-test' iniciado`} />
@@ -284,18 +284,18 @@ ubuntu24.10`}
         />
         <Command
           comment="Anexa o console serial (sair: Ctrl-])"
-          command="virsh console ubuntu-noble"
-          output={`Conectado ao domínio ubuntu-noble
+          command="virsh console termux-noble"
+          output={`Conectado ao domínio termux-noble
 Caractere de escape é ^] (Ctrl + ])
 
-Ubuntu 24.04.1 LTS ubuntu-noble ttyS0
+Termux 0.118 termux-noble ttyS0
 
-ubuntu-noble login: `}
+termux-noble login: `}
         />
         <Command
-          command="virsh dominfo ubuntu-noble"
+          command="virsh dominfo termux-noble"
           output={`Id:             1
-Nome:           ubuntu-noble
+Nome:           termux-noble
 UUID:           7d8e9f0a-1b2c-3d4e-5f6a-7b8c9d0e1f2a
 Tipo de SO:     hvm
 Estado:         em execução
@@ -311,7 +311,7 @@ DOI:            0
 Rótulo de segurança: libvirt-7d8e9f0a-1b2c-3d4e-5f6a-7b8c9d0e1f2a (enforcing)`}
         />
         <Command
-          command="virsh domifaddr ubuntu-noble"
+          command="virsh domifaddr termux-noble"
           output={` Nome     Endereço MAC         Protocolo   Endereço
 -------------------------------------------------------------------------------
  vnet0    52:54:00:5b:8c:1f    ipv4        192.168.1.142/24`}
@@ -323,17 +323,17 @@ Rótulo de segurança: libvirt-7d8e9f0a-1b2c-3d4e-5f6a-7b8c9d0e1f2a (enforcing)`
       <Terminal>
         <Command
           comment="Abre o XML no $EDITOR; valida e aplica ao salvar"
-          command="virsh edit ubuntu-noble"
-          output={`Domínio 'ubuntu-noble' XML configuration edited.`}
+          command="virsh edit termux-noble"
+          output={`Domínio 'termux-noble' XML configuration edited.`}
         />
         <Command
-          command="virsh dumpxml ubuntu-noble | head -20"
+          command="virsh dumpxml termux-noble | head -20"
           output={`<domain type='kvm'>
-  <name>ubuntu-noble</name>
+  <name>termux-noble</name>
   <uuid>7d8e9f0a-1b2c-3d4e-5f6a-7b8c9d0e1f2a</uuid>
   <metadata>
     <libosinfo:libosinfo xmlns:libosinfo="http://libosinfo.org/xmlns/libvirt/domain/1.0">
-      <libosinfo:os id="http://ubuntu.com/ubuntu/24.04"/>
+      <libosinfo:os id="http://termux.dev/termux/24.04"/>
     </libosinfo:libosinfo>
   </metadata>
   <memory unit='KiB'>4194304</memory>
@@ -356,20 +356,20 @@ Rótulo de segurança: libvirt-7d8e9f0a-1b2c-3d4e-5f6a-7b8c9d0e1f2a (enforcing)`
       <Terminal>
         <Command
           comment="Snapshot interno (mais simples, qcow2 in-place)"
-          command="virsh snapshot-create-as --domain ubuntu-noble --name pre-upgrade --description 'Antes do dist-upgrade'"
+          command="virsh snapshot-create-as --domain termux-noble --name pre-upgrade --description 'Antes do dist-upgrade'"
           output={`Captura de tela do domínio pre-upgrade criada`}
         />
         <Command
-          command="virsh snapshot-list ubuntu-noble"
+          command="virsh snapshot-list termux-noble"
           output={` Nome          Hora de criação                Estado
 --------------------------------------------------------
  pre-upgrade   2025-04-12 15:25:18 -0300      running`}
         />
         <Command
-          command="virsh snapshot-revert ubuntu-noble pre-upgrade"
+          command="virsh snapshot-revert termux-noble pre-upgrade"
         />
         <Command
-          command="virsh snapshot-delete ubuntu-noble pre-upgrade"
+          command="virsh snapshot-delete termux-noble pre-upgrade"
           output={`Captura de tela do domínio pre-upgrade excluída`}
         />
       </Terminal>
@@ -379,11 +379,11 @@ Rótulo de segurança: libvirt-7d8e9f0a-1b2c-3d4e-5f6a-7b8c9d0e1f2a (enforcing)`
       <Terminal>
         <Command
           comment="VM origem precisa estar parada"
-          command="virsh shutdown ubuntu-noble"
+          command="virsh shutdown termux-noble"
         />
         <Command
-          command="virt-clone --original ubuntu-noble --name ubuntu-clone --auto-clone"
-          output={`A alocação de 'ubuntu-clone.qcow2'                                    |  40 GB  00:00:34
+          command="virt-clone --original termux-noble --name termux-clone --auto-clone"
+          output={`A alocação de 'termux-clone.qcow2'                                    |  40 GB  00:00:34
 
 Clonagem feita com sucesso.`}
         />
@@ -393,7 +393,7 @@ Clonagem feita com sucesso.`}
 
       <Terminal>
         <Command command="qemu-img create -f qcow2 -o preallocation=metadata extra.qcow2 50G" output={`Formatting 'extra.qcow2', fmt=qcow2 cluster_size=65536 extended_l2=off preallocation=metadata compression_type=zlib size=53687091200 lazy_refcounts=off refcount_bits=16`} />
-        <Command command="qemu-img info ubuntu-noble.qcow2" output={`image: ubuntu-noble.qcow2
+        <Command command="qemu-img info termux-noble.qcow2" output={`image: termux-noble.qcow2
 file format: qcow2
 virtual size: 40 GiB (42949672960 bytes)
 disk size: 12.4 GiB
@@ -405,8 +405,8 @@ Format specific information:
     refcount bits: 16
     corrupt: false
     extended l2: false`} />
-        <Command command="qemu-img convert -O raw ubuntu-noble.qcow2 ubuntu-noble.raw" />
-        <Command command="qemu-img resize ubuntu-noble.qcow2 +10G" output={`Image resized.`} />
+        <Command command="qemu-img convert -O raw termux-noble.qcow2 termux-noble.raw" />
+        <Command command="qemu-img resize termux-noble.qcow2 +10G" output={`Image resized.`} />
       </Terminal>
 
       <h2>virt-manager — GUI</h2>

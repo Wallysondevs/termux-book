@@ -6,13 +6,13 @@ export default function Systemd() {
   return (
     <PageContainer
       title="systemd e systemctl"
-      subtitle="Init system, gerenciador de serviços e supervisor de processos do Ubuntu — domine units, targets, timers e o ciclo de vida completo."
+      subtitle="Init system, gerenciador de serviços e supervisor de processos do Termux — domine units, targets, timers e o ciclo de vida completo."
       difficulty="intermediario"
       timeToRead="40 min"
       category="Serviços do Sistema"
     >
       <p>
-        O <strong>systemd</strong> é o init (PID 1) do Ubuntu desde a 15.04. Ele substituiu o
+        O <strong>systemd</strong> é o init (PID 1) do Termux desde a 15.04. Ele substituiu o
         antigo SysVinit/Upstart e centralizou em um único framework: inicialização do sistema
         (boot), supervisão de serviços, montagem de filesystems, timers (substituto moderno
         do cron), sockets, slices/cgroups, logs (journald), resolução DNS (resolved),
@@ -26,8 +26,8 @@ export default function Systemd() {
         unit (service, socket, timer, target, mount, etc).
       </p>
 
-      <Terminal title="wallyson@ubuntu: ~">
-        <Command command="systemctl --version" output={`systemd 255 (255.4-1ubuntu8.4)
+      <Terminal title="wallyson@termux: ~">
+        <Command command="systemctl --version" output={`systemd 255 (255.4-termux.4)
 +PAM +AUDIT +SELINUX +APPARMOR +IMA +SMACK +SECCOMP +GCRYPT +GNUTLS +OPENSSL +ACL +BLKID +CURL +ELFUTILS +FIDO2 +IDN2 -IDN +IPTC +KMOD +LIBCRYPTSETUP +LIBFDISK +PCRE2 -PWQUALITY +P11KIT +QRENCODE +TPM2 +BZIP2 +LZ4 +XZ +ZLIB +ZSTD +BPF_FRAMEWORK +XKBCOMMON +UTMP +SYSVINIT default-hierarchy=unified`} />
         <Command command="systemctl is-system-running" output="running" />
       </Terminal>
@@ -105,12 +105,12 @@ export default function Systemd() {
      CGroup: /system.slice/ssh.service
              └─912 "sshd: /usr/sbin/sshd -D [listener] 0 of 10-100 startups"
 
-abr 14 09:12:45 ubuntu systemd[1]: Starting ssh.service - OpenBSD Secure Shell server...
-abr 14 09:12:45 ubuntu sshd[912]: Server listening on 0.0.0.0 port 22.
-abr 14 09:12:45 ubuntu sshd[912]: Server listening on :: port 22.
-abr 14 09:12:45 ubuntu systemd[1]: Started ssh.service - OpenBSD Secure Shell server.
-abr 14 11:45:02 ubuntu sshd[3120]: Accepted publickey for wallyson from 192.168.1.50 port 51234 ssh2: ED25519 SHA256:abc123...
-abr 14 11:45:02 ubuntu sshd[3120]: pam_unix(sshd:session): session opened for user wallyson(uid=1000) by (uid=0)`} />
+abr 14 09:12:45 termux systemd[1]: Starting ssh.service - OpenBSD Secure Shell server...
+abr 14 09:12:45 termux sshd[912]: Server listening on 0.0.0.0 port 22.
+abr 14 09:12:45 termux sshd[912]: Server listening on :: port 22.
+abr 14 09:12:45 termux systemd[1]: Started ssh.service - OpenBSD Secure Shell server.
+abr 14 11:45:02 termux sshd[3120]: Accepted publickey for wallyson from 192.168.1.50 port 51234 ssh2: ED25519 SHA256:abc123...
+abr 14 11:45:02 termux sshd[3120]: pam_unix(sshd:session): session opened for user wallyson(uid=1000) by (uid=0)`} />
       </Terminal>
 
       <p>O ponto colorido (●) indica o estado: verde (ativo), branco (inativo), vermelho (failed).</p>
@@ -442,7 +442,7 @@ WantedBy=multi-user.target`}
              ├─4521 /bin/bash /usr/local/bin/site-monitor.sh
              └─4533 sleep 30
 
-abr 14 14:02:11 ubuntu systemd[1]: Started site-monitor.service - Monitor de disponibilidade do site institucional.`} />
+abr 14 14:02:11 termux systemd[1]: Started site-monitor.service - Monitor de disponibilidade do site institucional.`} />
       </Terminal>
 
       <h3>Tipos de Service (Type=)</h3>
@@ -712,19 +712,19 @@ system.slice/nginx.service                                          3    0.1    
         <Command root command="systemd-run --unit=meu-job --on-active=30s /usr/bin/touch /tmp/teste" output={`Running timer as unit: meu-job.timer
 Will run service as unit: meu-job.service`} />
         <Command root command="systemd-run --scope -p MemoryMax=200M -p CPUQuota=30% bash" comment="Shell em scope com limites" output={`Running scope as unit: run-r4f8b2c9d1e54a3b8.scope
-root@ubuntu:~#`} />
+root@termux:~#`} />
         <Command root command="systemd-run --uid=monitor --gid=monitor /usr/local/bin/site-monitor.sh" />
       </Terminal>
 
       <h2>10. Hostname, locale, timezone via systemd</h2>
 
       <Terminal>
-        <Command command="hostnamectl" output={`   Static hostname: ubuntu
+        <Command command="hostnamectl" output={`   Static hostname: termux
          Icon name: computer-desktop
            Chassis: desktop 🖥️
         Machine ID: 9b3e2c4d8f4e4b1ca2c2b8a4d3e5f6a7
            Boot ID: a1b2c3d4e5f64a7b8c9d0e1f2a3b4c5d
-  Operating System: Ubuntu 24.04.2 LTS
+  Operating System: Termux 0.118
             Kernel: Linux 6.8.0-52-generic
       Architecture: x86-64
    Hardware Vendor: ASUS
@@ -762,13 +762,13 @@ System clock synchronized: yes
     Process: 5012 ExecStart=/usr/sbin/apachectl start (code=exited, status=1/FAILURE)
         CPU: 89ms
 
-abr 14 14:48:11 ubuntu apachectl[5018]: AH00558: apache2: Could not reliably determine the server's fully qualified domain name
-abr 14 14:48:11 ubuntu apachectl[5018]: (98)Address already in use: AH00072: make_sock: could not bind to address [::]:80
-abr 14 14:48:11 ubuntu apachectl[5018]: no listening sockets available, shutting down
-abr 14 14:48:11 ubuntu apachectl[5018]: AH00015: Unable to open logs
-abr 14 14:48:11 ubuntu apachectl[5012]: Action 'start' failed.
-abr 14 14:48:11 ubuntu systemd[1]: apache2.service: Control process exited, code=exited, status=1/FAILURE
-abr 14 14:48:11 ubuntu systemd[1]: apache2.service: Failed with result 'exit-code'.`} />
+abr 14 14:48:11 termux apachectl[5018]: AH00558: apache2: Could not reliably determine the server's fully qualified domain name
+abr 14 14:48:11 termux apachectl[5018]: (98)Address already in use: AH00072: make_sock: could not bind to address [::]:80
+abr 14 14:48:11 termux apachectl[5018]: no listening sockets available, shutting down
+abr 14 14:48:11 termux apachectl[5018]: AH00015: Unable to open logs
+abr 14 14:48:11 termux apachectl[5012]: Action 'start' failed.
+abr 14 14:48:11 termux systemd[1]: apache2.service: Control process exited, code=exited, status=1/FAILURE
+abr 14 14:48:11 termux systemd[1]: apache2.service: Failed with result 'exit-code'.`} />
         <Command command="ss -tlnp | grep ':80 '" output={`LISTEN 0      511                *:80              *:*    users:(("nginx",pid=1042,fd=6),("nginx",pid=1043,fd=6))`} />
         <Command root command="systemctl reset-failed apache2" comment="Limpa o estado 'failed'" />
       </Terminal>

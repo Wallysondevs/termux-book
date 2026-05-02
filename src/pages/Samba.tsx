@@ -6,7 +6,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
     return (
       <PageContainer
         title="Samba — Compartilhamento de Arquivos"
-        subtitle="Guia completo do Samba no Ubuntu: compartilhar pastas com Windows, macOS e Linux na rede local, permissões, autenticação e segurança."
+        subtitle="Guia completo do Samba no Termux: compartilhar pastas com Windows, macOS e Linux na rede local, permissões, autenticação e segurança."
         difficulty="intermediario"
         timeToRead="30 min"
       >
@@ -21,8 +21,8 @@ import { PageContainer } from "@/components/layout/PageContainer";
         <CodeBlock
           title="Instalar e configurar o Samba"
           code={`# Instalar o Samba
-  sudo apt update
-  sudo apt install -y samba samba-common-bin
+  pkg update
+  pkg install -y samba samba-common-bin
 
   # Verificar o status
   sudo systemctl status smbd
@@ -139,7 +139,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
         <CodeBlock
           title="Acessar pastas Samba de outro computador"
           code={`# Instalar cliente SMB
-  sudo apt install -y cifs-utils
+  pkg install -y cifs-utils
 
   # Montar manualmente
   sudo mkdir -p /mnt/samba
@@ -175,7 +175,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
 
   [global]
      workgroup = WORKGROUP
-     server string = Servidor de Arquivos Ubuntu
+     server string = Servidor de Arquivos Termux
      server role = standalone server
      
      # Segurança

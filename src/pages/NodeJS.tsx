@@ -5,7 +5,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
   export default function NodeJS() {
     return (
       <PageContainer
-        title="Node.js no Ubuntu"
+        title="Node.js no Termux"
         subtitle="Instalação via NVM, gerenciamento de versões, NPM, Yarn, PNPM, criação de projetos, PM2 para produção e deploy de aplicações Node.js."
         difficulty="intermediario"
         timeToRead="35 min"
@@ -20,7 +20,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
         <ul>
           <li><strong>NVM (recomendado)</strong> — Gerenciador de versões. Permite ter múltiplas versões instaladas e alternar entre elas facilmente.</li>
           <li><strong>NodeSource</strong> — Repositório oficial com versões atualizadas. Instala uma única versão global.</li>
-          <li><strong>apt</strong> — Versão dos repositórios do Ubuntu. Geralmente desatualizada.</li>
+          <li><strong>apt</strong> — Versão dos repositórios do Termux. Geralmente desatualizada.</li>
           <li><strong>fnm</strong> — Alternativa ao NVM, escrita em Rust (mais rápida).</li>
         </ul>
 
@@ -93,11 +93,11 @@ import { PageContainer } from "@/components/layout/PageContainer";
           title="Instalar Node.js via repositório NodeSource"
           code={`# Instalar o Node.js 20 via NodeSource
   curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-  sudo apt install -y nodejs
+  pkg install -y nodejs
 
   # Instalar o Node.js 22
   curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
-  sudo apt install -y nodejs
+  pkg install -y nodejs
 
   # Verificar a instalação
   node -v
@@ -372,7 +372,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
 
         <h2>Troubleshooting</h2>
         <CodeBlock
-          title="Problemas comuns com Node.js no Ubuntu"
+          title="Problemas comuns com Node.js no Termux"
           code={`# Erro: "node: command not found" após instalar via NVM
   # Solução: Recarregar o shell
   source ~/.bashrc

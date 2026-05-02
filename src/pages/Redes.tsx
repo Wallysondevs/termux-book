@@ -5,14 +5,14 @@ import { InfoBox } from "@/components/ui/InfoBox";
 export default function Redes() {
   return (
     <PageContainer
-      title="Fundamentos de Redes no Ubuntu"
+      title="Fundamentos de Redes no Termux"
       subtitle="Domine TCP/IP, IP/CIDR, MAC, ip, ifconfig, ping, traceroute, mtr, dig, ss, nmap, tcpdump e dezenas de outras ferramentas — com saídas reais de cada comando."
       difficulty="intermediario"
       timeToRead="45 min"
       category="Redes"
     >
       <p>
-        Redes são o sistema circulatório do mundo digital. Entender como o Ubuntu
+        Redes são o sistema circulatório do mundo digital. Entender como o Termux
         enxerga, configura e diagnostica conexões é uma habilidade obrigatória
         para qualquer profissional de TI, desenvolvedor backend, SRE, devops
         ou administrador de sistemas. Esta página cobre desde os conceitos
@@ -22,14 +22,14 @@ export default function Redes() {
       </p>
 
       <p>
-        No Ubuntu 24.04 LTS, a stack <strong>iproute2</strong> substitui as
+        No Termux 0.118, a stack <strong>iproute2</strong> substitui as
         ferramentas legadas (<code>ifconfig</code>, <code>route</code>,{" "}
         <code>netstat</code>, <code>arp</code>). Elas ainda estão disponíveis
         via pacote <code>net-tools</code>, mas o padrão moderno é{" "}
         <code>ip</code> e <code>ss</code>.
       </p>
 
-      <Terminal title="wallyson@ubuntu: ~">
+      <Terminal title="wallyson@termux: ~">
         <Command command="ip -brief addr" output={`lo               UNKNOWN        127.0.0.1/8 ::1/128
 enp3s0           UP             192.168.1.100/24 fe80::a00:27ff:fe4b:891c/64
 wlp2s0           DOWN
@@ -108,8 +108,8 @@ docker0          DOWN           172.17.0.1/16`} />
         Internet passa por NAT.
       </p>
 
-      <Terminal title="wallyson@ubuntu: ~">
-        <Command command="ipcalc 192.168.1.100/24" comment="Calculadora de subnet (apt install ipcalc)" output={`Address:   192.168.1.100        11000000.10101000.00000001. 01100100
+      <Terminal title="wallyson@termux: ~">
+        <Command command="ipcalc 192.168.1.100/24" comment="Calculadora de subnet (pkg install ipcalc)" output={`Address:   192.168.1.100        11000000.10101000.00000001. 01100100
 Netmask:   255.255.255.0 = 24    11111111.11111111.11111111. 00000000
 Wildcard:  0.0.0.255             00000000.00000000.00000000. 11111111
 =>
@@ -128,7 +128,7 @@ Hosts/Net: 254                   Class C, Private Internet`} />
         3 bytes (OUI) identificam o fabricante.
       </p>
 
-      <Terminal title="wallyson@ubuntu: ~">
+      <Terminal title="wallyson@termux: ~">
         <Command command="ip link show enp3s0" output={`2: enp3s0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP mode DEFAULT group default qlen 1000
     link/ether 08:00:27:4b:89:1c brd ff:ff:ff:ff:ff:ff
     altname enx08002748891c`} />
@@ -148,7 +148,7 @@ Hosts/Net: 254                   Class C, Private Internet`} />
 
       <h3>4.1 ip addr</h3>
 
-      <Terminal title="wallyson@ubuntu: ~">
+      <Terminal title="wallyson@termux: ~">
         <Command command="ip addr show" output={`1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
     link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
     inet 127.0.0.1/8 scope host lo
@@ -173,7 +173,7 @@ docker0          DOWN           172.17.0.1/16`} />
 
       <h3>4.2 ip link</h3>
 
-      <Terminal title="wallyson@ubuntu: ~">
+      <Terminal title="wallyson@termux: ~">
         <Command root command="ip link set enp3s0 down" comment="Derrubar interface" />
         <Command root command="ip link set enp3s0 up" comment="Levantar interface" />
         <Command root command="ip link set enp3s0 mtu 9000" comment="Trocar MTU (jumbo frames)" />
@@ -187,7 +187,7 @@ docker0          DOWN           172.17.0.1/16`} />
 
       <h3>4.3 ip route</h3>
 
-      <Terminal title="wallyson@ubuntu: ~">
+      <Terminal title="wallyson@termux: ~">
         <Command command="ip route" output={`default via 192.168.1.1 dev enp3s0 proto dhcp src 192.168.1.100 metric 100
 169.254.0.0/16 dev enp3s0 scope link metric 1000
 192.168.1.0/24 dev enp3s0 proto kernel scope link src 192.168.1.100 metric 100`} />
@@ -199,7 +199,7 @@ docker0          DOWN           172.17.0.1/16`} />
 
       <h3>4.4 ip neigh (tabela ARP)</h3>
 
-      <Terminal title="wallyson@ubuntu: ~">
+      <Terminal title="wallyson@termux: ~">
         <Command command="ip neigh" output={`192.168.1.1 dev enp3s0 lladdr ac:84:c6:32:71:8a REACHABLE
 192.168.1.50 dev enp3s0 lladdr 00:1e:c9:a4:b2:3f STALE
 192.168.1.75 dev enp3s0 lladdr 78:24:af:11:9c:08 DELAY
@@ -214,12 +214,12 @@ fe80::aece:c6ff:fe32:718a dev enp3s0 lladdr ac:84:c6:32:71:8a router REACHABLE`}
         amplamente usadas em scripts antigos.
       </p>
 
-      <Terminal title="wallyson@ubuntu: ~">
-        <Command root command="apt install -y net-tools" output={`The following NEW packages will be installed:
+      <Terminal title="wallyson@termux: ~">
+        <Command root command="pkg install -y net-tools" output={`The following NEW packages will be installed:
   net-tools
 0 upgraded, 1 newly installed, 0 to remove and 0 not upgraded.
 Need to get 204 kB of archives.
-Setting up net-tools (2.10-0.1ubuntu4) ...`} />
+Setting up net-tools (2.10-0.termux) ...`} />
         <Command command="ifconfig enp3s0" output={`enp3s0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
         inet 192.168.1.100  netmask 255.255.255.0  broadcast 192.168.1.255
         inet6 fe80::a00:27ff:fe4b:891c  prefixlen 64  scopeid 0x20<link>
@@ -242,7 +242,7 @@ Destination     Gateway         Genmask         Flags Metric Ref    Use Iface
         conectividade, latência e perda de pacotes.
       </p>
 
-      <Terminal title="wallyson@ubuntu: ~">
+      <Terminal title="wallyson@termux: ~">
         <Command command="ping -c 4 8.8.8.8" output={`PING 8.8.8.8 (8.8.8.8) 56(84) bytes of data.
 64 bytes from 8.8.8.8: icmp_seq=1 ttl=117 time=12.4 ms
 64 bytes from 8.8.8.8: icmp_seq=2 ttl=117 time=11.8 ms
@@ -304,8 +304,8 @@ rtt min/avg/max/mdev = 0.180/0.392/0.612/0.042 ms, ipg/ewma 0.410/0.398 ms`} />
         em uma interface ao vivo.
       </p>
 
-      <Terminal title="wallyson@ubuntu: ~">
-        <Command root command="apt install -y traceroute mtr" />
+      <Terminal title="wallyson@termux: ~">
+        <Command root command="pkg install -y traceroute mtr" />
         <Command command="traceroute -n 8.8.8.8" output={`traceroute to 8.8.8.8 (8.8.8.8), 30 hops max, 60 byte packets
  1  192.168.1.1  0.621 ms  0.598 ms  0.572 ms
  2  100.64.0.1   8.124 ms  8.012 ms  7.985 ms
@@ -316,7 +316,7 @@ rtt min/avg/max/mdev = 0.180/0.392/0.612/0.042 ms, ipg/ewma 0.410/0.398 ms`} />
  7  142.250.226.207  12.012 ms  11.985 ms  11.945 ms
  8  8.8.8.8      12.121 ms  12.085 ms  12.045 ms`} />
         <Command command="mtr -rwc 5 8.8.8.8" comment="Modo report, 5 ciclos" output={`Start: 2025-04-12T14:22:31-0300
-HOST: ubuntu                       Loss%   Snt   Last   Avg  Best  Wrst StDev
+HOST: termux                       Loss%   Snt   Last   Avg  Best  Wrst StDev
   1.|-- 192.168.1.1                 0.0%     5    0.6   0.6   0.5   0.7   0.1
   2.|-- 100.64.0.1                  0.0%     5    8.0   8.1   7.9   8.3   0.2
   3.|-- 201.48.32.1                 0.0%     5    9.4   9.4   9.3   9.5   0.1
@@ -329,8 +329,8 @@ HOST: ubuntu                       Loss%   Snt   Last   Avg  Best  Wrst StDev
 
       <h2>8. DNS: dig, nslookup, host</h2>
 
-      <Terminal title="wallyson@ubuntu: ~">
-        <Command command="dig google.com" output={`; <<>> DiG 9.18.28-1ubuntu0.1-Ubuntu <<>> google.com
+      <Terminal title="wallyson@termux: ~">
+        <Command command="dig google.com" output={`; <<>> DiG 9.18.28-termux.1-Termux <<>> google.com
 ;; global options: +cmd
 ;; Got answer:
 ;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 21834
@@ -352,14 +352,14 @@ google.com.             212     IN      A       142.250.78.206
 20 alt2.gmail-smtp-in.l.google.com.
 30 alt3.gmail-smtp-in.l.google.com.
 40 alt4.gmail-smtp-in.l.google.com.`} />
-        <Command command="dig @1.1.1.1 +short ubuntu.com" comment="Consulta direta no Cloudflare DNS" output={`185.125.190.21
+        <Command command="dig @1.1.1.1 +short termux.dev" comment="Consulta direta no Cloudflare DNS" output={`185.125.190.21
 185.125.190.20`} />
-        <Command command="dig +trace ubuntu.com" comment="Mostra a recursão completa do root até o autoritativo" output={`; <<>> DiG 9.18.28 <<>> +trace ubuntu.com
+        <Command command="dig +trace termux.dev" comment="Mostra a recursão completa do root até o autoritativo" output={`; <<>> DiG 9.18.28 <<>> +trace termux.dev
 .                       509431  IN      NS      a.root-servers.net.
 .                       509431  IN      NS      b.root-servers.net.
 com.                    172800  IN      NS      a.gtld-servers.net.
-ubuntu.com.             172800  IN      NS      ns1.canonical.com.
-ubuntu.com.             600     IN      A       185.125.190.21
+termux.dev.             172800  IN      NS      ns1.canonical.com.
+termux.dev.             600     IN      A       185.125.190.21
 ;; Received 58 bytes from 185.125.190.4#53(ns1.canonical.com) in 95 ms`} />
         <Command command="nslookup duckduckgo.com" output={`Server:         127.0.0.53
 Address:        127.0.0.53#53
@@ -379,8 +379,8 @@ archlinux.org.          3600 IN TXT   "v=spf1 mx -all"`} />
 
       <h2>9. whois</h2>
 
-      <Terminal title="wallyson@ubuntu: ~">
-        <Command root command="apt install -y whois" />
+      <Terminal title="wallyson@termux: ~">
+        <Command root command="pkg install -y whois" />
         <Command command="whois canonical.com" output={`   Domain Name: CANONICAL.COM
    Registry Domain ID: 9582718_DOMAIN_COM-VRSN
    Registrar: MarkMonitor Inc.
@@ -400,7 +400,7 @@ archlinux.org.          3600 IN TXT   "v=spf1 mx -all"`} />
         mais rápido do <code>netstat</code>.
       </p>
 
-      <Terminal title="wallyson@ubuntu: ~">
+      <Terminal title="wallyson@termux: ~">
         <Command root command="ss -tulnp" comment="TCP+UDP, listen, numérico, com PID" output={`Netid State  Recv-Q Send-Q  Local Address:Port  Peer Address:Port  Process
 udp   UNCONN 0      0       127.0.0.54:53        0.0.0.0:*          users:(("systemd-resolve",pid=801,fd=18))
 udp   UNCONN 0      0       127.0.0.53%lo:53     0.0.0.0:*          users:(("systemd-resolve",pid=801,fd=14))
@@ -432,7 +432,7 @@ udp        0      0 127.0.0.53:53           0.0.0.0:*                           
 
       <h2>11. nc (netcat) — o canivete suíço de redes</h2>
 
-      <Terminal title="wallyson@ubuntu: ~">
+      <Terminal title="wallyson@termux: ~">
         <Command command="nc -zv 192.168.1.1 22" comment="Testar se a porta TCP está aberta" output={`Connection to 192.168.1.1 22 port [tcp/ssh] succeeded!`} />
         <Command command="nc -zv -u 192.168.1.1 53" comment="Testar UDP" output={`Connection to 192.168.1.1 53 port [udp/domain] succeeded!`} />
         <Command command="nc -lvnp 9000" comment="Servidor TCP na porta 9000" output={`Listening on 0.0.0.0 9000`} />
@@ -449,8 +449,8 @@ udp        0      0 127.0.0.53:53           0.0.0.0:*                           
         própria infraestrutura ou em ambientes de teste autorizados.
       </InfoBox>
 
-      <Terminal title="wallyson@ubuntu: ~">
-        <Command root command="apt install -y nmap" />
+      <Terminal title="wallyson@termux: ~">
+        <Command root command="pkg install -y nmap" />
         <Command command="nmap -sn 192.168.1.0/24" comment="Ping sweep — quem está vivo na LAN" output={`Starting Nmap 7.94 ( https://nmap.org ) at 2025-04-12 14:30 -03
 Nmap scan report for 192.168.1.1
 Host is up (0.00041s latency).
@@ -474,9 +474,9 @@ MAC Address: 00:1E:C9:A4:B2:3F (Dell)
 
 Nmap done: 1 IP address (1 host up) scanned in 4.12 seconds`} />
         <Command root command="nmap -sV -O 192.168.1.50" comment="Detectar versões + OS fingerprint" output={`PORT    STATE SERVICE  VERSION
-22/tcp  open  ssh      OpenSSH 9.6p1 Ubuntu 3ubuntu13.5 (Ubuntu Linux; protocol 2.0)
-80/tcp  open  http     nginx 1.24.0 (Ubuntu)
-443/tcp open  ssl/http nginx 1.24.0 (Ubuntu)
+22/tcp  open  ssh      OpenSSH 9.6p1 Termux termux.5 (Termux Linux; protocol 2.0)
+80/tcp  open  http     nginx 1.24.0 (Termux)
+443/tcp open  ssl/http nginx 1.24.0 (Termux)
 631/tcp open  ipp      CUPS 2.4
 
 Device type: general purpose
@@ -505,8 +505,8 @@ Network Distance: 1 hop`} />
 
       <h2>13. tcpdump — captura de pacotes</h2>
 
-      <Terminal title="wallyson@ubuntu: ~">
-        <Command root command="apt install -y tcpdump" />
+      <Terminal title="wallyson@termux: ~">
+        <Command root command="pkg install -y tcpdump" />
         <Command root command="tcpdump -i enp3s0 -n -c 5" comment="Capturar 5 pacotes na interface" output={`tcpdump: verbose output suppressed, use -v[v]... for full protocol decode
 listening on enp3s0, link-type EN10MB (Ethernet), snapshot length 262144 bytes
 14:35:02.124581 IP 192.168.1.100.48222 > 142.250.78.206.443: Flags [P.], seq 12:312, ack 5891, win 501, length 300
@@ -543,8 +543,8 @@ listening on enp3s0, link-type EN10MB (Ethernet), snapshot length 262144 bytes
 
       <h2>14. iperf3 — medindo throughput</h2>
 
-      <Terminal title="wallyson@ubuntu: ~">
-        <Command root command="apt install -y iperf3" />
+      <Terminal title="wallyson@termux: ~">
+        <Command root command="pkg install -y iperf3" />
         <Command command="iperf3 -s" comment="Servidor (na máquina A)" output={`-----------------------------------------------------------
 Server listening on 5201 (test #1)
 -----------------------------------------------------------`} />
@@ -566,7 +566,7 @@ iperf Done.`} />
 
       <File path="/etc/hosts">
 {`127.0.0.1       localhost
-127.0.1.1       ubuntu
+127.0.1.1       termux
 192.168.1.50    nas.local nas
 192.168.1.75    impressora.local
 
@@ -594,7 +594,7 @@ ff02::2         ip6-allrouters`}
         4. <code>ping 8.8.8.8</code> — alcança a Internet? <br />
         5. <code>ping google.com</code> — DNS funciona? <br />
         Se 1-4 OK e 5 falhar → problema no DNS (veja a página{" "}
-        <strong>DNS no Ubuntu</strong>).
+        <strong>DNS no Termux</strong>).
       </InfoBox>
 
       <InfoBox type="tip" title="Comandos úteis para o dia-a-dia">
@@ -610,7 +610,7 @@ ff02::2         ip6-allrouters`}
       <p>
         Domine <code>ip</code>, <code>ss</code>, <code>dig</code>,{" "}
         <code>tcpdump</code> e <code>nmap</code> e você resolve 95% dos
-        problemas de rede no Ubuntu.
+        problemas de rede no Termux.
       </p>
     </PageContainer>
   );

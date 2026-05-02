@@ -6,7 +6,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
     return (
       <PageContainer
         title="Ansible — Automação de Infraestrutura"
-        subtitle="Guia completo do Ansible no Ubuntu: instalação, inventários, playbooks, roles, modules, vaults e automação de servidores em escala."
+        subtitle="Guia completo do Ansible no Termux: instalação, inventários, playbooks, roles, modules, vaults e automação de servidores em escala."
         difficulty="avancado"
         timeToRead="40 min"
       >
@@ -28,18 +28,18 @@ import { PageContainer } from "@/components/layout/PageContainer";
 
         <h2>1. Instalação do Ansible</h2>
         <CodeBlock
-          title="Instalar o Ansible no Ubuntu"
-          code={`# Método 1: Via apt (versão estável do Ubuntu)
-  sudo apt update
-  sudo apt install -y ansible
+          title="Instalar o Ansible no Termux"
+          code={`# Método 1: Via apt (versão estável do Termux)
+  pkg update
+  pkg install -y ansible
 
   # Método 2: Via PPA (versão mais recente)
   sudo add-apt-repository --yes ppa:ansible/ansible
-  sudo apt update
-  sudo apt install -y ansible
+  pkg update
+  pkg install -y ansible
 
   # Método 3: Via pip (última versão, mais flexível)
-  sudo apt install -y python3-pip
+  pkg install -y python3-pip
   pip3 install ansible
 
   # Verificar a instalação
@@ -98,7 +98,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
 
   # Variáveis globais para TODOS os hosts
   [all:vars]
-  ansible_user=ubuntu
+  ansible_user=u0_a123
   ansible_become=yes
   ansible_become_method=sudo
   EOF
@@ -107,7 +107,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
   cat > inventory.yml << 'EOF'
   all:
     vars:
-      ansible_user: ubuntu
+      ansible_user: u0_a123
       ansible_become: yes
     children:
       webservers:
@@ -175,7 +175,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
   ansible all -i inventory.ini -m user -a "name=deploy state=present shell=/bin/bash" --become
 
   # Executar em apenas 2 servidores por vez (limitar paralelismo)
-  ansible all -i inventory.ini -m shell -a "apt update" --become -f 2`}
+  ansible all -i inventory.ini -m shell -a "pkg update" --become -f 2`}
         />
 
         <h2>4. Playbooks — Automação Estruturada</h2>
@@ -439,7 +439,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
       - name: Instalar Node.js via NodeSource
         shell: |
           curl -fsSL https://deb.nodesource.com/setup_{{ node_version }}.x | bash -
-          apt install -y nodejs
+          pkg install -y nodejs
         args:
           creates: /usr/bin/node
 
@@ -501,7 +501,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
 
   # Erro: "Python not found on remote host"
   # Solução: Instalar Python no servidor ou especificar o caminho
-  ansible all -m raw -a "apt install -y python3" --become
+  ansible all -m raw -a "pkg install -y python3" --become
   # Ou no inventário: ansible_python_interpreter=/usr/bin/python3
 
   # Erro: "Host key verification failed"
@@ -515,7 +515,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
   ansible-playbook site.yml -vvv --start-at-task="Nome da task"
 
   # Testar conectividade com todos os servidores
-  ansible all -i inventory.ini -m ping -u ubuntu --private-key=~/.ssh/key.pem
+  ansible all -i inventory.ini -m ping -u u0_a123 --private-key=~/.ssh/key.pem
 
   # Listar todas as tasks de um playbook
   ansible-playbook site.yml --list-tasks

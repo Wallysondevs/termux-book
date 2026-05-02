@@ -5,7 +5,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
   export default function CodigoFonte() {
     return (
       <PageContainer
-        title="Compilar Código Fonte no Ubuntu"
+        title="Compilar Código Fonte no Termux"
         subtitle="Guia completo para compilar software a partir do código fonte: ./configure, make, make install, checkinstall, dependências e boas práticas."
         difficulty="avancado"
         timeToRead="25 min"
@@ -21,12 +21,12 @@ import { PageContainer } from "@/components/layout/PageContainer";
         <CodeBlock
           title="Instalar ferramentas de compilação"
           code={`# Instalar o essencial para compilação
-  sudo apt install -y build-essential
+  pkg install -y build-essential
   # Inclui: gcc, g++, make, dpkg-dev, libc6-dev
 
   # Ferramentas extras comuns
-  sudo apt install -y cmake automake autoconf libtool pkg-config
-  sudo apt install -y git wget curl
+  pkg install -y cmake automake autoconf libtool pkg-config
+  pkg install -y git wget curl
 
   # Instalar dependências de desenvolvimento (headers)
   # Cada software tem suas dependências — leia o README/INSTALL
@@ -63,7 +63,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
 
   # Se der erro de dependência:
   # "configure: error: Package requirements (libssl) were not met"
-  # Instalar: sudo apt install libssl-dev
+  # Instalar: pkg install libssl-dev
 
   # 3. Compilar
   make
@@ -87,7 +87,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
           title="Usar checkinstall para criar pacotes .deb"
           code={`# checkinstall cria um .deb ao invés de instalar diretamente
   # Vantagens: pode desinstalar com apt, rastrear arquivos, sem conflitos
-  sudo apt install -y checkinstall
+  pkg install -y checkinstall
 
   # Ao invés de "sudo make install", use:
   sudo checkinstall --default
@@ -102,7 +102,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
     --provides=meu-software
 
   # Desinstalar (como qualquer pacote):
-  sudo apt remove meu-software
+  pkg uninstall meu-software
 
   # Reinstalar o .deb:
   sudo dpkg -i meu-software_1.0-1_amd64.deb`}
@@ -140,12 +140,12 @@ import { PageContainer } from "@/components/layout/PageContainer";
         <h2>5. Encontrar Dependências</h2>
         <CodeBlock
           title="Resolver dependências de compilação"
-          code={`# Padrão no Ubuntu: pacotes -dev contêm os headers
+          code={`# Padrão no Termux: pacotes -dev contêm os headers
   # Se o configure pede "libfoo", instale "libfoo-dev"
-  sudo apt install -y libfoo-dev
+  pkg install -y libfoo-dev
 
   # Dependências comuns:
-  sudo apt install -y \
+  pkg install -y \
     libssl-dev \
     libcurl4-openssl-dev \
     libxml2-dev \
@@ -160,14 +160,14 @@ import { PageContainer } from "@/components/layout/PageContainer";
   # Buscar pacote de desenvolvimento:
   apt search libssl | grep dev
 
-  # Instalar dependências de um pacote do Ubuntu (para recompilar)
-  sudo apt build-dep nome-do-pacote
+  # Instalar dependências de um pacote do Termux (para recompilar)
+  pkg build-dep nome-do-pacote
 
   # Verificar quais pacotes fornecem um arquivo
   apt-file search "openssl/ssl.h"
   # Instalar apt-file se necessário:
-  sudo apt install -y apt-file
-  sudo apt-file update`}
+  pkg install -y apt-file
+  pkg files update`}
         />
 
         <h2>Troubleshooting</h2>
@@ -175,11 +175,11 @@ import { PageContainer } from "@/components/layout/PageContainer";
           title="Problemas comuns ao compilar"
           code={`# "configure: error: C compiler cannot create executables"
   # Instalar build-essential:
-  sudo apt install -y build-essential
+  pkg install -y build-essential
 
   # "No package 'xxx' found" (pkg-config)
   # Instalar o pacote -dev:
-  sudo apt install -y libxxx-dev
+  pkg install -y libxxx-dev
 
   # "fatal error: xxx.h: No such file or directory"
   # Encontrar qual pacote fornece o header:
@@ -197,7 +197,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
   # Ou usar checkinstall para gerenciar como pacote
 
   # Remover software compilado manualmente
-  # Se usou checkinstall: sudo apt remove nome
+  # Se usou checkinstall: pkg uninstall nome
   # Se usou make install e tem make uninstall: sudo make uninstall
   # Se não tem uninstall: use o install_manifest.txt ou reinstale com checkinstall`}
         />

@@ -64,7 +64,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
           title="Trabalhar com variáveis e argumentos"
           code={`#!/bin/bash
   # Variáveis (sem espaços ao redor do =!)
-  nome="Ubuntu"
+  nome="Termux"
   versao=24
   caminho="/home/$USER"
 
@@ -97,7 +97,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
   echo ""
 
   # Valor padrão
-  nome=\${1:-"Ubuntu"}   # Usa $1 ou "Ubuntu" se não informado
+  nome=\${1:-"Termux"}   # Usa $1 ou "Termux" se não informado
 
   # Comando como variável
   data=$(date +%Y%m%d)
@@ -368,7 +368,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
   bash -n meu-script.sh
 
   # ShellCheck — linter para scripts Bash
-  sudo apt install -y shellcheck
+  pkg install -y shellcheck
   shellcheck meu-script.sh
   # Aponta erros comuns, problemas de portabilidade e boas práticas
 

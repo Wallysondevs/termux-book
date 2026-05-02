@@ -13,13 +13,13 @@ export default function DockerCompose() {
     >
       <p>
         <strong>Docker Compose v2</strong> é hoje um <em>plugin</em> do CLI do Docker (não mais
-        o binário Python <code>docker-compose</code>). No Ubuntu, ele vem no pacote{" "}
+        o binário Python <code>docker-compose</code>). No Termux, ele vem no pacote{" "}
         <code>docker-compose-plugin</code>, instalado junto com o Docker Engine pelo repositório
         oficial. O comando passou de <code>docker-compose</code> (com hífen) para{" "}
         <code>docker compose</code> (com espaço).
       </p>
 
-      <Terminal title="wallyson@ubuntu: ~">
+      <Terminal title="wallyson@termux: ~">
         <Command
           command="docker compose version"
           output={`Docker Compose version v2.29.7`}
@@ -29,13 +29,13 @@ export default function DockerCompose() {
           command="dpkg -l docker-compose-plugin"
           output={`||/ Name                 Versão                       Arquitetura  Descrição
 +++-====================-============================-============-===============================
-ii  docker-compose-plugin 2.29.7-1~ubuntu.24.04~noble  amd64        Docker Compose (V2) plugin for the Docker CLI`}
+ii  docker-compose-plugin 2.29.7-1~termux.24.04~noble  amd64        Docker Compose (V2) plugin for the Docker CLI`}
         />
       </Terminal>
 
       <InfoBox type="warning" title="Compose v1 está descontinuado">
         Se você ainda tem <code>docker-compose</code> (Python, com hífen), remova:{" "}
-        <code>sudo apt remove docker-compose</code>. A sintaxe e flags evoluíram — use sempre{" "}
+        <code>pkg uninstall docker-compose</code>. A sintaxe e flags evoluíram — use sempre{" "}
         <code>docker compose</code>.
       </InfoBox>
 
@@ -139,7 +139,7 @@ TAG=1.27-alpine`}
 
       <h2>Comandos do dia-a-dia</h2>
 
-      <Terminal title="wallyson@ubuntu: ~/meublog">
+      <Terminal title="wallyson@termux: ~/meublog">
         <Command
           comment="Sobe a stack inteira em background"
           command="docker compose up -d"
@@ -448,7 +448,7 @@ UID                 PID                 PPID                C                   
 }`}
       </File>
 
-      <Terminal title="wallyson@ubuntu: ~/meublog">
+      <Terminal title="wallyson@termux: ~/meublog">
         <Command
           command="docker compose up -d --wait"
           output={`[+] Running 4/4

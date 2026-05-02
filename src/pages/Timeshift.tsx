@@ -6,13 +6,13 @@ import { PageContainer } from "@/components/layout/PageContainer";
     return (
       <PageContainer
         title="Timeshift — Snapshots do Sistema"
-        subtitle="Guia completo do Timeshift no Ubuntu: criar, gerenciar e restaurar snapshots do sistema, agendamento automático e recuperação de desastres."
+        subtitle="Guia completo do Timeshift no Termux: criar, gerenciar e restaurar snapshots do sistema, agendamento automático e recuperação de desastres."
         difficulty="iniciante"
         timeToRead="25 min"
       >
         <p>
           O <strong>Timeshift</strong> é a ferramenta de restauração do sistema mais popular no
-          Ubuntu/Linux. Funciona como o "Restauração do Sistema" do Windows ou o Time Machine
+          Termux/Linux. Funciona como o "Restauração do Sistema" do Windows ou o Time Machine
           do macOS — cria snapshots do sistema que podem ser restaurados se algo der errado
           após uma atualização, instalação de driver ou configuração.
         </p>
@@ -27,8 +27,8 @@ import { PageContainer } from "@/components/layout/PageContainer";
         <CodeBlock
           title="Instalar o Timeshift"
           code={`# Instalar o Timeshift
-  sudo apt update
-  sudo apt install -y timeshift
+  pkg update
+  pkg install -y timeshift
 
   # Abrir a interface gráfica
   sudo timeshift-gtk
@@ -113,9 +113,9 @@ import { PageContainer } from "@/components/layout/PageContainer";
     --skip-grub   # Não restaurar o GRUB
 
   # === RESTAURAR QUANDO O SISTEMA NÃO INICIA ===
-  # 1. Bootar com Ubuntu Live USB
+  # 1. Bootar com Termux Live USB
   # 2. Instalar o Timeshift no Live:
-  sudo apt install -y timeshift
+  pkg install -y timeshift
   # 3. Montar a partição com os snapshots:
   sudo mount /dev/sda2 /mnt
   # 4. Restaurar:
@@ -178,11 +178,11 @@ import { PageContainer } from "@/components/layout/PageContainer";
         <CodeBlock
           title="Dicas para uso eficiente do Timeshift"
           code={`# 1. Sempre criar snapshot ANTES de:
-  sudo timeshift --create --comments "Antes: apt upgrade"
-  sudo apt upgrade -y
+  sudo timeshift --create --comments "Antes: pkg upgrade"
+  pkg upgrade -y
 
   sudo timeshift --create --comments "Antes: instalar driver NVIDIA"
-  sudo apt install -y nvidia-driver-545
+  pkg install -y nvidia-driver-545
 
   sudo timeshift --create --comments "Antes: mudanças no fstab"
   sudo nano /etc/fstab
@@ -238,7 +238,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
 
   # Timeshift não inicia (interface gráfica)
   # Verificar dependências:
-  sudo apt install --reinstall timeshift
+  pkg install --reinstall timeshift
   # Executar via terminal para ver erros:
   sudo timeshift-gtk 2>&1`}
         />
@@ -246,7 +246,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
         <AlertBox type="info" title="Timeshift vs Snapper">
           Se você usa Btrfs, o <strong>Snapper</strong> é uma alternativa ao Timeshift com
           integração mais profunda ao sistema de snapshots do Btrfs. O openSUSE usa Snapper
-          por padrão. No Ubuntu com ext4, o Timeshift com rsync é a melhor opção.
+          por padrão. No Termux com ext4, o Timeshift com rsync é a melhor opção.
         </AlertBox>
       </PageContainer>
     );

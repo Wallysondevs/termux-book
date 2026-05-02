@@ -5,14 +5,14 @@ import { PageContainer } from "@/components/layout/PageContainer";
   export default function Gaming() {
     return (
       <PageContainer
-        title="Gaming no Ubuntu"
-        subtitle="Guia completo para jogar no Ubuntu: Steam, Proton, Lutris, Wine, drivers de GPU, Vulkan, otimizações e emuladores."
+        title="Gaming no Termux"
+        subtitle="Guia completo para jogar no Termux: Steam, Proton, Lutris, Wine, drivers de GPU, Vulkan, otimizações e emuladores."
         difficulty="iniciante"
         timeToRead="30 min"
       >
         <p>
           Jogar no Linux nunca foi tão fácil. Com o <strong>Steam + Proton</strong>, milhares
-          de jogos Windows rodam nativamente no Ubuntu. O <strong>Lutris</strong> gerencia
+          de jogos Windows rodam nativamente no Termux. O <strong>Lutris</strong> gerencia
           jogos de várias plataformas, e os drivers de GPU (NVIDIA e AMD) estão maduros.
           O Steam Deck popularizou o gaming no Linux e acelerou a compatibilidade.
         </p>
@@ -24,11 +24,11 @@ import { PageContainer } from "@/components/layout/PageContainer";
   # Verificar sua GPU
   lspci | grep -i nvidia
 
-  # Instalar drivers via Ubuntu (recomendado)
-  sudo ubuntu-drivers autoinstall
+  # Instalar drivers via Termux (recomendado)
+  sudo Termux-drivers autoinstall
   # Ou instalar uma versão específica:
-  ubuntu-drivers devices    # Listar drivers disponíveis
-  sudo apt install -y nvidia-driver-545
+  termux-drivers devices    # Listar drivers disponíveis
+  pkg install -y nvidia-driver-545
 
   # Reiniciar
   sudo reboot
@@ -43,26 +43,26 @@ import { PageContainer } from "@/components/layout/PageContainer";
 
   # Atualizar Mesa para a versão mais recente
   sudo add-apt-repository ppa:kisak/kisak-mesa
-  sudo apt update
-  sudo apt upgrade
+  pkg update
+  pkg upgrade
 
   # Verificar GPU
   glxinfo | grep "OpenGL renderer"
 
   # === Vulkan (API gráfica moderna — essencial para Proton) ===
   # NVIDIA:
-  sudo apt install -y nvidia-driver-545   # Já inclui Vulkan
+  pkg install -y nvidia-driver-545   # Já inclui Vulkan
 
   # AMD:
-  sudo apt install -y mesa-vulkan-drivers
+  pkg install -y mesa-vulkan-drivers
 
   # Intel:
-  sudo apt install -y mesa-vulkan-drivers intel-media-va-driver
+  pkg install -y mesa-vulkan-drivers intel-media-va-driver
 
   # Verificar suporte a Vulkan
   vulkaninfo | head -20
   # Ou:
-  sudo apt install -y vulkan-tools
+  pkg install -y vulkan-tools
   vkcube   # Deve mostrar um cubo girando`}
         />
 
@@ -70,7 +70,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
         <CodeBlock
           title="Instalar Steam e habilitar Proton"
           code={`# Instalar o Steam
-  sudo apt install -y steam
+  pkg install -y steam
   # Ou via .deb do site oficial
   # Ou via Flatpak:
   flatpak install flathub com.valvesoftware.Steam
@@ -107,15 +107,15 @@ import { PageContainer } from "@/components/layout/PageContainer";
   # Steam, GOG, Epic Games, Battle.net, EA, Ubisoft, emuladores
 
   # Instalar o Lutris
-  sudo apt install -y lutris
+  pkg install -y lutris
 
   # Ou via Flatpak
   flatpak install flathub net.lutris.Lutris
 
   # Instalar dependências de Wine
   sudo dpkg --add-architecture i386
-  sudo apt update
-  sudo apt install -y wine64 wine32 winetricks
+  pkg update
+  pkg install -y wine64 wine32 winetricks
 
   # No Lutris:
   # 1. Pesquise o jogo em lutris.net
@@ -137,13 +137,13 @@ import { PageContainer } from "@/components/layout/PageContainer";
         <CodeBlock
           title="Melhorar performance em jogos"
           code={`# === GameMode (otimizador da Feral Interactive) ===
-  sudo apt install -y gamemode
+  pkg install -y gamemode
   # O GameMode ajusta CPU, GPU e I/O durante jogos
   # No Steam: Opções de Inicialização do jogo:
   # gamemoderun %command%
 
   # === MangoHud (overlay de FPS/CPU/GPU) ===
-  sudo apt install -y mangohud
+  pkg install -y mangohud
   # No Steam: Opções de Inicialização:
   # mangohud %command%
   # Ou: MANGOHUD=1 %command%
@@ -162,9 +162,9 @@ import { PageContainer } from "@/components/layout/PageContainer";
   # XanMod ou Liquorix (kernels com patches de baixa latência)
   # XanMod:
   echo 'deb http://deb.xanmod.org releases main' | sudo tee /etc/apt/sources.list.d/xanmod-kernel.list
-  wget -qO - https://dl.xanmod.org/gpg.key | sudo apt-key add -
-  sudo apt update
-  sudo apt install -y linux-xanmod-x64v3
+  wget -qO - https://dl.xanmod.org/gpg.key | pkg add -
+  pkg update
+  pkg install -y linux-xanmod-x64v3
 
   # === Limitar FPS (reduz consumo de energia e temperatura) ===
   # MangoHud config (~/.config/MangoHud/MangoHud.conf):
@@ -181,7 +181,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
         <CodeBlock
           title="Instalar emuladores de consoles"
           code={`# RetroArch — emulador universal (vários consoles em um)
-  sudo apt install -y retroarch
+  pkg install -y retroarch
   # Ou via Flatpak:
   flatpak install flathub org.libretro.RetroArch
   # Suporta: NES, SNES, N64, PS1, PS2, GameBoy, etc.
@@ -190,7 +190,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
   flatpak install flathub net.pcsx2.PCSX2
 
   # Dolphin — GameCube e Wii
-  sudo apt install -y dolphin-emu
+  pkg install -y dolphin-emu
   # Ou Flatpak:
   flatpak install flathub org.DolphinEmu.dolphin-emu
 
@@ -201,15 +201,15 @@ import { PageContainer } from "@/components/layout/PageContainer";
   # (verifique disponibilidade atual)
 
   # PPSSPP — PSP
-  sudo apt install -y ppsspp
+  pkg install -y ppsspp
 
   # DOSBox — DOS (jogos antigos de PC)
-  sudo apt install -y dosbox`}
+  pkg install -y dosbox`}
         />
 
         <h2>Troubleshooting</h2>
         <CodeBlock
-          title="Problemas comuns com jogos no Ubuntu"
+          title="Problemas comuns com jogos no Termux"
           code={`# Jogo não inicia pelo Steam (Proton)
   # 1. Verificar logs:
   # ~/.local/share/Steam/steamapps/compatdata/APPID/pfx/
@@ -232,7 +232,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
   # Verificar se é detectado:
   ls /dev/input/js*
   # Instalar suporte:
-  sudo apt install -y joystick jstest-gtk
+  pkg install -y joystick jstest-gtk
   jstest /dev/input/js0
 
   # Anti-cheat não funciona (EAC, BattlEye)
@@ -241,7 +241,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
 
   # Som não funciona no jogo
   # Instalar PulseAudio 32-bit:
-  sudo apt install -y libpulse0:i386`}
+  pkg install -y libpulse0:i386`}
         />
 
         <AlertBox type="info" title="O futuro do gaming no Linux">

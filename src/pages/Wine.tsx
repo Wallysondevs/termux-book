@@ -5,8 +5,8 @@ import { PageContainer } from "@/components/layout/PageContainer";
   export default function Wine() {
     return (
       <PageContainer
-        title="Wine — Executar Aplicativos Windows no Ubuntu"
-        subtitle="Guia completo do Wine, Winetricks, Bottles e Proton para rodar programas e jogos Windows nativamente no Ubuntu sem virtualização."
+        title="Wine — Executar Aplicativos Windows no Termux"
+        subtitle="Guia completo do Wine, Winetricks, Bottles e Proton para rodar programas e jogos Windows nativamente no Termux sem virtualização."
         difficulty="intermediario"
         timeToRead="30 min"
       >
@@ -27,7 +27,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
 
         <h2>1. Instalar o Wine</h2>
         <CodeBlock
-          title="Instalação do Wine no Ubuntu"
+          title="Instalação do Wine no Termux"
           code={`# Habilitar arquitetura 32-bit (necessário para muitos programas Windows)
   sudo dpkg --add-architecture i386
 
@@ -35,17 +35,17 @@ import { PageContainer } from "@/components/layout/PageContainer";
   sudo mkdir -pm755 /etc/apt/keyrings
   sudo wget -O /etc/apt/keyrings/winehq-archive.key https://dl.winehq.org/wine-builds/winehq.key
 
-  # Adicionar o repositório (Ubuntu 24.04 Noble)
+  # Adicionar o repositório (Termux 0.118 Noble)
   sudo wget -NP /etc/apt/sources.list.d/ \
-    https://dl.winehq.org/wine-builds/ubuntu/dists/noble/winehq-noble.sources
+    https://dl.winehq.org/wine-builds/termux/dists/noble/winehq-noble.sources
 
   # Atualizar e instalar
-  sudo apt update
+  pkg update
 
   # Escolha UMA das versões:
-  sudo apt install -y --install-recommends winehq-stable    # Estável (recomendado)
-  sudo apt install -y --install-recommends winehq-staging   # Com patches extras (gaming)
-  sudo apt install -y --install-recommends winehq-devel     # Desenvolvimento (mais recente)
+  pkg install -y --install-recommends winehq-stable    # Estável (recomendado)
+  pkg install -y --install-recommends winehq-staging   # Com patches extras (gaming)
+  pkg install -y --install-recommends winehq-devel     # Desenvolvimento (mais recente)
 
   # Verificar a instalação
   wine --version
@@ -108,7 +108,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
         <CodeBlock
           title="Instalar e usar o Winetricks"
           code={`# Instalar o Winetricks
-  sudo apt install -y winetricks
+  pkg install -y winetricks
 
   # Abrir a interface gráfica do Winetricks
   winetricks
@@ -149,7 +149,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
         <CodeBlock
           title="Instalar e usar o Bottles"
           code={`# Instalar o Bottles via Flatpak (forma recomendada)
-  sudo apt install -y flatpak
+  pkg install -y flatpak
   flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
   flatpak install flathub com.usebottles.bottles
 
@@ -176,8 +176,8 @@ import { PageContainer } from "@/components/layout/PageContainer";
           title="Instalar e usar o Lutris"
           code={`# Adicionar o repositório do Lutris
   sudo add-apt-repository ppa:lutris-team/lutris
-  sudo apt update
-  sudo apt install -y lutris
+  pkg update
+  pkg install -y lutris
 
   # O Lutris é uma plataforma de gaming que integra:
   # - Wine/Proton (jogos Windows)
@@ -203,7 +203,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
         <CodeBlock
           title="Configurar Proton no Steam"
           code={`# Instalar o Steam
-  sudo apt install -y steam
+  pkg install -y steam
 
   # Habilitar o Steam Play (Proton) para todos os jogos:
   # 1. Abra o Steam
@@ -242,11 +242,11 @@ import { PageContainer } from "@/components/layout/PageContainer";
 
   # Instalar drivers Vulkan (ESSENCIAL para performance)
   # Para GPUs NVIDIA:
-  sudo apt install -y nvidia-driver-545 libvulkan1
+  pkg install -y nvidia-driver-545 libvulkan1
   # Para GPUs AMD:
-  sudo apt install -y mesa-vulkan-drivers libvulkan1
+  pkg install -y mesa-vulkan-drivers libvulkan1
   # Para GPUs Intel:
-  sudo apt install -y mesa-vulkan-drivers intel-media-va-driver libvulkan1
+  pkg install -y mesa-vulkan-drivers intel-media-va-driver libvulkan1
 
   # Verificar se o Vulkan está funcionando
   vulkaninfo | head -20
@@ -260,7 +260,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
   # Você verá um overlay com FPS no canto da tela
 
   # Monitorar performance com MangoHud
-  sudo apt install -y mangohud
+  pkg install -y mangohud
   # Executar um jogo com MangoHud:
   mangohud wine jogo.exe
   # Ou via Steam: adicione "mangohud %command%" nos launch options`}
@@ -285,13 +285,13 @@ import { PageContainer } from "@/components/layout/PageContainer";
 
   # Áudio não funciona
   # Instalar bibliotecas de áudio
-  sudo apt install -y wine32:i386 libasound2-plugins:i386
+  pkg install -y wine32:i386 libasound2-plugins:i386
   winetricks sound=alsa    # ou sound=pulse
 
   # Performance ruim em jogos
   # 1. Verificar se DXVK está ativo (não wined3d)
   # 2. Verificar drivers Vulkan: vulkaninfo
-  # 3. Usar gamemode: sudo apt install -y gamemode
+  # 3. Usar gamemode: pkg install -y gamemode
   # 4. Executar com: gamemoderun wine jogo.exe
 
   # Programa precisa de versão específica do Windows

@@ -16,10 +16,10 @@ export default function GPG() {
         (RFC 4880). Cobre dois mundos: <em>criptografia assimétrica</em> (chave pública para
         cifrar, privada para decifrar) e <em>assinatura digital</em> (privada assina, pública
         verifica). É a tecnologia por trás dos repositórios APT assinados, do <code>git commit
-        --gpg-sign</code>, das verificações de integridade dos ISOs do Ubuntu, etc.
+        --gpg-sign</code>, das verificações de integridade dos ISOs do Termux, etc.
       </p>
 
-      <Terminal title="wallyson@ubuntu: ~">
+      <Terminal title="wallyson@termux: ~">
         <Command command="gpg --version" output={`gpg (GnuPG) 2.4.4
 libgcrypt 1.10.3
 Copyright (C) 2024 g10 Code GmbH
@@ -42,7 +42,7 @@ Compression: Uncompressed, ZIP, ZLIB, BZIP2`} />
         rápidas, fortes. Use RSA 4096 só por compatibilidade com sistemas antigos.
       </p>
 
-      <Terminal title="wallyson@ubuntu: ~">
+      <Terminal title="wallyson@termux: ~">
         <Command command="gpg --full-generate-key --expert" output={`gpg (GnuPG) 2.4.4; Copyright (C) 2024 g10 Code GmbH
 
 Please select what kind of key you want:
@@ -108,7 +108,7 @@ sub   cv25519 2025-11-12 [E] [expires: 2027-11-12]`} />
 
       <h2>2. Listar e inspecionar chaves</h2>
 
-      <Terminal title="wallyson@ubuntu: ~">
+      <Terminal title="wallyson@termux: ~">
         <Command command="gpg --list-keys" output={`/home/wallyson/.gnupg/pubring.kbx
 --------------------------------
 pub   ed25519 2025-11-12 [SC] [expires: 2027-11-12]
@@ -127,7 +127,7 @@ sub   cv25519 2025-11-12 [E] [expires: 2027-11-12]`} />
 
       <h2>3. Exportar / importar chaves</h2>
 
-      <Terminal title="wallyson@ubuntu: ~">
+      <Terminal title="wallyson@termux: ~">
         <Command command="gpg --export --armor wallyson@exemplo.com > wallyson.pub.asc" comment="Sua chave pública (compartilhável)" />
         <Command command="head -3 wallyson.pub.asc" output={`-----BEGIN PGP PUBLIC KEY BLOCK-----
 
@@ -152,7 +152,7 @@ gpg> save`} />
 
       <h2>4. Criptografar / descriptografar</h2>
 
-      <Terminal title="wallyson@ubuntu: ~">
+      <Terminal title="wallyson@termux: ~">
         <Command command="echo 'segredo importante' > mensagem.txt" />
         <Command
           command="gpg --encrypt --armor --recipient maria@exemplo.com mensagem.txt"
@@ -178,7 +178,7 @@ Repeat passphrase: ********`}
 
       <h2>5. Assinar e verificar</h2>
 
-      <Terminal title="wallyson@ubuntu: ~">
+      <Terminal title="wallyson@termux: ~">
         <Command command="gpg --sign documento.pdf" comment="Cria documento.pdf.gpg (binário, com assinatura + conteúdo)" />
         <Command command="gpg --clearsign artigo.txt" comment="Assinatura legível dentro do mesmo arquivo (ASCII)" />
         <Command command="cat artigo.txt.asc" output={`-----BEGIN PGP SIGNED MESSAGE-----
@@ -191,15 +191,15 @@ Conteúdo original do texto...
 iQEzBAEBCgAdFiEE...
 =8aBz
 -----END PGP SIGNATURE-----`} />
-        <Command command="gpg --detach-sign --armor ubuntu-24.04.iso" comment="Gera ubuntu-24.04.iso.asc — assinatura SEPARADA" />
-        <Command command="gpg --verify ubuntu-24.04.iso.asc ubuntu-24.04.iso" output={`gpg: Signature made Tue 12 Nov 2025 09:54:11 BRT
+        <Command command="gpg --detach-sign --armor termux-24.04.iso" comment="Gera termux-24.04.iso.asc — assinatura SEPARADA" />
+        <Command command="gpg --verify termux-24.04.iso.asc termux-24.04.iso" output={`gpg: Signature made Tue 12 Nov 2025 09:54:11 BRT
 gpg:                using EDDSA key 9F2A1E72C4B5D8E91A3B4C5D6E7F8901234567890
 gpg: Good signature from "Wallyson Silva (Chave pessoal) <wallyson@exemplo.com>" [ultimate]`} />
       </Terminal>
 
       <h2>6. Keyservers — distribuir e baixar chaves</h2>
 
-      <Terminal title="wallyson@ubuntu: ~">
+      <Terminal title="wallyson@termux: ~">
         <Command command="gpg --keyserver hkps://keys.openpgp.org --send-keys 9F2A1E72C4B5D8E91A3B4C5D6E7F8901234567890" output={`gpg: sending key 6E7F890123456789 to hkps://keys.openpgp.org`} />
         <Command command="gpg --keyserver hkps://keys.openpgp.org --search-keys maria@exemplo.com" output={`gpg: data source: https://keys.openpgp.org:443
 (1)     Maria Silva <maria@exemplo.com>
@@ -212,7 +212,7 @@ gpg:               imported: 1`} />
       </Terminal>
 
       <h2>7. Backup e revogação</h2>
-      <Terminal title="wallyson@ubuntu: ~">
+      <Terminal title="wallyson@termux: ~">
         <Command command="ls ~/.gnupg/openpgp-revocs.d/" output={`9F2A1E72C4B5D8E91A3B4C5D6E7F8901234567890.rev`} />
         <Command command="cat ~/.gnupg/openpgp-revocs.d/9F2A1E72C4B5D8E91A3B4C5D6E7F8901234567890.rev | head -5" output={`This is a revocation certificate for the OpenPGP key:
 
@@ -246,7 +246,7 @@ allow-loopback-pinentry
 enable-ssh-support`}
       </File>
 
-      <Terminal title="wallyson@ubuntu: ~">
+      <Terminal title="wallyson@termux: ~">
         <Command command="gpgconf --kill gpg-agent" comment="Reinicia o agent" />
         <Command command="gpg-connect-agent reloadagent /bye" output={`OK`} />
         <Command command="ssh-add -L" comment="GPG agent pode atuar como ssh-agent" output={`ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEr2Y3...`} />
@@ -254,7 +254,7 @@ enable-ssh-support`}
 
       <h2>9. Integração com Git</h2>
 
-      <Terminal title="wallyson@ubuntu: ~">
+      <Terminal title="wallyson@termux: ~">
         <Command command="git config --global user.signingkey 9F2A1E72C4B5D8E91A3B4C5D6E7F8901234567890" />
         <Command command="git config --global commit.gpgsign true" />
         <Command command="git config --global tag.gpgSign true" />
@@ -278,12 +278,12 @@ Date:   Tue Nov 12 10:14:22 2025 -0300
         <code>apt-key</code> (depreciado).
       </p>
 
-      <Terminal title="root@ubuntu: ~">
+      <Terminal title="root@termux: ~">
         <Command root command="install -m 0755 -d /etc/apt/keyrings" />
-        <Command root command="curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg" />
+        <Command root command="curl -fsSL https://download.docker.com/linux/termux/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg" />
         <Command root command="chmod a+r /etc/apt/keyrings/docker.gpg" />
-        <Command root command={"echo \"deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo $VERSION_CODENAME) stable\" | tee /etc/apt/sources.list.d/docker.list"} />
-        <Command root command="apt update" output={`Hit:1 https://download.docker.com/linux/ubuntu noble InRelease
+        <Command root command={"echo \"deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/termux $(. /etc/os-release && echo $VERSION_CODENAME) stable\" | tee /etc/apt/sources.list.d/docker.list"} />
+        <Command root command="pkg update" output={`Hit:1 https://download.docker.com/linux/termux noble InRelease
 Reading package lists... Done`} />
       </Terminal>
 

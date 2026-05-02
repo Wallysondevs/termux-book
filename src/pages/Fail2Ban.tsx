@@ -20,14 +20,14 @@ export default function Fail2Ban() {
         tempo) e qualquer log com regex customizada.
       </p>
 
-      <Terminal title="root@ubuntu: ~">
-        <Command root command="apt install -y fail2ban" output={`Reading package lists... Done
+      <Terminal title="root@termux: ~">
+        <Command root command="pkg install -y fail2ban" output={`Reading package lists... Done
 The following NEW packages will be installed:
   fail2ban python3-pyinotify python3-systemd whois
 0 upgraded, 4 newly installed, 0 to remove and 0 not upgraded.
 Need to get 489 kB of archives.
 After this operation, 2.211 kB of additional disk space will be used.
-Setting up fail2ban (1.0.2-3ubuntu0.1) ...
+Setting up fail2ban (1.0.2-termux.1) ...
 Created symlink /etc/systemd/system/multi-user.target.wants/fail2ban.service → /usr/lib/systemd/system/fail2ban.service.
 Synchronizing state of fail2ban.service with SysV service script with /usr/lib/systemd/systemd-sysv-install.`} />
         <Command root command="systemctl status fail2ban" output={`● fail2ban.service - Fail2Ban Service
@@ -49,7 +49,7 @@ Synchronizing state of fail2ban.service with SysV service script with /usr/lib/s
         arquivos em <code>/etc/fail2ban/jail.d/*.conf</code> (organização modular).
       </p>
 
-      <Terminal title="root@ubuntu: ~">
+      <Terminal title="root@termux: ~">
         <Command root command="ls /etc/fail2ban/" output={`action.d/    fail2ban.conf  fail2ban.d/   filter.d/   jail.conf   jail.d/   paths-arch.conf   paths-common.conf   paths-debian.conf   paths-opensuse.conf`} />
         <Command root command="cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.local" comment="Cópia inicial — depois edite só o necessário" />
       </Terminal>
@@ -68,7 +68,7 @@ bantime  = 1h
 # Tentativas antes de banir
 maxretry = 5
 
-# Backend de log (auto detecta; systemd em Ubuntu 24.04)
+# Backend de log (auto detecta; systemd em Termux 0.118)
 backend  = systemd
 
 # Banir tanto IPv4 quanto IPv6
@@ -78,7 +78,7 @@ banaction_allports = ufw
 
 # E-mail de notificação (opcional)
 destemail = admin@exemplo.com
-sender    = fail2ban@ubuntu
+sender    = fail2ban@termux
 mta       = sendmail
 action    = %(action_mwl)s    # mw=mail, l=inclui linhas do log
 
@@ -131,7 +131,7 @@ findtime = 1d
 maxretry = 3`}
       </File>
 
-      <Terminal title="root@ubuntu: ~">
+      <Terminal title="root@termux: ~">
         <Command root command="systemctl restart fail2ban" />
         <Command root command="fail2ban-client status" output={`Status
 |- Number of jail:      5
@@ -154,7 +154,7 @@ maxretry = 3`}
         para excluir falsos positivos.
       </p>
 
-      <Terminal title="root@ubuntu: ~">
+      <Terminal title="root@termux: ~">
         <Command root command="ls /etc/fail2ban/filter.d/ | head -10" output={`apache-auth.conf
 apache-badbots.conf
 apache-botsearch.conf
@@ -212,7 +212,7 @@ bantime  = 1d
 action   = ufw[application="Nginx Full"]`}
       </File>
 
-      <Terminal title="root@ubuntu: ~">
+      <Terminal title="root@termux: ~">
         <Command root command="fail2ban-client reload" output={`OK`} />
         <Command root command="fail2ban-regex /var/log/nginx/access.log /etc/fail2ban/filter.d/nginx-admin.conf" comment="Testa o regex contra um log real" output={`Running tests
 =============
@@ -241,7 +241,7 @@ Lines: 4231 lines, 0 ignored, 27 matched, 4204 missed
 
       <h2>4. fail2ban-client — controle dia-a-dia</h2>
 
-      <Terminal title="root@ubuntu: ~">
+      <Terminal title="root@termux: ~">
         <Command root command="fail2ban-client status sshd" />
         <Command root command="fail2ban-client unban 45.79.12.8" comment="Desbanir um IP (você mesmo, por exemplo)" output={`1`} />
         <Command root command="fail2ban-client unban --all" comment="Reset total de banimentos" output={`12`} />
@@ -261,7 +261,7 @@ Lines: 4231 lines, 0 ignored, 27 matched, 4204 missed
         permissão.
       </p>
 
-      <Terminal title="root@ubuntu: ~">
+      <Terminal title="root@termux: ~">
         <Command root command="cat /etc/fail2ban/action.d/ufw.conf | head -25" output={`[Definition]
 actionstart =
 actionstop =
@@ -289,7 +289,7 @@ application =`} />
 
       <h2>6. Logs — quem fez o quê e quando</h2>
 
-      <Terminal title="root@ubuntu: ~">
+      <Terminal title="root@termux: ~">
         <Command root command="tail -n 10 /var/log/fail2ban.log" output={`2025-11-12 09:14:32,221 fail2ban.server [4421]: INFO Starting Fail2ban v1.0.2
 2025-11-12 09:14:32,224 fail2ban.observer [4421]: INFO Observer start...
 2025-11-12 09:14:32,318 fail2ban.jail [4421]: INFO Jail 'sshd' started
@@ -322,7 +322,7 @@ application =`} />
       </InfoBox>
 
       <h2>8. Testes finais</h2>
-      <Terminal title="root@ubuntu: ~">
+      <Terminal title="root@termux: ~">
         <Command root command="fail2ban-client -t" comment="Valida configuração antes de aplicar" output={`OK: configuration test is successful`} />
         <Command root command="fail2ban-client -d | head -20" comment="Dump completo da config carregada" />
         <Command root command="fail2ban-client status recidive" output={`Status for the jail: recidive

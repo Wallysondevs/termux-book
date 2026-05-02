@@ -6,7 +6,7 @@ export default function Backup() {
   return (
     <PageContainer
       title="Backup com rsync"
-      subtitle="Estratégias 3-2-1, snapshots incrementais com --link-dest, sincronização remota via SSH e scripts robustos para Ubuntu."
+      subtitle="Estratégias 3-2-1, snapshots incrementais com --link-dest, sincronização remota via SSH e scripts robustos para Termux."
       difficulty="intermediario"
       timeToRead="50 min"
       category="Backup & Cloud"
@@ -15,10 +15,10 @@ export default function Backup() {
         <strong>rsync</strong> é a ferramenta clássica para copiar e sincronizar diretórios no
         Linux. Diferente de <code>cp</code>, ele transfere apenas as <em>diferenças</em>{" "}
         (delta-transfer algorithm), preserva permissões, datas, links e hard-links, e funciona
-        tanto local quanto remotamente sobre SSH. Já vem instalado no Ubuntu por padrão.
+        tanto local quanto remotamente sobre SSH. Já vem instalado no Termux por padrão.
       </p>
 
-      <Terminal title="wallyson@ubuntu: ~">
+      <Terminal title="wallyson@termux: ~">
         <Command
           command="rsync --version | head -3"
           output={`rsync  version 3.2.7  protocol version 31

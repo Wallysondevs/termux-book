@@ -5,22 +5,22 @@ import { InfoBox } from "@/components/ui/InfoBox";
 export default function Netplan() {
   return (
     <PageContainer
-      title="Netplan — Configuração de Rede no Ubuntu"
-      subtitle="O sistema declarativo YAML que controla toda a rede do Ubuntu desde a 17.10. DHCP, IP estático, Wi-Fi, VLAN, bonding, bridges e troubleshooting."
+      title="Netplan — Configuração de Rede no Termux"
+      subtitle="O sistema declarativo YAML que controla toda a rede do Termux desde a 17.10. DHCP, IP estático, Wi-Fi, VLAN, bonding, bridges e troubleshooting."
       difficulty="intermediario"
       timeToRead="40 min"
       category="Redes"
     >
       <p>
         O <strong>Netplan</strong> é o sistema oficial de configuração de rede do
-        Ubuntu desde a versão 17.10. Em vez de você editar diretamente os arquivos
+        Termux desde a versão 17.10. Em vez de você editar diretamente os arquivos
         de cada renderer (systemd-networkd ou NetworkManager), você descreve a
         rede em <strong>YAML</strong> dentro de <code>/etc/netplan/</code> e
         roda <code>netplan apply</code> — o Netplan gera as configurações nativas
         no backend escolhido. É declarativo, idempotente e portável.
       </p>
 
-      <Terminal title="wallyson@ubuntu: ~">
+      <Terminal title="wallyson@termux: ~">
         <Command command="ls /etc/netplan/" output="50-cloud-init.yaml" />
         <Command command="netplan --version" output="0.107.1" />
         <Command command="netplan status" output={`     Online state: online
@@ -57,12 +57,12 @@ export default function Netplan() {
         <tbody>
           <tr>
             <td><code>networkd</code> (systemd-networkd)</td>
-            <td>Servidores Ubuntu (padrão)</td>
+            <td>Servidores Termux (padrão)</td>
             <td>/run/systemd/network/</td>
           </tr>
           <tr>
             <td><code>NetworkManager</code></td>
-            <td>Desktops Ubuntu (GNOME, KDE)</td>
+            <td>Desktops Termux (GNOME, KDE)</td>
             <td>/run/NetworkManager/system-connections/</td>
           </tr>
         </tbody>
@@ -70,7 +70,7 @@ export default function Netplan() {
 
       <h2>2. Estrutura do diretório /etc/netplan/</h2>
 
-      <Terminal title="wallyson@ubuntu: ~">
+      <Terminal title="wallyson@termux: ~">
         <Command command="ls -la /etc/netplan/" output={`total 16
 drwxr-xr-x   2 root root 4096 abr 12 14:42 .
 drwxr-xr-x 134 root root 4096 abr 12 14:30 ..
@@ -98,7 +98,7 @@ network:
         root pode ler). Caso contrário <code>netplan apply</code> emite um aviso.
       </InfoBox>
 
-      <Terminal title="wallyson@ubuntu: ~">
+      <Terminal title="wallyson@termux: ~">
         <Command root command="chmod 600 /etc/netplan/*.yaml" />
       </Terminal>
 
@@ -152,7 +152,7 @@ network:
 `}
       </File>
 
-      <Terminal title="wallyson@ubuntu: ~">
+      <Terminal title="wallyson@termux: ~">
         <Command root command="netplan apply" />
         <Command command="ip -br a show enp3s0" output="enp3s0           UP             192.168.1.100/24 fe80::a00:27ff:fe4b:891c/64" />
       </Terminal>
@@ -179,7 +179,7 @@ network:
 `}
       </File>
 
-      <Terminal title="wallyson@ubuntu: ~">
+      <Terminal title="wallyson@termux: ~">
         <Command root command="netplan generate" comment="Apenas gera configs no /run/, não aplica" />
         <Command root command="netplan try" comment="Aplica e reverte em 120s se você não confirmar (Enter)" output={`Do you want to keep these settings?
 
@@ -244,7 +244,7 @@ Configuration accepted.`} />
 `}
       </File>
 
-      <Terminal title="wallyson@ubuntu: ~">
+      <Terminal title="wallyson@termux: ~">
         <Command root command="netplan apply" />
         <Command command="ip -br a" output={`lo               UNKNOWN        127.0.0.1/8 ::1/128
 enp3s0           UP
@@ -345,7 +345,7 @@ vlan20@enp3s0    UP             192.168.20.5/24`} />
 
       <h2>11. Comandos do Netplan</h2>
 
-      <Terminal title="wallyson@ubuntu: ~">
+      <Terminal title="wallyson@termux: ~">
         <Command root command="netplan generate" comment="Renderiza YAMLs em /run/systemd/network/ ou /run/NetworkManager/" />
         <Command root command="netplan apply" comment="Aplica de fato (reload do renderer)" />
         <Command root command="netplan try" comment="Aplica com rollback automático em 120s" />
@@ -370,12 +370,12 @@ T1=43200
 T2=75600
 LIFETIME=86400
 DNS=192.168.1.1
-HOSTNAME=ubuntu`} />
+HOSTNAME=termux`} />
       </Terminal>
 
       <h2>12. Validando YAML</h2>
 
-      <Terminal title="wallyson@ubuntu: ~">
+      <Terminal title="wallyson@termux: ~">
         <Command root command="netplan generate" comment="Erro de sintaxe será reportado aqui" output={`** (generate:2148): WARNING **: 14:51:02.412: Permissions for /etc/netplan/01-static.yaml are too open. Netplan configuration should NOT be accessible by others.
 Error in network definition /etc/netplan/01-static.yaml line 7 column 14: expected mapping`} />
       </Terminal>
@@ -394,7 +394,7 @@ Error in network definition /etc/netplan/01-static.yaml line 7 column 14: expect
         <code>renderer:</code> no YAML.
       </p>
 
-      <Terminal title="wallyson@ubuntu: ~">
+      <Terminal title="wallyson@termux: ~">
         <Command root command="systemctl status systemd-networkd" output={`● systemd-networkd.service - Network Configuration
      Loaded: loaded (/lib/systemd/system/systemd-networkd.service; enabled)
      Active: active (running) since Sat 2025-04-12 13:42:11 -03; 1h 10min ago
@@ -431,7 +431,7 @@ Error in network definition /etc/netplan/01-static.yaml line 7 column 14: expect
         </tbody>
       </table>
 
-      <Terminal title="wallyson@ubuntu: ~">
+      <Terminal title="wallyson@termux: ~">
         <Command root command="netplan --debug apply" output={`** (generate:3211): DEBUG: 14:55:42.114: Processing input file /etc/netplan/50-cloud-init.yaml..
 ** (generate:3211): DEBUG: 14:55:42.115: starting new processing pass
 ** (generate:3211): DEBUG: 14:55:42.115: enp3s0: setting default backend to networkd
@@ -439,12 +439,12 @@ Error in network definition /etc/netplan/01-static.yaml line 7 column 14: expect
 ** (generate:3211): DEBUG: 14:55:42.116: networkd: definition enp3s0 is not for us (backend 1)
 DEBUG:netplan generated networkd configuration changed, restarting networkd
 DEBUG:no netplan generated NM configuration exists`} />
-        <Command root command="journalctl -u systemd-networkd -n 30 --no-pager" comment="Logs do networkd" output={`abr 12 14:55:42 ubuntu systemd[1]: Reloading systemd-networkd...
-abr 12 14:55:42 ubuntu systemd-networkd[421]: Loaded files: /run/systemd/network/10-netplan-enp3s0.network
-abr 12 14:55:42 ubuntu systemd-networkd[421]: enp3s0: Configured IP address 192.168.1.100/24
-abr 12 14:55:42 ubuntu systemd-networkd[421]: enp3s0: Gained carrier
-abr 12 14:55:42 ubuntu systemd-networkd[421]: enp3s0: Configured DHCPv4 lease
-abr 12 14:55:42 ubuntu systemd-networkd[421]: Reloaded.`} />
+        <Command root command="journalctl -u systemd-networkd -n 30 --no-pager" comment="Logs do networkd" output={`abr 12 14:55:42 termux systemd[1]: Reloading systemd-networkd...
+abr 12 14:55:42 termux systemd-networkd[421]: Loaded files: /run/systemd/network/10-netplan-enp3s0.network
+abr 12 14:55:42 termux systemd-networkd[421]: enp3s0: Configured IP address 192.168.1.100/24
+abr 12 14:55:42 termux systemd-networkd[421]: enp3s0: Gained carrier
+abr 12 14:55:42 termux systemd-networkd[421]: enp3s0: Configured DHCPv4 lease
+abr 12 14:55:42 termux systemd-networkd[421]: Reloaded.`} />
       </Terminal>
 
       <h2>15. Caso prático completo: servidor com bridge para libvirt</h2>
@@ -473,7 +473,7 @@ abr 12 14:55:42 ubuntu systemd-networkd[421]: Reloaded.`} />
 `}
       </File>
 
-      <Terminal title="wallyson@ubuntu: ~">
+      <Terminal title="wallyson@termux: ~">
         <Command root command="chmod 600 /etc/netplan/99-server.yaml" />
         <Command root command="netplan try" output="Configuration accepted." />
         <Command command="ip -br a" output={`lo               UNKNOWN        127.0.0.1/8 ::1/128

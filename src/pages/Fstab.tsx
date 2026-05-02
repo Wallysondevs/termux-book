@@ -6,7 +6,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
     return (
       <PageContainer
         title="fstab — Montagem de Sistemas de Arquivos"
-        subtitle="Guia completo do /etc/fstab no Ubuntu: montar partições automaticamente, opções de montagem, UUID, swap e dispositivos removíveis."
+        subtitle="Guia completo do /etc/fstab no Termux: montar partições automaticamente, opções de montagem, UUID, swap e dispositivos removíveis."
         difficulty="intermediario"
         timeToRead="25 min"
       >
@@ -202,9 +202,9 @@ import { PageContainer } from "@/components/layout/PageContainer";
   # Verificar o tipo de filesystem:
   sudo blkid /dev/sdb1
   # Instalar suporte ao filesystem:
-  sudo apt install -y ntfs-3g    # Para NTFS
-  sudo apt install -y cifs-utils # Para CIFS/Samba
-  sudo apt install -y nfs-common # Para NFS
+  pkg install -y ntfs-3g    # Para NTFS
+  pkg install -y cifs-utils # Para CIFS/Samba
+  pkg install -y nfs-common # Para NFS
 
   # UUID mudou (após formatar ou trocar disco)
   # Atualizar o UUID no fstab:

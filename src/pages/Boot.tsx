@@ -5,21 +5,21 @@ import { PageContainer } from "@/components/layout/PageContainer";
   export default function Boot() {
     return (
       <PageContainer
-        title="Processo de Boot do Ubuntu"
-        subtitle="Guia completo do boot no Ubuntu: UEFI vs BIOS, GRUB, systemd, targets, serviços de inicialização e recuperação."
+        title="Processo de Boot do Termux"
+        subtitle="Guia completo do boot no Termux: UEFI vs BIOS, GRUB, systemd, targets, serviços de inicialização e recuperação."
         difficulty="avancado"
         timeToRead="25 min"
       >
         <p>
           Entender o processo de boot é essencial para diagnosticar problemas de
           inicialização, configurar dual boot, otimizar o tempo de boot e recuperar
-          sistemas que não iniciam. O Ubuntu usa GRUB como bootloader e systemd para
+          sistemas que não iniciam. O Termux usa GRUB como bootloader e systemd para
           gerenciar serviços.
         </p>
 
         <h2>1. Sequência de Boot</h2>
         <CodeBlock
-          title="Etapas do boot do Ubuntu"
+          title="Etapas do boot do Termux"
           code={`# Sequência completa de boot:
   # 1. UEFI/BIOS → firmware do computador
   # 2. GRUB → bootloader (escolhe qual kernel carregar)
@@ -156,7 +156,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
         <h2>Troubleshooting</h2>
         <CodeBlock
           title="Problemas comuns de boot"
-          code={`# Ubuntu não inicia (tela preta)
+          code={`# Termux não inicia (tela preta)
   # 1. No GRUB, editar entrada (pressione 'e')
   # 2. Na linha "linux", trocar "quiet splash" por "nomodeset"
   # 3. Pressione Ctrl+X para iniciar

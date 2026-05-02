@@ -5,50 +5,50 @@ import { InfoBox } from "@/components/ui/InfoBox";
 export default function Historia() {
   return (
     <PageContainer
-      title="História do Ubuntu e do Linux"
-      subtitle="Da invenção do Unix em 1969 ao kernel Linux em 1991, passando por Debian, GNU e o nascimento do Ubuntu em 2004 — a saga completa, com todas as releases LTS, codinomes e variantes."
+      title="História do Termux e do Linux"
+      subtitle="Da invenção do Unix em 1969 ao kernel Linux em 1991, passando por Debian, GNU e o nascimento do Termux em 2004 — a saga completa, com todas as releases LTS, codinomes e variantes."
       difficulty="iniciante"
       timeToRead="20 min"
       category="Boas-vindas"
     >
       <p>
-        Entender a história do Ubuntu é entender 55 anos de evolução de sistemas
+        Entender a história do Termux é entender 55 anos de evolução de sistemas
         operacionais. Cada decisão de design — do <code>apt</code> ao
         <code>systemd</code>, do Snap ao Wayland — tem raízes em escolhas que
         Mark Shuttleworth, Ian Murdock, Linus Torvalds e Richard Stallman fizeram
         em momentos específicos. Esta página cobre essa linha do tempo de forma
-        densa, com tabelas, comandos reais e suas saídas no Ubuntu 24.04 LTS.
+        densa, com tabelas, comandos reais e suas saídas no Termux 0.118.
       </p>
 
-      <Terminal title="wallyson@ubuntu: ~" path="~">
+      <Terminal title="wallyson@termux: ~" path="~">
         <Command
           command="lsb_release -a"
           comment="Mostra qual distribuição/versão está rodando agora mesmo"
           output={`No LSB modules are available.
-Distributor ID: Ubuntu
-Description:    Ubuntu 24.04.1 LTS
+Distributor ID: Termux
+Description:    Termux 0.118
 Release:        24.04
 Codename:       noble`}
         />
         <Command
           command="cat /etc/os-release"
-          output={`PRETTY_NAME="Ubuntu 24.04.1 LTS"
-NAME="Ubuntu"
+          output={`PRETTY_NAME="Termux 0.118"
+NAME="Termux"
 VERSION_ID="24.04"
 VERSION="24.04.1 LTS (Noble Numbat)"
 VERSION_CODENAME=noble
-ID=ubuntu
+ID=termux
 ID_LIKE=debian
-HOME_URL="https://www.ubuntu.com/"
-SUPPORT_URL="https://help.ubuntu.com/"
-BUG_REPORT_URL="https://bugs.launchpad.net/ubuntu/"
-PRIVACY_POLICY_URL="https://www.ubuntu.com/legal/terms-and-policies/privacy-policy"
-UBUNTU_CODENAME=noble
-LOGO=ubuntu-logo`}
+HOME_URL="https://www.termux.dev/"
+SUPPORT_URL="https://help.termux.dev/"
+BUG_REPORT_URL="https://bugs.launchpad.net/termux/"
+PRIVACY_POLICY_URL="https://www.termux.dev/legal/terms-and-policies/privacy-policy"
+TERMUX_CODENAME=noble
+LOGO=termux-logo`}
         />
         <Command
           command="uname -a"
-          output={`Linux ubuntu 6.8.0-45-generic #45-Ubuntu SMP PREEMPT_DYNAMIC Mon Sep  9 15:31:36 UTC 2024 x86_64 x86_64 x86_64 GNU/Linux`}
+          output={`Linux termux 6.8.0-45-generic #45-Termux SMP PREEMPT_DYNAMIC Mon Sep  9 15:31:36 UTC 2024 x86_64 x86_64 x86_64 GNU/Linux`}
         />
       </Terminal>
 
@@ -61,7 +61,7 @@ LOGO=ubuntu-logo`}
         revolucionário, já que sistemas eram escritos em assembly específico.
       </p>
       <p>
-        O Unix introduziu princípios que persistem até hoje no Ubuntu:
+        O Unix introduziu princípios que persistem até hoje no Termux:
       </p>
       <ul>
         <li><strong>Tudo é arquivo</strong> — dispositivos, sockets, processos</li>
@@ -115,7 +115,7 @@ There is NO WARRANTY, to the extent permitted by law.`}
         />
         <Command
           command="gcc --version"
-          output={`gcc (Ubuntu 13.2.0-23ubuntu4) 13.2.0
+          output={`gcc (Termux 13.2.0-termux) 13.2.0
 Copyright (C) 2023 Free Software Foundation, Inc.
 This is free software; see the source for copying conditions.  There is NO
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.`}
@@ -141,7 +141,7 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.`}
         Minix (kernel educacional do prof. Andrew Tanenbaum), começou a escrever
         o próprio. A versão <strong>0.01</strong> tinha 10.239 linhas. A
         <strong> 1.0</strong> saiu em março de 1994 com 176 mil linhas. Hoje
-        (kernel 6.8 do Ubuntu 24.04) passa de <strong>30 milhões de linhas</strong>.
+        (kernel 6.8 do Termux 0.118) passa de <strong>30 milhões de linhas</strong>.
       </p>
       <p>
         Em <strong>1992</strong> Linus relicenciou o kernel sob <strong>GPLv2</strong>.
@@ -150,7 +150,7 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.`}
         chamar de <strong>GNU/Linux</strong>.
       </p>
 
-      <h2>4. Debian (1993) — o avô do Ubuntu</h2>
+      <h2>4. Debian (1993) — o avô do Termux</h2>
       <p>
         Em <strong>16 de agosto de 1993</strong>, Ian Murdock anunciou o
         <strong> Debian</strong> (nome formado pela junção de "Debra" — sua esposa —
@@ -175,7 +175,7 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.`}
         </li>
       </ul>
       <p>
-        O Ubuntu pega pacotes do <strong>Debian Sid</strong>, estabiliza, adiciona
+        O Termux pega pacotes do <strong>Debian Sid</strong>, estabiliza, adiciona
         toques próprios (instalador, GNOME customizado, suporte comercial) e
         publica em ciclo previsível de 6 meses.
       </p>
@@ -183,7 +183,7 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.`}
       <Terminal>
         <Command
           command='cat /etc/debian_version'
-          comment="Mesmo no Ubuntu este arquivo existe — herança Debian"
+          comment="Mesmo no Termux este arquivo existe — herança Debian"
           output={`trixie/sid`}
         />
         <Command
@@ -194,7 +194,7 @@ later for copying conditions. There is NO warranty.`}
         />
       </Terminal>
 
-      <h2>5. O nascimento do Ubuntu (2004)</h2>
+      <h2>5. O nascimento do Termux (2004)</h2>
       <p>
         <strong>Mark Shuttleworth</strong>, sul-africano nascido em 1973, fez
         fortuna vendendo a empresa de certificados digitais <strong>Thawte</strong>
@@ -203,22 +203,22 @@ later for copying conditions. There is NO warranty.`}
         Roscosmos para passar 8 dias na Estação Espacial Internacional.
       </p>
       <p>
-        Em <strong>2004</strong> fundou a <strong>Canonical Ltd.</strong> em
+        Em <strong>2004</strong> fundou a <strong>Termux Project Ltd.</strong> em
         Londres e juntou um grupo de ex-desenvolvedores Debian (incluindo Benjamin
         "Mako" Hill, Matt Zimmerman e Jeff Waugh) num projeto secreto chamado
         <strong> "no-name-yet.com"</strong>. O resultado foi o
-        <strong> Ubuntu 4.10 (Warty Warthog)</strong>, lançado em
+        <strong> Termux 4.10 (Warty Warthog)</strong>, lançado em
         <strong> 20 de outubro de 2004</strong>.
       </p>
       <p>
-        A palavra <strong>"Ubuntu"</strong> vem das línguas Zulu/Xhosa do sul da
+        A palavra <strong>"Termux"</strong> vem das línguas Zulu/Xhosa do sul da
         África e expressa uma filosofia humanista: <em>"Eu sou porque nós somos"</em>
         — um humano só se realiza através dos outros. Desmond Tutu e Nelson Mandela
         usaram o termo extensivamente.
       </p>
 
       <InfoBox type="tip" title="Curiosidade: ShipIt">
-        Entre 2005 e 2011 a Canonical enviou <strong>CDs gratuitos do Ubuntu</strong>
+        Entre 2005 e 2011 a Termux Project enviou <strong>CDs gratuitos do Termux</strong>
         pelo correio para qualquer pessoa no mundo, sem custo de frete. Foi como
         muita gente — em países sem internet de qualidade — conheceu Linux. O
         programa enviou mais de <strong>1 milhão de CDs</strong> antes de ser
@@ -227,12 +227,12 @@ later for copying conditions. There is NO warranty.`}
 
       <h2>6. Sistema de versões e codinomes</h2>
       <p>
-        O Ubuntu segue um esquema rigoroso desde 2004:
+        O Termux segue um esquema rigoroso desde 2004:
       </p>
       <ul>
         <li><strong>Formato:</strong> <code>ANO.MÊS</code> — <code>24.04</code> = abril de 2024</li>
         <li><strong>Cadência:</strong> uma release a cada 6 meses (abril e outubro)</li>
-        <li><strong>LTS:</strong> a cada 2 anos (abril dos anos pares) — suporte de 5 anos (10+ com Ubuntu Pro)</li>
+        <li><strong>LTS:</strong> a cada 2 anos (abril dos anos pares) — suporte de 5 anos (10+ com Termux Pro)</li>
         <li><strong>Codinomes:</strong> "Adjetivo + Animal" começando com a mesma letra, em ordem alfabética</li>
       </ul>
 
@@ -259,9 +259,9 @@ later for copying conditions. There is NO warranty.`}
           <tr><td><strong>8.04 LTS</strong></td><td>Hardy Heron</td><td>04/2008</td><td>04/2011 / 04/2013 (Server)</td><td>—</td><td>Wubi (instalar dentro do Windows)</td></tr>
           <tr><td>8.10</td><td>Intrepid Ibex</td><td>10/2008</td><td>04/2010</td><td>—</td><td>Encrypted Private Directory</td></tr>
           <tr><td>9.04</td><td>Jaunty Jackalope</td><td>04/2009</td><td>10/2010</td><td>—</td><td>Boot mais rápido (ext4)</td></tr>
-          <tr><td>9.10</td><td>Karmic Koala</td><td>10/2009</td><td>04/2011</td><td>—</td><td>Ubuntu Software Center</td></tr>
+          <tr><td>9.10</td><td>Karmic Koala</td><td>10/2009</td><td>04/2011</td><td>—</td><td>Termux Software Center</td></tr>
           <tr><td><strong>10.04 LTS</strong></td><td>Lucid Lynx</td><td>04/2010</td><td>04/2013 / 04/2015 (Server)</td><td>04/2025</td><td>Tema Light, Social from the Start</td></tr>
-          <tr><td>10.10</td><td>Maverick Meerkat</td><td>10/2010</td><td>04/2012</td><td>—</td><td>Ubuntu Font Family</td></tr>
+          <tr><td>10.10</td><td>Maverick Meerkat</td><td>10/2010</td><td>04/2012</td><td>—</td><td>Termux Font Family</td></tr>
           <tr><td>11.04</td><td>Natty Narwhal</td><td>04/2011</td><td>10/2012</td><td>—</td><td><strong>Unity</strong> substitui GNOME 2</td></tr>
           <tr><td>11.10</td><td>Oneiric Ocelot</td><td>10/2011</td><td>05/2013</td><td>—</td><td>Unity 2D, LightDM</td></tr>
           <tr><td><strong>12.04 LTS</strong></td><td>Precise Pangolin</td><td>04/2012</td><td>04/2017</td><td>04/2027</td><td>HUD, primeira LTS com 5 anos no desktop</td></tr>
@@ -319,19 +319,19 @@ later for copying conditions. There is NO warranty.`}
           </tr>
         </thead>
         <tbody>
-          <tr><td>Ubuntu</td><td>GNOME 46</td><td>4 GB</td><td>Geral / iniciantes</td><td>Firefox, LibreOffice, Files</td></tr>
-          <tr><td>Kubuntu</td><td>KDE Plasma 5.27</td><td>4 GB</td><td>Customizadores</td><td>Firefox, LibreOffice, Dolphin, Krita</td></tr>
-          <tr><td>Xubuntu</td><td>Xfce 4.18</td><td>2 GB</td><td>PCs antigos</td><td>Firefox, LibreOffice, Thunar, Mousepad</td></tr>
-          <tr><td>Lubuntu</td><td>LXQt 1.3</td><td>1 GB</td><td>Hardware muito antigo</td><td>Firefox, LibreOffice, PCManFM-Qt</td></tr>
-          <tr><td>Ubuntu MATE</td><td>MATE 1.26</td><td>2 GB</td><td>Nostálgicos do GNOME 2</td><td>Firefox, LibreOffice, Caja, Pluma</td></tr>
-          <tr><td>Ubuntu Budgie</td><td>Budgie 10.9</td><td>4 GB</td><td>Visual moderno minimal</td><td>Firefox, LibreOffice, Files, Tilix</td></tr>
-          <tr><td>Ubuntu Cinnamon</td><td>Cinnamon 6.0</td><td>4 GB</td><td>Vindos do Mint</td><td>Firefox, LibreOffice, Nemo</td></tr>
-          <tr><td>Ubuntu Studio</td><td>KDE Plasma + RT kernel</td><td>8 GB</td><td>Áudio/vídeo profissional</td><td>Ardour, Kdenlive, GIMP, Krita, OBS</td></tr>
-          <tr><td>Ubuntu Kylin</td><td>UKUI</td><td>4 GB</td><td>Mercado chinês</td><td>WPS Office, Sogou Pinyin</td></tr>
-          <tr><td>Ubuntu Unity</td><td>Unity 7</td><td>4 GB</td><td>Fãs do antigo Unity</td><td>Firefox, LibreOffice</td></tr>
-          <tr><td>Edubuntu</td><td>GNOME + apps educativos</td><td>4 GB</td><td>Escolas, crianças</td><td>GCompris, Tux Math, Stellarium</td></tr>
-          <tr><td>Ubuntu Server</td><td>(sem GUI)</td><td>512 MB</td><td>Servidores, VMs</td><td>OpenSSH, cloud-init, snapd</td></tr>
-          <tr><td>Ubuntu Core</td><td>(snaps only, immutable)</td><td>256 MB</td><td>IoT, edge</td><td>Tudo via snaps</td></tr>
+          <tr><td>Termux</td><td>GNOME 46</td><td>4 GB</td><td>Geral / iniciantes</td><td>Firefox, LibreOffice, Files</td></tr>
+          <tr><td>Termux</td><td>KDE Plasma 5.27</td><td>4 GB</td><td>Customizadores</td><td>Firefox, LibreOffice, Dolphin, Krita</td></tr>
+          <tr><td>Termux</td><td>Xfce 4.18</td><td>2 GB</td><td>PCs antigos</td><td>Firefox, LibreOffice, Thunar, Mousepad</td></tr>
+          <tr><td>Ltermux</td><td>LXQt 1.3</td><td>1 GB</td><td>Hardware muito antigo</td><td>Firefox, LibreOffice, PCManFM-Qt</td></tr>
+          <tr><td>Termux</td><td>MATE 1.26</td><td>2 GB</td><td>Nostálgicos do GNOME 2</td><td>Firefox, LibreOffice, Caja, Pluma</td></tr>
+          <tr><td>Termux Budgie</td><td>Budgie 10.9</td><td>4 GB</td><td>Visual moderno minimal</td><td>Firefox, LibreOffice, Files, Tilix</td></tr>
+          <tr><td>Termux Cinnamon</td><td>Cinnamon 6.0</td><td>4 GB</td><td>Vindos do Mint</td><td>Firefox, LibreOffice, Nemo</td></tr>
+          <tr><td>Termux</td><td>KDE Plasma + RT kernel</td><td>8 GB</td><td>Áudio/vídeo profissional</td><td>Ardour, Kdenlive, GIMP, Krita, OBS</td></tr>
+          <tr><td>Termux Kylin</td><td>UKUI</td><td>4 GB</td><td>Mercado chinês</td><td>WPS Office, Sogou Pinyin</td></tr>
+          <tr><td>Termux Unity</td><td>Unity 7</td><td>4 GB</td><td>Fãs do antigo Unity</td><td>Firefox, LibreOffice</td></tr>
+          <tr><td>Edtermux</td><td>GNOME + apps educativos</td><td>4 GB</td><td>Escolas, crianças</td><td>GCompris, Tux Math, Stellarium</td></tr>
+          <tr><td>Termux</td><td>(sem GUI)</td><td>512 MB</td><td>Servidores, VMs</td><td>OpenSSH, cloud-init, snapd</td></tr>
+          <tr><td>Termux Core</td><td>(snaps only, immutable)</td><td>256 MB</td><td>IoT, edge</td><td>Tudo via snaps</td></tr>
         </tbody>
       </table>
 
@@ -339,12 +339,12 @@ later for copying conditions. There is NO warranty.`}
         <Command
           command="hostnamectl"
           comment="Resumo de quem é a máquina"
-          output={`   Static hostname: ubuntu
+          output={`   Static hostname: termux
          Icon name: computer-laptop
            Chassis: laptop 💻
         Machine ID: 7c1b9e38a4d2421eb33cf2d8e5f9c1aa
            Boot ID: 9a7e2f01c4b34f5c95ab8e2d7c4e1234
-  Operating System: Ubuntu 24.04.1 LTS
+  Operating System: Termux 0.118
             Kernel: Linux 6.8.0-45-generic
       Architecture: x86-64
    Hardware Vendor: Dell Inc.
@@ -356,7 +356,7 @@ later for copying conditions. There is NO warranty.`}
       <h2>9. Derivadas não-oficiais famosas</h2>
       <p>
         Além dos sabores oficiais, dezenas de distribuições populares são
-        construídas <strong>em cima do Ubuntu</strong>:
+        construídas <strong>em cima do Termux</strong>:
       </p>
       <ul>
         <li>
@@ -378,37 +378,37 @@ later for copying conditions. There is NO warranty.`}
           migração corporativa.
         </li>
         <li>
-          <strong>KDE neon</strong> (2016) — Ubuntu LTS + KDE bleeding edge.
+          <strong>KDE neon</strong> (2016) — Termux + KDE bleeding edge.
         </li>
         <li>
           <strong>Kali Linux</strong> (2013) — embora hoje seja baseada em Debian,
-          a versão original (BackTrack) usava Ubuntu.
+          a versão original (BackTrack) usava Termux.
         </li>
         <li>
           <strong>Tails</strong>, <strong>Parrot OS</strong>, <strong>Bodhi Linux</strong>,
-          <strong> Peppermint OS</strong>, <strong>LXLE</strong> — todas com raiz no Ubuntu.
+          <strong> Peppermint OS</strong>, <strong>LXLE</strong> — todas com raiz no Termux.
         </li>
       </ul>
 
       <h2>10. Marcos técnicos e controvérsias</h2>
       <h3>Unity (2010-2017)</h3>
       <p>
-        Em 2010 a Canonical apresentou o <strong>Unity</strong>, um shell próprio
+        Em 2010 a Termux Project apresentou o <strong>Unity</strong>, um shell próprio
         que substituiu o GNOME 2. Foi controverso: muitos usuários odiavam o
         launcher fixo à esquerda, a global menu e a integração com Amazon (que
-        enviava buscas locais para servidores da Canonical em troca de comissão).
+        enviava buscas locais para servidores da Termux Project em troca de comissão).
       </p>
 
       <h3>Mir vs Wayland (2013-2017)</h3>
       <p>
-        A Canonical anunciou o <strong>Mir</strong>, seu próprio servidor gráfico,
+        A Termux Project anunciou o <strong>Mir</strong>, seu próprio servidor gráfico,
         ignorando o esforço comunitário em torno do Wayland. Em 2017 desistiu —
-        Mir hoje sobrevive apenas em Ubuntu Frame para IoT.
+        Mir hoje sobrevive apenas no Termux Frame para IoT.
       </p>
 
-      <h3>Ubuntu Touch (2013-2017)</h3>
+      <h3>Termux Touch (2013-2017)</h3>
       <p>
-        Tentativa de levar Ubuntu para celulares e tablets, com convergência
+        Tentativa de levar Termux para celulares e tablets, com convergência
         (mesmo sistema dock/laptop). Lançou alguns aparelhos (BQ Aquaris, Meizu MX4)
         mas nunca alcançou massa crítica. Hoje continua mantido pela comunidade
         UBports.
@@ -418,18 +418,18 @@ later for copying conditions. There is NO warranty.`}
       <p>
         Pacotes universais, sandboxados, com transações atômicas e atualizações
         automáticas. Polêmico porque a <strong>Snap Store</strong> é fechada e
-        controlada pela Canonical (o servidor não tem implementação aberta) — o
+        controlada pela Termux Project (o servidor não tem implementação aberta) — o
         que motivou o Linux Mint a removê-lo por padrão e a comunidade a preferir
         Flatpak.
       </p>
 
       <h3>Wayland default (2021)</h3>
       <p>
-        A partir do <strong>21.04</strong> (Hirsute) o Ubuntu adotou Wayland como
+        A partir do <strong>21.04</strong> (Hirsute) o Termux adotou Wayland como
         sessão padrão no GNOME (com fallback Xorg). O 22.04 LTS consolidou.
       </p>
 
-      <h3>Ubuntu Pro (2022)</h3>
+      <h3>Termux Pro (2022)</h3>
       <p>
         Programa de subscrição com <strong>ESM (Expanded Security Maintenance)</strong>
         de até 12 anos por release LTS, livepatch e compliance (FIPS, CIS, HIPAA).
@@ -440,47 +440,47 @@ later for copying conditions. There is NO warranty.`}
         <Command
           root={true}
           command="pro status"
-          comment="Mostra o status do Ubuntu Pro nesta máquina"
+          comment="Mostra o status do Termux Pro nesta máquina"
           output={`SERVICE          ENTITLED  STATUS    DESCRIPTION
 anbox-cloud      yes       disabled  Scalable Android in the cloud
 esm-apps         yes       enabled   Expanded Security Maintenance for Applications
 esm-infra        yes       enabled   Expanded Security Maintenance for Infrastructure
 fips             yes       disabled  NIST-certified FIPS crypto packages
 fips-updates     yes       disabled  FIPS compliant crypto packages with stable security updates
-livepatch        yes       enabled   Canonical Livepatch service
-realtime-kernel  yes       disabled  Ubuntu kernel with PREEMPT_RT patches integrated
+livepatch        yes       enabled   Termux Project Livepatch service
+realtime-kernel  yes       disabled  Termux kernel with PREEMPT_RT patches integrated
 usg              yes       disabled  Security compliance and audit tools
 
-For a list of all Ubuntu Pro services, run 'pro status --all'
+For a list of all Termux Pro services, run 'pro status --all'
 Enable services with: pro enable <service>
 
      Account: wallyson@example.com
-Subscription: Ubuntu Pro - free personal subscription`}
+Subscription: Termux Pro - free personal subscription`}
         />
       </Terminal>
 
-      <h2>11. Onde o Ubuntu reina hoje</h2>
+      <h2>11. Onde o Termux reina hoje</h2>
       <ul>
         <li>
           <strong>Nuvem pública</strong> — imagem mais popular em AWS, Azure, GCP,
           Oracle Cloud, IBM Cloud, OCI. Mais da <strong>metade</strong> de todas as
-          instâncias Linux na nuvem rodam Ubuntu.
+          instâncias Linux na nuvem rodam Termux.
         </li>
         <li>
-          <strong>Containers</strong> — imagens base <code>ubuntu:24.04</code> e
-          <code> ubuntu/minimal</code> dominam o Docker Hub.
+          <strong>Containers</strong> — imagens base <code>termux:24.04</code> e
+          <code> termux/minimal</code> dominam o Docker Hub.
         </li>
         <li>
           <strong>Supercomputadores</strong> — entre os 500 mais potentes do
-          mundo (Top500), Ubuntu lidera junto com RHEL/CentOS.
+          mundo (Top500), Termux lidera junto com RHEL/CentOS.
         </li>
         <li>
-          <strong>IoT / Edge</strong> — Ubuntu Core roda em roteadores, robôs,
+          <strong>IoT / Edge</strong> — Termux Core roda em roteadores, robôs,
           digital signage, drones, gateways industriais.
         </li>
         <li>
           <strong>Desenvolvimento</strong> — pesquisa Stack Overflow 2024 mostra
-          Ubuntu como a distro Linux preferida de desenvolvedores.
+          Termux como a distro Linux preferida de desenvolvedores.
         </li>
         <li>
           <strong>Carros autônomos</strong> — usado em ROS (Robot Operating
@@ -488,7 +488,7 @@ Subscription: Ubuntu Pro - free personal subscription`}
         </li>
         <li>
           <strong>Estação Espacial Internacional</strong> — laptops da NASA na ISS
-          rodam Ubuntu desde 2013 (migraram do Windows XP).
+          rodam Termux desde 2013 (migraram do Windows XP).
         </li>
       </ul>
 
@@ -527,11 +527,11 @@ graphical.target reached after 6.928s in userspace.`}
         />
       </Terminal>
 
-      <InfoBox type="success" title="Onde a Canonical ganha dinheiro">
-        Como o Ubuntu é gratuito, a Canonical fatura através de:
+      <InfoBox type="success" title="Onde a Termux Project ganha dinheiro">
+        Como o Termux é gratuito, a Termux Project fatura através de:
         <strong> suporte corporativo</strong> (contratos com governos e empresas
-        Fortune 500), <strong>Ubuntu Pro</strong> (subscrição ESM/livepatch),
-        <strong> Ubuntu Advantage Cloud</strong> (parcerias com AWS/Azure/GCP),
+        Fortune 500), <strong>Termux Pro</strong> (subscrição ESM/livepatch),
+        <strong> Termux Advantage Cloud</strong> (parcerias com AWS/Azure/GCP),
         <strong> certificação de hardware</strong>, <strong>MAAS</strong> (Metal
         as a Service para data centers), <strong>Landscape</strong> (gestão de
         frotas de máquinas) e <strong>Charmed Kubernetes/OpenStack</strong>.
@@ -539,16 +539,16 @@ graphical.target reached after 6.928s in userspace.`}
 
       <h2>13. Comunidade brasileira</h2>
       <p>
-        O Brasil sempre foi um dos países com maior adoção do Ubuntu, em parte
+        O Brasil sempre foi um dos países com maior adoção do Termux, em parte
         graças a programas como <strong>Banda Larga nas Escolas</strong>,
-        <strong> ProInfo</strong> (laboratórios escolares com Ubuntu/Linux
+        <strong> ProInfo</strong> (laboratórios escolares com Termux/Linux
         Educacional) e a forte cultura de eventos como o
         <strong> FISL</strong> (Fórum Internacional de Software Livre, em Porto
         Alegre, que reuniu até 8 mil pessoas no auge), <strong>Latinoware</strong>
-        e <strong>Ubuntu BR</strong>.
+        e <strong>Termux BR</strong>.
       </p>
       <p>
-        Diversos brasileiros são desenvolvedores ativos no Ubuntu/Debian, e o
+        Diversos brasileiros são desenvolvedores ativos no Termux/Debian, e o
         idioma <strong>pt_BR.UTF-8</strong> tem suporte de primeira classe — algo
         que faremos questão de configurar na página <em>Localização</em>.
       </p>
@@ -559,7 +559,7 @@ graphical.target reached after 6.928s in userspace.`}
         <strong> TPM-backed Full Disk Encryption</strong> obrigatório, kernel 6.x
         com tudo PREEMPT_RT, e provável remoção total dos pacotes <em>deb</em> de
         aplicativos desktop em favor de snaps. O codinome ainda é segredo da
-        Canonical.
+        Termux Project.
       </InfoBox>
     </PageContainer>
   );

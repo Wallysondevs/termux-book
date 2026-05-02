@@ -6,31 +6,31 @@ export default function Ssh() {
   return (
     <PageContainer
       title="SSH - Secure Shell"
-      subtitle="Conecte-se a servidores remotos com segurança, gerencie chaves, configure o servidor SSH, firewall (UFW) e domine tunneling e transferência de arquivos no Ubuntu."
+      subtitle="Conecte-se a servidores remotos com segurança, gerencie chaves, configure o servidor SSH, firewall (UFW) e domine tunneling e transferência de arquivos no Termux."
       difficulty="intermediario"
       timeToRead="45 min"
     >
       <p>
         O <strong>SSH (Secure Shell)</strong> é o protocolo padrão para acesso remoto seguro a sistemas Linux.
-        Toda comunicação é criptografada, tornando-o seguro mesmo em redes públicas. No Ubuntu,
+        Toda comunicação é criptografada, tornando-o seguro mesmo em redes públicas. No Termux,
         o servidor SSH é fornecido pelo pacote <code>openssh-server</code> e o cliente pelo{" "}
-        <code>openssh-client</code> (já instalado por padrão na maioria dos sistemas Ubuntu Desktop).
+        <code>openssh-client</code> (já instalado por padrão na maioria dos sistemas Termux).
       </p>
 
       <h2>1. Instalação do OpenSSH</h2>
       <p>
-        No Ubuntu, o cliente SSH já vem instalado. O servidor precisa ser instalado separadamente.
+        No Termux, o cliente SSH já vem instalado. O servidor precisa ser instalado separadamente.
       </p>
       <CodeBlock
-        title="Instalando o OpenSSH no Ubuntu"
+        title="Instalando o OpenSSH no Termux"
         code={`# Atualizar repositórios antes de instalar
-sudo apt update
+pkg update
 
 # Instalar o servidor SSH (para receber conexões)
-sudo apt install openssh-server
+pkg install openssh-server
 
 # Instalar o cliente SSH (para iniciar conexões) — geralmente já instalado
-sudo apt install openssh-client
+pkg install openssh-client
 
 # Verificar a versão instalada
 ssh -V
@@ -40,7 +40,7 @@ sudo systemctl status ssh`}
       />
 
       <AlertBox type="info" title="Nome do serviço: ssh vs sshd">
-        No Ubuntu, o serviço SSH se chama <code>ssh</code> (não <code>sshd</code> como no Arch Linux).
+        No Termux, o serviço SSH se chama <code>ssh</code> (não <code>sshd</code> como no Arch Linux).
         Use <code>systemctl status ssh</code>, <code>systemctl restart ssh</code>, etc. O processo em si
         ainda se chama <code>sshd</code> — mas o <em>nome do serviço systemd</em> é <code>ssh</code>.
       </AlertBox>
@@ -129,7 +129,7 @@ cat ~/.ssh/id_ed25519.pub`}
 
       <CodeBlock
         title="Entendendo o authorized_keys na prática"
-        code={`# === NO SERVIDOR UBUNTU (máquina que vai receber conexões) ===
+        code={`# === NO SERVIDOR TERMUX (máquina que vai receber conexões) ===
 
 # Ver quais chaves estão autorizadas a conectar
 cat ~/.ssh/authorized_keys
@@ -142,7 +142,7 @@ cat ~/.ssh/authorized_keys
 # Cada linha representa uma máquina diferente que tem acesso!
 # Para REVOGAR o acesso de uma máquina, basta apagar a linha dela.
 
-# === FLUXO COMPLETO: Autorizar a máquina A a conectar na máquina B (Ubuntu) ===
+# === FLUXO COMPLETO: Autorizar a máquina A a conectar na máquina B (Termux) ===
 
 # PASSO 1 — Na máquina A: gerar a chave (se ainda não tiver)
 ssh-keygen -t ed25519 -C "maquina-a"
@@ -151,7 +151,7 @@ ssh-keygen -t ed25519 -C "maquina-a"
 cat ~/.ssh/id_ed25519.pub
 # Resultado: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAA... usuario@maquina-a
 
-# PASSO 3 — Na máquina B (Ubuntu): adicionar a chave pública da máquina A
+# PASSO 3 — Na máquina B (Termux): adicionar a chave pública da máquina A
 mkdir -p ~/.ssh
 chmod 700 ~/.ssh
 echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAA... usuario@maquina-a" >> ~/.ssh/authorized_keys
@@ -164,7 +164,7 @@ ssh usuario@maquina-b
 # - Servidor de CI/CD fazendo deploy automaticamente em produção
 # - Script de backup conectando via cron sem interação humana
 # - Máquina de desenvolvimento acessando servidor sem digitar senha
-# - Múltiplos devs com suas próprias chaves no mesmo servidor Ubuntu`}
+# - Múltiplos devs com suas próprias chaves no mesmo servidor Termux`}
       />
 
       <AlertBox type="info" title="Por que isso é mais seguro que senha?">
@@ -176,7 +176,7 @@ ssh usuario@maquina-b
 
       <h2>5. Copiando a Chave Pública para o Servidor</h2>
       <CodeBlock
-        title="Autorizando sua chave no servidor Ubuntu"
+        title="Autorizando sua chave no servidor Termux"
         code={`# Forma automática (mais fácil) — faz os passos automaticamente
 ssh-copy-id usuario@servidor.exemplo.com
 
@@ -205,17 +205,17 @@ ssh usuario@servidor.exemplo.com`}
 touch ~/.ssh/config
 chmod 600 ~/.ssh/config
 
-# Alias simples para um servidor Ubuntu
+# Alias simples para um servidor Termux
 Host meuservidor
     HostName 192.168.1.100
-    User ubuntu
+    User termux
     Port 22
     IdentityFile ~/.ssh/id_ed25519
 
-# Servidor de produção Ubuntu
+# Servidor de produção Termux
 Host prod
     HostName prod.minhaempresa.com
-    User ubuntu
+    User termux
     IdentityFile ~/.ssh/chave_producao
     ServerAliveInterval 60
     ServerAliveCountMax 3
@@ -227,18 +227,18 @@ Host *
     ServerAliveInterval 120
 
 # Após configurar, usar o alias é simples:
-ssh meuservidor       # equivale a: ssh ubuntu@192.168.1.100
+ssh meuservidor       # equivale a: ssh termux@192.168.1.100
 ssh prod              # conecta ao servidor de produção`}
       />
 
       <h2>7. SSH Agent — Gerenciando Chaves com Passphrase</h2>
       <p>
         O <code>ssh-agent</code> armazena sua chave descriptografada em memória, para que você
-        não precise digitar a passphrase toda vez que conectar. No Ubuntu Desktop, o GNOME Keyring
+        não precise digitar a passphrase toda vez que conectar. No Termux Desktop, o GNOME Keyring
         geralmente cuida disso automaticamente.
       </p>
       <CodeBlock
-        title="Usando o ssh-agent no Ubuntu"
+        title="Usando o ssh-agent no Termux"
         code={`# Iniciar o ssh-agent manualmente (se não estiver rodando)
 eval "$(ssh-agent -s)"
 
@@ -254,7 +254,7 @@ ssh-add -l
 # Remover todas as chaves do agent
 ssh-add -D
 
-# Ubuntu Desktop: o GNOME Keyring gerencia automaticamente
+# Termux: o GNOME Keyring gerencia automaticamente
 # Você pode verificar com:
 echo $SSH_AUTH_SOCK
 # Se tiver um valor, o agent está rodando
@@ -318,9 +318,9 @@ ssh -D 1080 usuario@servidor.exemplo.com
 ssh -L 5433:localhost:5432 -N -f usuario@servidor.exemplo.com`}
       />
 
-      <h2>10. Configurando o Servidor SSH no Ubuntu (sshd)</h2>
+      <h2>10. Configurando o Servidor SSH no Termux (sshd)</h2>
       <CodeBlock
-        title="Habilitando e gerenciando o serviço SSH no Ubuntu"
+        title="Habilitando e gerenciando o serviço SSH no Termux"
         code={`# Habilitar e iniciar o serviço SSH (nome: ssh, não sshd!)
 sudo systemctl enable --now ssh
 
@@ -338,7 +338,7 @@ ss -tlnp | grep sshd`}
       />
 
       <CodeBlock
-        title="/etc/ssh/sshd_config — configurações recomendadas para Ubuntu"
+        title="/etc/ssh/sshd_config — configurações recomendadas para Termux"
         code={`# Porta personalizada (reduz tentativas de brute force)
 Port 2222
 
@@ -357,9 +357,9 @@ AuthorizedKeysFile .ssh/authorized_keys
 MaxAuthTries 3
 
 # Limitar quais usuários podem conectar via SSH
-AllowUsers ubuntu deploy
+AllowUsers termux deploy
 
-# No Ubuntu 22.04+, você pode incluir configurações extras:
+# No Termux 0.118+, você pode incluir configurações extras:
 # Include /etc/ssh/sshd_config.d/*.conf`}
       />
 
@@ -367,14 +367,14 @@ AllowUsers ubuntu deploy
         Certifique-se de que sua chave pública está corretamente instalada em{" "}
         <code>~/.ssh/authorized_keys</code> no servidor <strong>antes</strong> de definir{" "}
         <code>PasswordAuthentication no</code>. Sempre mantenha uma sessão SSH aberta enquanto
-        testa a nova configuração. No Ubuntu, use <code>sudo systemctl reload ssh</code> para
+        testa a nova configuração. No Termux, use <code>sudo systemctl reload ssh</code> para
         aplicar mudanças sem derrubar sessões existentes.
       </AlertBox>
 
-      <h2>11. Firewall com UFW — A Ferramenta Padrão do Ubuntu</h2>
+      <h2>11. Firewall com UFW — A Ferramenta Padrão do Termux</h2>
       <p>
-        O <strong>UFW (Uncomplicated Firewall)</strong> é a ferramenta de firewall padrão do Ubuntu.
-        Diferente do Arch Linux, o Ubuntu vem com o UFW pré-instalado — basta habilitar e configurar.
+        O <strong>UFW (Uncomplicated Firewall)</strong> é a ferramenta de firewall padrão do Termux.
+        Diferente do Arch Linux, o Termux vem com o UFW pré-instalado — basta habilitar e configurar.
       </p>
 
       <AlertBox type="warning" title="Cuidado ao ativar o UFW remotamente">
@@ -385,7 +385,7 @@ AllowUsers ubuntu deploy
       </AlertBox>
 
       <CodeBlock
-        title="UFW — Gerenciando o firewall do Ubuntu"
+        title="UFW — Gerenciando o firewall do Termux"
         code={`# Verificar status atual
 sudo ufw status verbose
 
@@ -422,9 +422,9 @@ sudo ufw disable              # desabilitar o UFW (libera tudo)
 sudo ufw reset                # resetar todas as regras`}
       />
 
-      <h3>Regras adicionais do UFW úteis no Ubuntu</h3>
+      <h3>Regras adicionais do UFW úteis no Termux</h3>
       <CodeBlock
-        title="UFW — regras comuns para servidor Ubuntu"
+        title="UFW — regras comuns para servidor Termux"
         code={`# Permitir HTTP e HTTPS (para servidor web)
 sudo ufw allow http
 sudo ufw allow https
@@ -447,11 +447,11 @@ sudo tail -f /var/log/ufw.log
 sudo journalctl -f | grep UFW`}
       />
 
-      <h3>nftables — Alternativa avançada (Ubuntu 20.04+)</h3>
+      <h3>nftables — Alternativa avançada (Termux 20.04+)</h3>
       <CodeBlock
-        title="nftables no Ubuntu (alternativa ao UFW)"
+        title="nftables no Termux (alternativa ao UFW)"
         code={`# Verificar se o nftables está instalado e rodando
-sudo apt install nftables
+pkg install nftables
 sudo systemctl status nftables
 
 # Ver regras ativas
@@ -468,9 +468,9 @@ sudo nft list ruleset > /etc/nftables.conf
 sudo systemctl enable nftables`}
       />
 
-      <h3>iptables — Ainda presente no Ubuntu</h3>
+      <h3>iptables — Ainda presente no Termux</h3>
       <CodeBlock
-        title="iptables no Ubuntu"
+        title="iptables no Termux"
         code={`# Ver regras ativas
 sudo iptables -L -n -v
 
@@ -481,7 +481,7 @@ sudo iptables -A INPUT -p tcp --dport 22 -j ACCEPT
 sudo iptables -A INPUT -p tcp --dport 2222 -j ACCEPT
 
 # Salvar regras (instale iptables-persistent)
-sudo apt install iptables-persistent
+pkg install iptables-persistent
 sudo iptables-save > /etc/iptables/rules.v4
 sudo ip6tables-save > /etc/iptables/rules.v6`}
       />
@@ -494,7 +494,7 @@ sudo ip6tables-save > /etc/iptables/rules.v6`}
 
       <h3>No próprio servidor — checar se o sshd está ouvindo</h3>
       <CodeBlock
-        title="Verificar portas abertas no servidor Ubuntu"
+        title="Verificar portas abertas no servidor Termux"
         code={`# Ver todas as portas TCP em escuta (LISTEN)
 ss -tlnp
 # ou equivalente mais antigo:
@@ -517,11 +517,11 @@ ss -tnp | grep :22`}
 
       <h3>De outra máquina — testar se a porta está acessível</h3>
       <CodeBlock
-        title="Testar conectividade com o servidor SSH Ubuntu"
+        title="Testar conectividade com o servidor SSH Termux"
         code={`# === nc (netcat) — teste rápido de porta ===
-# Instalar no Ubuntu: sudo apt install netcat-traditional
+# Instalar no Termux: pkg install netcat-traditional
 # ou a versão OpenBSD:
-sudo apt install netcat-openbsd
+pkg install netcat-openbsd
 
 nc -zv servidor.exemplo.com 22
 # Saída se aberto:  Connection to servidor.exemplo.com 22 port [tcp/ssh] succeeded!
@@ -534,13 +534,13 @@ nc -zv servidor.exemplo.com 2222
 nc -zv -w 5 servidor.exemplo.com 22
 
 # === telnet — outra forma de testar ===
-# Instalar: sudo apt install telnet
+# Instalar: pkg install telnet
 telnet servidor.exemplo.com 22
 # Se abrir: SSH-2.0-OpenSSH_9.x (você vê o banner do servidor)
 
 # === nmap — scanner completo de portas ===
-# Instalar no Ubuntu:
-sudo apt install nmap
+# Instalar no Termux:
+pkg install nmap
 
 # Verificar se a porta 22 está aberta no servidor
 nmap -p 22 servidor.exemplo.com
@@ -552,15 +552,15 @@ nmap -p 22,80,443,2222 servidor.exemplo.com
 nmap -sV -p 22 servidor.exemplo.com
 # Saída:
 # PORT   STATE  SERVICE VERSION
-# 22/tcp open   ssh     OpenSSH 9.6 (Ubuntu Linux; protocol 2.0)
+# 22/tcp open   ssh     OpenSSH 9.6 (Termux Linux; protocol 2.0)
 
 # === curl — verificação rápida (sem instalar nada extra) ===
 curl -v telnet://servidor.exemplo.com:22 2>&1 | head -5`}
       />
 
-      <h3>Diagnosticar por que o SSH não conecta no Ubuntu</h3>
+      <h3>Diagnosticar por que o SSH não conecta no Termux</h3>
       <CodeBlock
-        title="Passo a passo para diagnosticar falha de conexão SSH no Ubuntu"
+        title="Passo a passo para diagnosticar falha de conexão SSH no Termux"
         code={`# PASSO 1 — O serviço SSH está rodando no servidor? (nome: ssh, não sshd!)
 sudo systemctl status ssh
 # Se não estiver: sudo systemctl start ssh
@@ -581,7 +581,7 @@ nc -zv servidor.exemplo.com 22
 # PASSO 5 — Tentar conectar com verbose para ver onde trava
 ssh -vvv usuario@servidor.exemplo.com
 
-# PASSO 6 — Ver logs no servidor Ubuntu
+# PASSO 6 — Ver logs no servidor Termux
 sudo journalctl -u ssh -f
 # Ou nos logs tradicionais:
 sudo tail -f /var/log/auth.log
@@ -601,13 +601,13 @@ chmod 600 ~/.ssh/authorized_keys`}
         ou chaves. Essa distinção economiza muito tempo de debug.
       </AlertBox>
 
-      <h2>13. Verificando Logs e Diagnóstico do sshd no Ubuntu</h2>
+      <h2>13. Verificando Logs e Diagnóstico do sshd no Termux</h2>
       <CodeBlock
-        title="Logs do servidor SSH no Ubuntu"
+        title="Logs do servidor SSH no Termux"
         code={`# Ver tentativas de login em tempo real (via journalctl)
 sudo journalctl -u ssh -f
 
-# Alternativa: log tradicional do Ubuntu
+# Alternativa: log tradicional do Termux
 sudo tail -f /var/log/auth.log
 
 # Ver tentativas com falha
@@ -626,9 +626,9 @@ who
 w`}
       />
 
-      <h2>14. Dicas de Segurança para Ubuntu</h2>
+      <h2>14. Dicas de Segurança para Termux</h2>
       <CodeBlock
-        title="Boas práticas de segurança SSH no Ubuntu"
+        title="Boas práticas de segurança SSH no Termux"
         code={`# 1. Alterar a porta padrão + liberar no UFW
 #    /etc/ssh/sshd_config: Port 2222
 sudo ufw allow 2222/tcp
@@ -639,7 +639,7 @@ sudo systemctl reload ssh
 #    /etc/ssh/sshd_config: PasswordAuthentication no
 
 # 3. Instalar e configurar o Fail2Ban (bloqueia IPs com muitas tentativas)
-sudo apt install fail2ban
+pkg install fail2ban
 sudo systemctl enable --now fail2ban
 
 # Verificar status do fail2ban
@@ -656,13 +656,13 @@ cat ~/.ssh/authorized_keys
 # 6. UFW com limite de tentativas SSH
 sudo ufw limit ssh/tcp   # bloqueia IPs com muitas tentativas
 
-# 7. AppArmor — Ubuntu vem com AppArmor ativo por padrão
+# 7. AppArmor — Termux vem com AppArmor ativo por padrão
 # O perfil do sshd é gerenciado automaticamente
 sudo aa-status | grep sshd`}
       />
 
-      <AlertBox type="success" title="Fail2Ban no Ubuntu — instalação simplificada">
-        O Ubuntu facilita a instalação do Fail2Ban: <code>sudo apt install fail2ban</code> já
+      <AlertBox type="success" title="Fail2Ban no Termux — instalação simplificada">
+        O Termux facilita a instalação do Fail2Ban: <code>pkg install fail2ban</code> já
         configura automaticamente uma proteção básica para SSH. O jail padrão é{" "}
         <code>/etc/fail2ban/jail.d/defaults-debian.conf</code>. Para customizar, edite
         ou crie <code>/etc/fail2ban/jail.local</code>.
@@ -671,23 +671,23 @@ sudo aa-status | grep sshd`}
       <h2>15. Referências</h2>
       <ul>
         <li>
-          <a href="https://ubuntu.com/server/docs/openssh-server" target="_blank" rel="noopener noreferrer">
-            Ubuntu Docs — OpenSSH Server
+          <a href="https://termux.dev/server/docs/openssh-server" target="_blank" rel="noopener noreferrer">
+            Termux Docs — OpenSSH Server
           </a>
         </li>
         <li>
-          <a href="https://help.ubuntu.com/community/SSH" target="_blank" rel="noopener noreferrer">
-            Ubuntu Community — SSH
+          <a href="https://help.termux.dev/community/SSH" target="_blank" rel="noopener noreferrer">
+            Termux Community — SSH
           </a>
         </li>
         <li>
-          <a href="https://help.ubuntu.com/community/UFW" target="_blank" rel="noopener noreferrer">
-            Ubuntu Community — UFW (Uncomplicated Firewall)
+          <a href="https://help.termux.dev/community/UFW" target="_blank" rel="noopener noreferrer">
+            Termux Community — UFW (Uncomplicated Firewall)
           </a>
         </li>
         <li>
-          <a href="https://ubuntu.com/server/docs/firewalls" target="_blank" rel="noopener noreferrer">
-            Ubuntu Docs — Firewalls
+          <a href="https://termux.dev/server/docs/firewalls" target="_blank" rel="noopener noreferrer">
+            Termux Docs — Firewalls
           </a>
         </li>
         <li>

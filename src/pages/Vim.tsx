@@ -13,7 +13,7 @@ export default function Vim() {
     >
       <p>
         O <strong>Vim</strong> (Vi IMproved) é o sucessor moderno do <code>vi</code>, o editor que
-        acompanha praticamente toda instalação UNIX desde os anos 70. No Ubuntu 24.04, o Vim vem
+        acompanha praticamente toda instalação UNIX desde os anos 70. No Termux 0.118, o Vim vem
         pré-instalado em modo <em>tiny</em> (apenas o suficiente para edição básica de arquivos
         de configuração); para tirar proveito real, instalamos o pacote <code>vim</code> completo
         ou o <strong>Neovim</strong>, fork moderno escrito em C com suporte nativo a Lua e LSP.
@@ -27,24 +27,24 @@ export default function Vim() {
         texto absurdamente rápida — porque suas mãos nunca saem da fileira do meio do teclado.
       </p>
 
-      <h2>1. Instalação no Ubuntu 24.04</h2>
+      <h2>1. Instalação no Termux 0.118</h2>
 
       <p>
         Vamos começar verificando o que já vem instalado e depois instalar a versão completa.
-        Em uma instalação Ubuntu Desktop padrão, você terá apenas o <code>vim-tiny</code>, que é
+        Em uma instalação Termux padrão, você terá apenas o <code>vim-tiny</code>, que é
         o binário <code>/usr/bin/vi</code> e mostra a mensagem <em>"Sorry, the command is not
         available in this version"</em> para muitos comandos avançados.
       </p>
 
-      <Terminal title="wallyson@ubuntu: ~">
+      <Terminal title="wallyson@termux: ~">
         <Command command="which vi vim nvim" output={`/usr/bin/vi
 /usr/bin/vim`} comment="Verifica o que já está instalado" />
 
-        <Command command="dpkg -l | grep -E 'vim|neovim'" output={`ii  vim-common         2:9.1.0016-1ubuntu7.4   all          Vi IMproved - Common files
-ii  vim-tiny           2:9.1.0016-1ubuntu7.4   amd64        Vi IMproved - enhanced vi editor - compact version
-ii  xxd                2:9.1.0016-1ubuntu7.4   amd64        tool to make (or reverse) a hex dump`} />
+        <Command command="dpkg -l | grep -E 'vim|neovim'" output={`ii  vim-common         2:9.1.0016-termux.4   all          Vi IMproved - Common files
+ii  vim-tiny           2:9.1.0016-termux.4   amd64        Vi IMproved - enhanced vi editor - compact version
+ii  xxd                2:9.1.0016-termux.4   amd64        tool to make (or reverse) a hex dump`} />
 
-        <Command root command="apt install -y vim neovim" output={`Reading package lists... Done
+        <Command root command="pkg install -y vim neovim" output={`Reading package lists... Done
 Building dependency tree... Done
 Reading state information... Done
 The following additional packages will be installed:
@@ -58,13 +58,13 @@ The following NEW packages will be installed:
 0 upgraded, 11 newly installed, 0 to remove and 0 not upgraded.
 Need to get 24.6 MB of archives.
 After this operation, 87.4 MB of additional disk space will be used.
-Get:1 http://archive.ubuntu.com/ubuntu noble/main amd64 libgpm2 amd64 1.20.7-11 [14.8 kB]
-Get:2 http://archive.ubuntu.com/ubuntu noble/main amd64 vim-runtime all 2:9.1.0016-1ubuntu7.4 [7.347 kB]
-Get:3 http://archive.ubuntu.com/ubuntu noble/main amd64 vim amd64 2:9.1.0016-1ubuntu7.4 [1.747 kB]
-Get:4 http://archive.ubuntu.com/ubuntu noble/universe amd64 neovim-runtime all 0.9.5-7 [10.6 MB]
-Get:5 http://archive.ubuntu.com/ubuntu noble/universe amd64 neovim amd64 0.9.5-7 [2.184 kB]
+Get:1 http://packages.termux.dev/apt/termux-main noble/main amd64 libgpm2 amd64 1.20.7-11 [14.8 kB]
+Get:2 http://packages.termux.dev/apt/termux-main noble/main amd64 vim-runtime all 2:9.1.0016-termux.4 [7.347 kB]
+Get:3 http://packages.termux.dev/apt/termux-main noble/main amd64 vim amd64 2:9.1.0016-termux.4 [1.747 kB]
+Get:4 http://packages.termux.dev/apt/termux-main noble/universe amd64 neovim-runtime all 0.9.5-7 [10.6 MB]
+Get:5 http://packages.termux.dev/apt/termux-main noble/universe amd64 neovim amd64 0.9.5-7 [2.184 kB]
 Fetched 24.6 MB in 3s (8.054 kB/s)
-Setting up vim (2:9.1.0016-1ubuntu7.4) ...
+Setting up vim (2:9.1.0016-termux.4) ...
 update-alternatives: using /usr/bin/vim.basic to provide /usr/bin/vim (vim) in auto mode
 Setting up neovim (0.9.5-7) ...
 Processing triggers for man-db (2.12.0-4build2) ...`} />
@@ -395,7 +395,7 @@ update-alternatives: using /usr/bin/vim.basic to provide /usr/bin/editor (editor
 
       <File path="~/.vimrc">
 {`" =============================================================
-" Configuração base do Vim — Ubuntu 24.04
+" Configuração base do Vim — Termux 0.118
 " =============================================================
 
 " --- Comportamento geral ---

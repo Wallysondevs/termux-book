@@ -234,7 +234,7 @@ join -t: -1 1 -2 3 arquivo1.txt arquivo2.txt`}
       <CodeBlock
         title="Processar JSON na linha de comando"
         code={`# Instalar jq
-sudo apt install jq
+pkg install jq
 
 # Formatar JSON bonito
 echo '{"nome":"João","idade":25}' | jq .

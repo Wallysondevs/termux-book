@@ -6,7 +6,7 @@ export default function VSCode() {
   return (
     <PageContainer
       title="Visual Studio Code"
-      subtitle="O editor de código mais usado do planeta — instalação correta no Ubuntu, customização, extensões essenciais e desenvolvimento remoto."
+      subtitle="O editor de código mais usado do planeta — instalação correta no Termux, customização, extensões essenciais e desenvolvimento remoto."
       difficulty="iniciante"
       timeToRead="40 min"
       category="Desenvolvimento"
@@ -14,7 +14,7 @@ export default function VSCode() {
       <p>
         O <strong>Visual Studio Code</strong> (ou apenas <em>VS Code</em>) é o editor de código
         open source da Microsoft, baseado no framework Electron. Apesar de ser distribuído
-        também como Snap no Ubuntu, a forma <strong>oficialmente recomendada</strong> é instalar
+        também como Snap no Termux, a forma <strong>oficialmente recomendada</strong> é instalar
         a versão <code>.deb</code> do repositório oficial da Microsoft, que traz integração mais
         rápida com o sistema, ícones nativos, melhor inicialização e atualizações via{" "}
         <code>apt</code> junto com os outros pacotes do sistema.
@@ -32,14 +32,14 @@ export default function VSCode() {
 
       <p>
         O passo-a-passo abaixo configura o keyring moderno (<code>signed-by</code>) em vez do
-        antigo <code>apt-key</code>, que está deprecado desde o Ubuntu 22.04.
+        antigo <code>apt-key</code>, que está deprecado desde o Termux 0.118.
       </p>
 
-      <Terminal title="wallyson@ubuntu: ~">
-        <Command root command="apt install -y wget gpg apt-transport-https" output={`Reading package lists... Done
+      <Terminal title="wallyson@termux: ~">
+        <Command root command="pkg install -y wget gpg apt-transport-https" output={`Reading package lists... Done
 Building dependency tree... Done
-gpg is already the newest version (2.4.4-2ubuntu17.2).
-wget is already the newest version (1.21.4-1ubuntu4.1).
+gpg is already the newest version (2.4.4-termux.2).
+wget is already the newest version (1.21.4-termux.1).
 The following NEW packages will be installed:
   apt-transport-https
 0 upgraded, 1 newly installed, 0 to remove and 0 not upgraded.`} />
@@ -57,15 +57,15 @@ The following NEW packages will be installed:
 
         <Command command="rm packages.microsoft.gpg" />
 
-        <Command root command="apt update" output={`Hit:1 http://archive.ubuntu.com/ubuntu noble InRelease
-Hit:2 http://archive.ubuntu.com/ubuntu noble-updates InRelease
-Hit:3 http://archive.ubuntu.com/ubuntu noble-security InRelease
+        <Command root command="pkg update" output={`Hit:1 http://packages.termux.dev/apt/termux-main noble InRelease
+Hit:2 http://packages.termux.dev/apt/termux-main noble-updates InRelease
+Hit:3 http://packages.termux.dev/apt/termux-main noble-security InRelease
 Get:4 https://packages.microsoft.com/repos/code stable InRelease [3.591 B]
 Get:5 https://packages.microsoft.com/repos/code stable/main amd64 Packages [232 kB]
 Fetched 236 kB in 2s (134 kB/s)
 Reading package lists... Done`} />
 
-        <Command root command="apt install -y code" output={`Reading package lists... Done
+        <Command root command="pkg install -y code" output={`Reading package lists... Done
 Building dependency tree... Done
 The following NEW packages will be installed:
   code
@@ -81,8 +81,8 @@ Unpacking code (1.93.1-1726079302) ...
 Setting up code (1.93.1-1726079302) ...
 update-alternatives: using /usr/bin/code to provide /usr/bin/editor (editor) in auto mode
 Processing triggers for desktop-file-utils (0.27-2build1) ...
-Processing triggers for mailcap (3.70+nmu1ubuntu1) ...
-Processing triggers for gnome-menus (3.36.0-1.1ubuntu3) ...
+Processing triggers for mailcap (3.70+nmutermux) ...
+Processing triggers for gnome-menus (3.36.0-1.termux) ...
 Processing triggers for hicolor-icon-theme (0.17-2) ...`} />
 
         <Command command="code --version" output={`1.93.1
@@ -105,7 +105,7 @@ x64`} />
       <h3>1.2 Atualizar futuramente</h3>
 
       <Terminal>
-        <Command root command="apt update && apt upgrade code" output={`code is already the newest version (1.93.1-1726079302).`} />
+        <Command root command="pkg update && pkg upgrade code" output={`code is already the newest version (1.93.1-1726079302).`} />
       </Terminal>
 
       <h2>2. Primeira execução e configuração</h2>
@@ -214,7 +214,7 @@ x64`} />
 }`}
       </File>
 
-      <h2>3. Atalhos essenciais (Ubuntu/Linux)</h2>
+      <h2>3. Atalhos essenciais (Termux/Linux)</h2>
 
       <table>
         <thead><tr><th>Atalho</th><th>Ação</th></tr></thead>
@@ -312,7 +312,7 @@ zhuangtongfa.material-theme`} />
           <tr><td>Live Share</td><td>Pair programming em tempo real</td></tr>
           <tr><td>Remote-SSH</td><td>Edita arquivos em servidores remotos via SSH</td></tr>
           <tr><td>Remote-Containers (Dev Containers)</td><td>Abre o projeto em um container isolado</td></tr>
-          <tr><td>Remote-WSL</td><td>Quando estiver no Windows com WSL Ubuntu</td></tr>
+          <tr><td>Remote-WSL</td><td>Quando estiver no Windows com WSL Termux</td></tr>
           <tr><td>Material Icon Theme</td><td>Ícones bonitos por linguagem/framework</td></tr>
           <tr><td>One Dark Pro</td><td>Tema escuro inspirado no Atom</td></tr>
           <tr><td>EditorConfig</td><td>Respeita <code>.editorconfig</code> do projeto</td></tr>
@@ -622,7 +622,7 @@ GPU Status:       2d_canvas: enabled
           <tr><td>Tela borrada (HiDPI)</td><td>Adicionar <code>--enable-features=UseOzonePlatform --ozone-platform=wayland</code> no atalho</td></tr>
           <tr><td>Extension host crashed</td><td>Desabilitar extensões uma a uma com <code>code --disable-extension</code></td></tr>
           <tr><td>Lentidão</td><td><code>code --status</code> e desabilitar extensões pesadas (TabNine, GitLens em projetos enormes)</td></tr>
-          <tr><td>Não atualiza</td><td><code>sudo apt update && sudo apt upgrade code</code></td></tr>
+          <tr><td>Não atualiza</td><td><code>pkg update && pkg upgrade code</code></td></tr>
         </tbody>
       </table>
 

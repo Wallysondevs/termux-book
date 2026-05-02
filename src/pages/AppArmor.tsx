@@ -5,8 +5,8 @@ import { InfoBox } from "@/components/ui/InfoBox";
 export default function AppArmor() {
   return (
     <PageContainer
-      title="AppArmor — MAC do Ubuntu"
-      subtitle="Mandatory Access Control nativo do Ubuntu: perfis, modos enforce/complain, criação de perfis novos com aa-genprof e comparação com SELinux."
+      title="AppArmor — MAC do Termux"
+      subtitle="Mandatory Access Control nativo do Termux: perfis, modos enforce/complain, criação de perfis novos com aa-genprof e comparação com SELinux."
       difficulty="avancado"
       timeToRead="25 min"
       category="Segurança"
@@ -16,11 +16,11 @@ export default function AppArmor() {
         processos a um conjunto explícito de recursos: arquivos, capabilities do kernel, sockets
         de rede, sinais. Diferente do <strong>DAC</strong> (permissões rwx + uid/gid) que é
         discricionário, o MAC é imposto pelo kernel <em>mesmo se o processo for root</em>. No
-        Ubuntu o AppArmor vem ligado por padrão e protege serviços como CUPS, snapd, dhclient,
+        Termux o AppArmor vem ligado por padrão e protege serviços como CUPS, snapd, dhclient,
         evince, firefox (snap), nginx (opcional), apache, mysqld.
       </p>
 
-      <Terminal title="wallyson@ubuntu: ~">
+      <Terminal title="wallyson@termux: ~">
         <Command command="aa-enabled" output={`Yes`} />
         <Command command="cat /sys/kernel/security/apparmor/profiles | head -10" output={`/usr/bin/man (enforce)
 /usr/lib/snapd/snap-confine (enforce)
@@ -36,14 +36,14 @@ snap.firefox.firefox (enforce)`} />
 
       <h2>1. Instalando as ferramentas e estrutura</h2>
 
-      <Terminal title="root@ubuntu: ~">
-        <Command root command="apt install -y apparmor apparmor-utils apparmor-profiles apparmor-profiles-extra" output={`Reading package lists... Done
+      <Terminal title="root@termux: ~">
+        <Command root command="pkg install -y apparmor apparmor-utils apparmor-profiles apparmor-profiles-extra" output={`Reading package lists... Done
 The following NEW packages will be installed:
   apparmor-profiles apparmor-profiles-extra apparmor-utils python3-apparmor python3-libapparmor
 0 upgraded, 5 newly installed, 0 to remove and 0 not upgraded.
 Need to get 712 kB of archives.
-Setting up apparmor-utils (4.0.1-0ubuntu0.24.04.3) ...
-Setting up apparmor-profiles (4.0.1-0ubuntu0.24.04.3) ...`} />
+Setting up apparmor-utils (4.0.1-termux1) ...
+Setting up apparmor-profiles (4.0.1-termux1) ...`} />
         <Command root command="ls /etc/apparmor.d/" output={`abstractions/         tunables/
 local/                usr.bin.evince
 disable/              usr.bin.man
@@ -64,7 +64,7 @@ cups-client`} />
 
       <h2>2. aa-status — radiografia do sistema</h2>
 
-      <Terminal title="root@ubuntu: ~">
+      <Terminal title="root@termux: ~">
         <Command root command="aa-status" output={`apparmor module is loaded.
 46 profiles are loaded.
 40 profiles are in enforce mode.
@@ -111,7 +111,7 @@ cups-client`} />
 
       <h2>3. Trocar modo de um perfil</h2>
 
-      <Terminal title="root@ubuntu: ~">
+      <Terminal title="root@termux: ~">
         <Command root command="aa-complain /usr/sbin/nginx" output={`Setting /usr/sbin/nginx to complain mode.`} />
         <Command root command="aa-enforce /usr/sbin/nginx" output={`Setting /usr/sbin/nginx to enforce mode.`} />
         <Command root command="aa-disable /usr/sbin/mysqld" comment="Cria link em /etc/apparmor.d/disable/" output={`Disabling /usr/sbin/mysqld.`} />
@@ -164,7 +164,7 @@ cups-client`} />
 
       <h2>5. Recarregar perfis e diagnosticar</h2>
 
-      <Terminal title="root@ubuntu: ~">
+      <Terminal title="root@termux: ~">
         <Command root command="apparmor_parser -r /etc/apparmor.d/usr.sbin.tcpdump" comment="-r recarrega; -a adiciona; -R remove" />
         <Command root command="systemctl reload apparmor" />
         <Command root command="dmesg | grep -i apparmor | tail -10" output={`[ 8423.221] audit: type=1400 audit(1731412821.221:43): apparmor="DENIED" operation="open" profile="/usr/sbin/tcpdump" name="/etc/shadow" pid=4421 comm="tcpdump" requested_mask="r" denied_mask="r" fsuid=0 ouid=0
@@ -179,7 +179,7 @@ cups-client`} />
         Allow/Deny para cada acesso descoberto.
       </p>
 
-      <Terminal title="root@ubuntu: ~">
+      <Terminal title="root@termux: ~">
         <Command root command="aa-genprof /usr/local/bin/backup.sh" output={`Updating AppArmor profiles in /etc/apparmor.d.
 Writing updated profile for /usr/local/bin/backup.sh.
 Setting /usr/local/bin/backup.sh to complain mode.
@@ -215,7 +215,7 @@ Severity: 4
         lê os logs e propõe regras incrementais.
       </p>
 
-      <Terminal title="root@ubuntu: ~">
+      <Terminal title="root@termux: ~">
         <Command root command="aa-logprof" output={`Reading log entries from /var/log/audit/audit.log.
 Updating AppArmor profiles in /etc/apparmor.d.
 
@@ -254,7 +254,7 @@ deny /etc/shadow r,`}
 
       <table>
         <thead>
-          <tr><th>Aspecto</th><th>AppArmor (Ubuntu/SUSE)</th><th>SELinux (RHEL/Fedora)</th></tr>
+          <tr><th>Aspecto</th><th>AppArmor (Termux/SUSE)</th><th>SELinux (RHEL/Fedora)</th></tr>
         </thead>
         <tbody>
           <tr><td><strong>Modelo</strong></td><td>Path-based (caminhos)</td><td>Label-based (xattr nos inodes)</td></tr>
@@ -263,12 +263,12 @@ deny /etc/shadow r,`}
           <tr><td><strong>Modo de teste</strong></td><td><code>complain</code></td><td><code>permissive</code></td></tr>
           <tr><td><strong>Ferramentas</strong></td><td>aa-status, aa-genprof, aa-logprof</td><td>sestatus, audit2allow, semanage, restorecon</td></tr>
           <tr><td><strong>Quando muda mount-point</strong></td><td>Perde proteção (paths mudaram)</td><td>Mantém (labels viajam com o inode)</td></tr>
-          <tr><td><strong>Ubuntu padrão</strong></td><td>✅ ATIVO</td><td>❌ Não vem</td></tr>
+          <tr><td><strong>Termux padrão</strong></td><td>✅ ATIVO</td><td>❌ Não vem</td></tr>
         </tbody>
       </table>
 
       <InfoBox type="tip" title="Dica de produção">
-        Em servidores Ubuntu mantenha AppArmor sempre ligado. Se um pacote está crashando por
+        Em servidores Termux mantenha AppArmor sempre ligado. Se um pacote está crashando por
         AppArmor, NUNCA o desabilite globalmente — coloque <em>esse perfil específico</em> em
         complain, abra o issue/audit, gere as regras necessárias e volte para enforce.
       </InfoBox>

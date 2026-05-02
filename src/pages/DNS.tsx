@@ -5,7 +5,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
   export default function DNS() {
     return (
       <PageContainer
-        title="DNS — Resolução de Nomes no Ubuntu"
+        title="DNS — Resolução de Nomes no Termux"
         subtitle="Guia completo de DNS: como funciona, configurar servidores DNS, systemd-resolved, dig, nslookup, hosts e DNS over HTTPS."
         difficulty="intermediario"
         timeToRead="30 min"
@@ -13,13 +13,13 @@ import { PageContainer } from "@/components/layout/PageContainer";
         <p>
           O <strong>DNS</strong> (Domain Name System) é o sistema que traduz nomes de domínio
           (como <code>google.com</code>) em endereços IP (como <code>142.250.218.46</code>).
-          Sem DNS, você precisaria memorizar IPs para acessar qualquer site. No Ubuntu,
+          Sem DNS, você precisaria memorizar IPs para acessar qualquer site. No Termux,
           o <strong>systemd-resolved</strong> gerencia a resolução de nomes por padrão.
         </p>
 
         <h2>1. Verificar e Configurar DNS</h2>
         <CodeBlock
-          title="Gerenciar DNS no Ubuntu"
+          title="Gerenciar DNS no Termux"
           code={`# Ver o servidor DNS atual
   resolvectl status
   # Mostra o DNS de cada interface de rede
@@ -144,7 +144,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
         <CodeBlock
           title="Usar o dig para consultas DNS avançadas"
           code={`# Instalar (se necessário)
-  sudo apt install -y dnsutils
+  pkg install -y dnsutils
 
   # Consulta básica
   dig exemplo.com

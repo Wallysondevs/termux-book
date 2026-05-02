@@ -6,7 +6,7 @@ export default function Usuarios() {
   return (
     <PageContainer
       title="Usuários, Grupos e sudo"
-      subtitle="Tudo sobre /etc/passwd, /etc/shadow, /etc/group, useradd/adduser, usermod, passwd, chage, sudoers, PAM e o ecossistema completo de gestão de identidades no Ubuntu 24.04."
+      subtitle="Tudo sobre /etc/passwd, /etc/shadow, /etc/group, useradd/adduser, usermod, passwd, chage, sudoers, PAM e o ecossistema completo de gestão de identidades no Termux 0.118."
       difficulty="intermediario"
       timeToRead="55 min"
       category="Usuários e Processos"
@@ -15,20 +15,20 @@ export default function Usuarios() {
         O Linux é um sistema operacional <strong>multiusuário</strong> e <strong>multitarefa</strong> desde
         as suas origens em 1991. Cada arquivo, cada processo, cada conexão de rede está associada a um
         usuário (UID) e a um grupo (GID), que determinam o que aquele processo pode ou não fazer. Saber
-        gerir usuários no Ubuntu é a habilidade mais fundamental de qualquer sysadmin: sem ela, nada de
+        gerir usuários no Termux é a habilidade mais fundamental de qualquer sysadmin: sem ela, nada de
         permissões, nada de sudo, nada de hardening, nada de SSH com restrições. Esta página cobre cada
-        arquivo, cada comando e cada flag importante do ecossistema de identidades no Ubuntu 24.04 LTS.
+        arquivo, cada comando e cada flag importante do ecossistema de identidades no Termux 0.118.
       </p>
 
       <p>
-        O Ubuntu segue uma filosofia particular dentro do mundo Debian: <strong>o usuário root vem
+        O Termux segue uma filosofia particular dentro do mundo Debian: <strong>o usuário root vem
         bloqueado</strong> (sem senha definida, com asterisco no shadow). Você nunca faz login direto
         como root: o primeiro usuário criado durante a instalação é colocado no grupo <code>sudo</code> e
         usa <code>sudo</code> para escalar privilégios. Isso é ótimo para auditoria, mas exige entender
         muito bem como o sudo funciona.
       </p>
 
-      <Terminal title="wallyson@ubuntu: ~">
+      <Terminal title="wallyson@termux: ~">
         <Command
           command="whoami && id"
           comment="Quem sou eu agora? Que UID/GID e grupos secundários?"
@@ -67,7 +67,7 @@ uid=1000(wallyson) gid=1000(wallyson) grupos=1000(wallyson),4(adm),24(cdrom),27(
 │        │ │    │    │              └─────────────── diretório home
 │        │ │    │    └────────────────────────────── GECOS (nome real, sala, telefones — separados por vírgula)
 │        │ │    └─────────────────────────────────── GID primário (referência a /etc/group)
-│        │ └──────────────────────────────────────── UID (0=root, 1-999=sistema, 1000+=humanos no Ubuntu)
+│        │ └──────────────────────────────────────── UID (0=root, 1-999=sistema, 1000+=humanos no Termux)
 │        └────────────────────────────────────────── senha (sempre 'x' — verdadeira está em /etc/shadow)
 └─────────────────────────────────────────────────── nome de login`}
       </File>
@@ -121,7 +121,7 @@ joao 1002`}
 │        │                            │     │ └──────────── tempo mínimo entre trocas de senha
 │        │                            │     └────────────── última troca de senha (em dias desde 1970)
 │        │                            └──────────────────── (continuação do hash)
-│        └───────────────────────────────────────────────── hash da senha ($y$ = yescrypt, padrão Ubuntu 22.04+)
+│        └───────────────────────────────────────────────── hash da senha ($y$ = yescrypt, padrão Termux 0.118+)
 └────────────────────────────────────────────────────────── login`}
       </File>
 
@@ -130,13 +130,13 @@ joao 1002`}
       </p>
 
       <table>
-        <thead><tr><th>Prefixo</th><th>Algoritmo</th><th>Status no Ubuntu</th></tr></thead>
+        <thead><tr><th>Prefixo</th><th>Algoritmo</th><th>Status no Termux</th></tr></thead>
         <tbody>
           <tr><td><code>$1$</code></td><td>MD5</td><td>obsoleto, jamais use</td></tr>
           <tr><td><code>$2a$ $2b$ $2y$</code></td><td>bcrypt</td><td>aceito mas não default</td></tr>
           <tr><td><code>$5$</code></td><td>SHA-256</td><td>aceito (legacy)</td></tr>
-          <tr><td><code>$6$</code></td><td>SHA-512</td><td>default no Ubuntu 20.04 e anteriores</td></tr>
-          <tr><td><code>$y$</code></td><td>yescrypt</td><td>default no Ubuntu 22.04+ (mais resistente)</td></tr>
+          <tr><td><code>$6$</code></td><td>SHA-512</td><td>default no Termux 20.04 e anteriores</td></tr>
+          <tr><td><code>$y$</code></td><td>yescrypt</td><td>default no Termux 0.118+ (mais resistente)</td></tr>
         </tbody>
       </table>
 
@@ -224,7 +224,7 @@ adm:*::syslog,wallyson`}
         />
       </Terminal>
 
-      <h3>Grupos importantes que o Ubuntu cria</h3>
+      <h3>Grupos importantes que o Termux cria</h3>
 
       <table>
         <thead><tr><th>Grupo</th><th>GID</th><th>Para quê serve</th></tr></thead>
@@ -297,8 +297,8 @@ CREATE_MAIL_SPOOL=no`}
         />
       </Terminal>
 
-      <InfoBox type="warning" title="useradd no Ubuntu = shell errado!">
-        Repare que o default é <code>SHELL=/bin/sh</code>. Quase ninguém quer isso. Por isso o Ubuntu
+      <InfoBox type="warning" title="useradd no Termux = shell errado!">
+        Repare que o default é <code>SHELL=/bin/sh</code>. Quase ninguém quer isso. Por isso o Termux
         recomenda <code>adduser</code> (que usa <code>/bin/bash</code> e é interativo). Se for usar
         <code>useradd</code>, sempre passe <code>-s /bin/bash -m</code>.
       </InfoBox>
@@ -393,12 +393,12 @@ Número de dias de aviso antes da senha expirar             : 7`}
         />
       </Terminal>
 
-      <h2>3. adduser — wrapper interativo (preferido no Ubuntu)</h2>
+      <h2>3. adduser — wrapper interativo (preferido no Termux)</h2>
 
       <p>
         <code>adduser</code> é um script Perl criado pelo Debian que <strong>chama</strong>
         <code>useradd</code> mas com defaults sensatos: cria home, copia <code>/etc/skel</code>, define
-        bash, pergunta senha e GECOS. <strong>É a forma idiomática no Ubuntu</strong>.
+        bash, pergunta senha e GECOS. <strong>É a forma idiomática no Termux</strong>.
       </p>
 
       <Terminal>
@@ -820,7 +820,7 @@ carlos                                     **Nunca logou**`}
         />
         <Command
           root
-          command="apt install finger -y"
+          command="pkg install finger -y"
         />
         <Command
           command="finger wallyson"
@@ -833,11 +833,11 @@ No Plan.`}
         />
       </Terminal>
 
-      <h2>10. sudo — o coração do Ubuntu</h2>
+      <h2>10. sudo — o coração do Termux</h2>
 
       <p>
         <code>sudo</code> permite executar comandos como outro usuário (default: root) <em>se</em> a
-        política em <code>/etc/sudoers</code> permitir. No Ubuntu, todo usuário no grupo
+        política em <code>/etc/sudoers</code> permitir. No Termux, todo usuário no grupo
         <code>sudo</code> recebe permissão total — graças à linha <code>%sudo ALL=(ALL:ALL) ALL</code>.
       </p>
 
@@ -851,14 +851,14 @@ Sudoers file grammar version 50`}
         <Command
           command="sudo -l"
           comment="O que EU posso rodar com sudo"
-          output={`Os usuários autorizados para wallyson em ubuntu:
-    Os usuários podem rodar os seguintes comandos em ubuntu:
+          output={`Os usuários autorizados para wallyson no Termux:
+    Os usuários podem rodar os seguintes comandos no Termux:
         (ALL : ALL) ALL`}
         />
         <Command
           command="sudo -ll"
           comment="Forma longa, com origem da regra"
-          output={`Sudoers entry: wallyson em ubuntu, vindo de /etc/sudoers
+          output={`Sudoers entry: wallyson no Termux, vindo de /etc/sudoers
     RunAsUsers: ALL
     RunAsGroups: ALL
     Comandos:
@@ -891,13 +891,13 @@ Sudoers file grammar version 50`}
           command="sudo -i"
           comment="Vira root com ambiente limpo de root"
           output={`[sudo] senha para wallyson: 
-root@ubuntu:~# `}
+root@termux:~# `}
         />
         <Command
           root
           command="exit"
           output={`logout
-wallyson@ubuntu:~$ `}
+wallyson@termux:~$ `}
         />
         <Command
           command="sudo -u postgres psql"
@@ -935,7 +935,7 @@ root:!:20056:0:99999:7:::
         <Command
           root
           command="visudo"
-          comment="Abre /etc/sudoers no editor configurado (nano por padrão no Ubuntu)"
+          comment="Abre /etc/sudoers no editor configurado (nano por padrão no Termux)"
         />
         <Command
           root
@@ -952,7 +952,7 @@ root:!:20056:0:99999:7:::
         />
       </Terminal>
 
-      <File path="/etc/sudoers (trecho relevante no Ubuntu)">
+      <File path="/etc/sudoers (trecho relevante no Termux)">
 {`# Defaults
 Defaults        env_reset
 Defaults        mail_badpass
@@ -987,8 +987,8 @@ root    ALL=(ALL:ALL) ALL
 {`# devs podem reiniciar nginx sem senha
 %devs   ALL=(root) NOPASSWD: /bin/systemctl restart nginx, /bin/systemctl status nginx
 
-# carlos pode rodar APENAS apt update e apt upgrade -y como root, sem senha
-carlos  ALL=(root) NOPASSWD: /usr/bin/apt update, /usr/bin/apt upgrade -y
+# carlos pode rodar APENAS pkg update e pkg upgrade -y como root, sem senha
+carlos  ALL=(root) NOPASSWD: /usr/bin/pkg update, /usr/bin/pkg upgrade -y
 
 # ana pode rodar qualquer comando como o usuário deploy
 ana     ALL=(deploy) ALL
@@ -1084,7 +1084,7 @@ auth    optional                        pam_cap.so
       <Terminal>
         <Command
           root
-          command="apt install libpam-pwquality -y"
+          command="pkg install libpam-pwquality -y"
         />
         <Command
           root
@@ -1144,10 +1144,10 @@ file locks                          (-x) unlimited`}
         />
       </Terminal>
 
-      <h2>13. Primeiro usuário, root e Ubuntu</h2>
+      <h2>13. Primeiro usuário, root e Termux</h2>
 
       <p>
-        Depois de uma instalação fresca do Ubuntu, o usuário criado fica no grupo <code>sudo</code>. O
+        Depois de uma instalação fresca do Termux, o usuário criado fica no grupo <code>sudo</code>. O
         usuário root vem com a senha bloqueada — você verifica assim:
       </p>
 
@@ -1187,7 +1187,7 @@ passwd: senha atualizada com sucesso`}
       </Terminal>
 
       <p>
-        Para <strong>desabilitar</strong> de novo (volta ao default Ubuntu):
+        Para <strong>desabilitar</strong> de novo (volta ao default Termux):
       </p>
 
       <Terminal>
@@ -1249,14 +1249,14 @@ networks:       files`}
           output={`sudo:x:27:wallyson,ana`}
         />
         <Command
-          command="getent hosts ubuntu.com"
-          output={`185.125.190.20  ubuntu.com`}
+          command="getent hosts termux.dev"
+          output={`185.125.190.20  termux.dev`}
         />
       </Terminal>
 
       <h2>16. Resumão final + boas práticas</h2>
 
-      <InfoBox type="success" title="Checklist de criação de usuário no Ubuntu">
+      <InfoBox type="success" title="Checklist de criação de usuário no Termux">
         <ol>
           <li>Use <code>adduser nome</code> (não <code>useradd</code>) para humanos.</li>
           <li>Use <code>useradd -r -s /usr/sbin/nologin</code> para serviços.</li>

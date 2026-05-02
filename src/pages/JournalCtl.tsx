@@ -6,13 +6,13 @@ import { PageContainer } from "@/components/layout/PageContainer";
     return (
       <PageContainer
         title="journalctl — Logs do Sistema"
-        subtitle="Guia completo do journalctl no Ubuntu: visualizar, filtrar, pesquisar e gerenciar logs do systemd, serviços, kernel e aplicações."
+        subtitle="Guia completo do journalctl no Termux: visualizar, filtrar, pesquisar e gerenciar logs do systemd, serviços, kernel e aplicações."
         difficulty="intermediario"
         timeToRead="30 min"
       >
         <p>
           O <strong>journalctl</strong> é a ferramenta para acessar os logs do systemd journal,
-          o sistema centralizado de logs do Ubuntu. Ele captura logs do kernel, serviços systemd,
+          o sistema centralizado de logs do Termux. Ele captura logs do kernel, serviços systemd,
           aplicações e mensagens do sistema em um formato estruturado e indexado, permitindo
           buscas rápidas e filtros poderosos.
         </p>

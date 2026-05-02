@@ -6,7 +6,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
     return (
       <PageContainer
         title="Git — Controle de Versão"
-        subtitle="Guia completo do Git no Ubuntu: instalar, configurar, branches, merge, rebase, stash, reset, tags, GitHub e workflows profissionais."
+        subtitle="Guia completo do Git no Termux: instalar, configurar, branches, merge, rebase, stash, reset, tags, GitHub e workflows profissionais."
         difficulty="iniciante"
         timeToRead="35 min"
       >
@@ -21,7 +21,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
         <CodeBlock
           title="Instalar e configurar o Git"
           code={`# Instalar Git
-  sudo apt install -y git
+  pkg install -y git
 
   # Verificar versão
   git --version

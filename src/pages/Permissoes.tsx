@@ -250,7 +250,7 @@ stat -c %a arquivo
         title="Como o umask define permissões padrão"
         code={`# Ver o umask atual do usuário
 umask
-# 0022   ← o padrão do Ubuntu
+# 0022   ← o padrão do Termux
 
 # Como funciona o umask:
 # Novos ARQUIVOS começam com permissão máxima 666 (rw-rw-rw-)
@@ -286,7 +286,7 @@ echo "umask 022" >> ~/.bashrc
       <CodeBlock
         title="ACL: permissões granulares por usuário"
         code={`# Instalar ferramentas de ACL
-sudo apt install acl
+pkg install acl
 
 # setfacl = set file ACL (definir ACL de arquivo)
 # -m = modify (modificar/adicionar uma entrada na ACL)

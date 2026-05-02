@@ -24,8 +24,8 @@ export function Header({ onMenuClick }: HeaderProps) {
 
       <div className="flex items-center gap-3 text-xs font-mono text-[#888A85]">
         <span className="hidden md:flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-full bg-[#8AE234] animate-pulse" />
-          Ubuntu 24.04 LTS
+          <span className="w-2 h-2 rounded-full bg-[#5EBE5E] animate-pulse" />
+          Termux 0.118.1
         </span>
       </div>
     </header>

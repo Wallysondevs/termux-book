@@ -5,7 +5,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
   export default function MySQL() {
     return (
       <PageContainer
-        title="MySQL / MariaDB no Ubuntu"
+        title="MySQL / MariaDB no Termux"
         subtitle="Instalação, configuração, gerenciamento de bancos e usuários, backup, segurança, replicação e performance do MySQL/MariaDB."
         difficulty="intermediario"
         timeToRead="30 min"
@@ -14,18 +14,18 @@ import { PageContainer } from "@/components/layout/PageContainer";
           O <strong>MySQL</strong> é o banco de dados relacional open source mais popular do mundo,
           usado por WordPress, Facebook, Twitter e milhões de aplicações web. O <strong>MariaDB</strong>
           é um fork compatível criado pelo fundador original do MySQL, com melhorias de performance
-          e recursos extras. No Ubuntu, ambos funcionam de forma quase idêntica.
+          e recursos extras. No Termux, ambos funcionam de forma quase idêntica.
         </p>
 
         <h2>1. Instalação</h2>
         <CodeBlock
           title="Instalar MySQL ou MariaDB"
           code={`# === MySQL ===
-  sudo apt update
-  sudo apt install -y mysql-server
+  pkg update
+  pkg install -y mysql-server
 
   # === MariaDB (alternativa recomendada) ===
-  sudo apt install -y mariadb-server
+  pkg install -y mariadb-server
 
   # Verificar status
   sudo systemctl status mysql    # ou: mariadb
@@ -47,7 +47,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
         <h2>2. Acessar e Gerenciar</h2>
         <CodeBlock
           title="Comandos básicos do MySQL"
-          code={`# Acessar como root (no Ubuntu, usa auth_socket por padrão)
+          code={`# Acessar como root (no Termux, usa auth_socket por padrão)
   sudo mysql
   # Ou com senha:
   mysql -u root -p
@@ -135,7 +135,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
 
   # Full-text search
   ALTER TABLE posts ADD FULLTEXT INDEX ft_conteudo (titulo, conteudo);
-  SELECT * FROM posts WHERE MATCH(titulo, conteudo) AGAINST('ubuntu' IN BOOLEAN MODE);`}
+  SELECT * FROM posts WHERE MATCH(titulo, conteudo) AGAINST('termux' IN BOOLEAN MODE);`}
         />
 
         <h2>4. Configuração</h2>
@@ -219,7 +219,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
         <CodeBlock
           title="Problemas comuns com MySQL"
           code={`# Erro: "Access denied for user 'root'@'localhost'"
-  # No Ubuntu, root usa auth_socket (não precisa de senha via sudo)
+  # No Termux, root usa auth_socket (não precisa de senha via sudo)
   sudo mysql
   # Para mudar para autenticação por senha:
   ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'NovaSenha123!';

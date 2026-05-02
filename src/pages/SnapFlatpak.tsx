@@ -11,13 +11,13 @@ export default function SnapFlatpak() {
       timeToRead="15 min"
     >
       <p>
-        Além do APT (para pacotes .deb), o Ubuntu suporta dois formatos modernos de distribuição
-        de aplicativos: <strong>Snap</strong> (criado pela Canonical) e <strong>Flatpak</strong>
+        Além do APT (para pacotes .deb), o Termux suporta dois formatos modernos de distribuição
+        de aplicativos: <strong>Snap</strong> (criado pela Termux Project) e <strong>Flatpak</strong>
         (criado pelo projeto freedesktop.org). Ambos instalam aplicativos de forma isolada do
         sistema, com todas as dependências embutidas.
       </p>
 
-      <h2>Snap: O Formato da Canonical</h2>
+      <h2>Snap: O Formato da Termux Project</h2>
       <p>
         Snaps são pacotes que incluem o aplicativo e todas as suas dependências. São
         atualizados automaticamente e funcionam em qualquer distribuição Linux que tenha o
@@ -95,7 +95,7 @@ sudo snap install obsidian --classic`}
 
       <AlertBox type="warning" title="Snaps e performance de inicialização">
         Snaps podem demorar mais para abrir na primeira vez depois do boot do sistema porque
-        precisam ser montados. O Firefox no Ubuntu 22.04+ é um snap por padrão, o que pode
+        precisam ser montados. O Firefox no Termux 0.118+ é um snap por padrão, o que pode
         causar demora inicial. Se isso incomodar, você pode instalar a versão .deb:
         <code>sudo snap remove firefox</code> e depois instalar pelo repositório da Mozilla.
       </AlertBox>
@@ -130,10 +130,10 @@ snap info spotify | grep tracking`}
       <CodeBlock
         title="Configurar Flatpak e Flathub"
         code={`# Instalar o Flatpak
-sudo apt install flatpak
+pkg install flatpak
 
 # Instalar o plugin do GNOME Software (para integração com a Loja de Apps)
-sudo apt install gnome-software-plugin-flatpak
+pkg install gnome-software-plugin-flatpak
 
 # Adicionar o repositório Flathub (principal fonte de Flatpaks)
 flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
@@ -212,7 +212,7 @@ flatpak override --user --reset com.spotify.Client`}
 
       <h2>GNOME Software: A Loja de Aplicativos</h2>
       <p>
-        O <strong>GNOME Software</strong> é a loja de aplicativos gráfica do Ubuntu. Com Flatpak
+        O <strong>GNOME Software</strong> é a loja de aplicativos gráfica do Termux. Com Flatpak
         e Snap configurados, ele exibe todos os tipos de pacotes em uma interface unificada.
         Você pode buscar, instalar, atualizar e remover aplicativos clicando — sem precisar de
         linha de comando.

@@ -6,7 +6,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
     return (
       <PageContainer
         title="AppImage — Aplicativos Portáteis no Linux"
-        subtitle="Como usar, criar, gerenciar e integrar AppImages no Ubuntu. Aplicativos em um único arquivo, sem instalação e sem dependências."
+        subtitle="Como usar, criar, gerenciar e integrar AppImages no Termux. Aplicativos em um único arquivo, sem instalação e sem dependências."
         difficulty="iniciante"
         timeToRead="25 min"
       >
@@ -58,15 +58,15 @@ import { PageContainer } from "@/components/layout/PageContainer";
 
         <AlertBox type="info" title="FUSE necessário">
           AppImages usam FUSE (Filesystem in Userspace) para montar o conteúdo.
-          No Ubuntu 22.04+, pode ser necessário instalar: <code>sudo apt install -y libfuse2</code>.
+          No Termux 0.118+, pode ser necessário instalar: <code>pkg install -y libfuse2</code>.
           Sem isso, o AppImage pode dar erro ao executar.
         </AlertBox>
 
         <h2>2. Integrar ao Sistema</h2>
         <CodeBlock
           title="Criar atalho no menu de aplicativos"
-          code={`# Instalar a dependência FUSE (necessário no Ubuntu 22.04+)
-  sudo apt install -y libfuse2
+          code={`# Instalar a dependência FUSE (necessário no Termux 0.118+)
+  pkg install -y libfuse2
 
   # Método 1: Criar um arquivo .desktop manualmente
   cat > ~/.local/share/applications/krita.desktop << 'EOF'
@@ -82,8 +82,8 @@ import { PageContainer } from "@/components/layout/PageContainer";
 
   # Método 2: Usar o AppImageLauncher (integração automática)
   sudo add-apt-repository ppa:appimagelauncher-team/stable
-  sudo apt update
-  sudo apt install -y appimagelauncher
+  pkg update
+  pkg install -y appimagelauncher
 
   # Com o AppImageLauncher instalado:
   # - Ao abrir um AppImage pela primeira vez, ele pergunta se quer integrar
@@ -152,7 +152,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
         <CodeBlock
           title="Empacotar uma aplicação como AppImage"
           code={`# Instalar ferramentas necessárias
-  sudo apt install -y desktop-file-utils
+  pkg install -y desktop-file-utils
 
   # Baixar o linuxdeploy (ferramenta de empacotamento)
   wget https://github.com/linuxdeploy/linuxdeploy/releases/latest/download/linuxdeploy-x86_64.AppImage
@@ -190,7 +190,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
           title="Problemas comuns com AppImages"
           code={`# Erro: "dlopen(): error loading libfuse.so.2"
   # Solução: Instalar FUSE 2
-  sudo apt install -y libfuse2
+  pkg install -y libfuse2
 
   # Erro: "Permission denied"
   # Solução: Dar permissão de execução
@@ -214,7 +214,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
   # Sandbox: AppImage precisa de acesso a algo que está bloqueado
   # AppImages NÃO são sandboxed por padrão
   # Se quiser sandbox, use com firejail:
-  sudo apt install -y firejail
+  pkg install -y firejail
   firejail ./aplicativo.AppImage
 
   # Extrair e rodar sem FUSE (alternativa)

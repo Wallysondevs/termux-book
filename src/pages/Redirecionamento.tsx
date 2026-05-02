@@ -100,7 +100,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
   ls -la | less                    # Paginar saída
   ps aux | grep nginx              # Filtrar processos
   cat /etc/passwd | wc -l          # Contar linhas
-  history | grep "apt install"     # Buscar no histórico
+  history | grep "pkg install"     # Buscar no histórico
 
   # Encadear múltiplos pipes
   cat access.log | grep "404" | sort | uniq -c | sort -rn | head -10
@@ -145,14 +145,14 @@ import { PageContainer } from "@/components/layout/PageContainer";
   EOF
 
   # Here String (<<<)
-  grep "Ubuntu" <<< "Eu uso Ubuntu"
+  grep "Termux" <<< "Eu uso Termux"
   wc -w <<< "contar estas palavras"
 
   # Here Document com variáveis
   nome="João"
   cat << EOF
   Olá, $nome!
-  Bem-vindo ao Ubuntu.
+  Bem-vindo ao Termux.
   EOF
 
   # Here Document sem expandir variáveis (aspas no delimitador)

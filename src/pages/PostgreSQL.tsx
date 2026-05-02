@@ -5,7 +5,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
   export default function PostgreSQL() {
     return (
       <PageContainer
-        title="PostgreSQL no Ubuntu"
+        title="PostgreSQL no Termux"
         subtitle="Instalação, configuração, gerenciamento de bancos, usuários, backup, replicação, tunning de performance e segurança do PostgreSQL."
         difficulty="intermediario"
         timeToRead="35 min"
@@ -19,10 +19,10 @@ import { PageContainer } from "@/components/layout/PageContainer";
 
         <h2>1. Instalação</h2>
         <CodeBlock
-          title="Instalar o PostgreSQL no Ubuntu"
-          code={`# Instalar o PostgreSQL (versão dos repositórios do Ubuntu)
-  sudo apt update
-  sudo apt install -y postgresql postgresql-contrib
+          title="Instalar o PostgreSQL no Termux"
+          code={`# Instalar o PostgreSQL (versão dos repositórios do Termux)
+  pkg update
+  pkg install -y postgresql postgresql-contrib
 
   # postgresql-contrib inclui extensões úteis como:
   # - pg_stat_statements (análise de queries)
@@ -40,9 +40,9 @@ import { PageContainer } from "@/components/layout/PageContainer";
 
   # Instalar versão específica via repositório oficial
   sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
-  wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
-  sudo apt update
-  sudo apt install -y postgresql-16`}
+  wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | pkg add -
+  pkg update
+  pkg install -y postgresql-16`}
         />
 
         <h2>2. Acessar e Gerenciar o PostgreSQL</h2>
@@ -300,12 +300,12 @@ import { PageContainer } from "@/components/layout/PageContainer";
   ORDER BY similarity(nome, 'João') DESC;
 
   # PostGIS — dados geoespaciais
-  sudo apt install -y postgresql-16-postgis-3
+  pkg install -y postgresql-16-postgis-3
   # No psql:
   CREATE EXTENSION postgis;
 
   # pgAdmin — Interface gráfica para gerenciar PostgreSQL
-  sudo apt install -y pgadmin4
+  pkg install -y pgadmin4
   # Ou via container:
   # docker run -p 5050:80 -e PGADMIN_DEFAULT_EMAIL=admin@admin.com -e PGADMIN_DEFAULT_PASSWORD=admin dpage/pgadmin4`}
         />

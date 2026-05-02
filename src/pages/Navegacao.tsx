@@ -33,9 +33,9 @@ export default function Navegacao() {
 # pwd = Print Working Directory (imprimir o diretório de trabalho atual)
 
 # O "~" no prompt representa seu diretório home (/home/seu-usuario)
-# joao@ubuntu:~$       ← você está em /home/joao  (o ~ é atalho para home)
-# joao@ubuntu:~$ cd /etc
-# joao@ubuntu:/etc$    ← você está em /etc`}
+# joao@termux:~$       ← você está em /home/joao  (o ~ é atalho para home)
+# joao@termux:~$ cd /etc
+# joao@termux:/etc$    ← você está em /etc`}
       />
 
       <h2>ls — Listar Conteúdo do Diretório</h2>
@@ -190,7 +190,7 @@ find /etc -name "*.conf" -not -name "*.bak"
       <CodeBlock
         title="tree: visualização hierárquica"
         code={`# Instalar (não vem por padrão):
-sudo apt install tree
+pkg install tree
 
 # Ver estrutura do diretório atual
 tree
@@ -297,7 +297,7 @@ history 20    # Ver os últimos 20
 
 # Pesquisar no histórico interativamente (muito útil!):
 # Pressione Ctrl+R e comece a digitar qualquer parte do comando
-# (reverse-i-search)\`apt': sudo apt update
+# (reverse-i-search)\`apt': pkg update
 # Continue pressionando Ctrl+R para ver resultados anteriores
 
 # Limpar o histórico (apaga todos os comandos salvos)

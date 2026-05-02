@@ -6,12 +6,12 @@ import { PageContainer } from "@/components/layout/PageContainer";
     return (
       <PageContainer
         title="Hardware — Informações e Diagnóstico"
-        subtitle="Guia completo para identificar hardware no Ubuntu: CPU, memória, discos, placa de vídeo, rede, USB, sensores e drivers."
+        subtitle="Guia completo para identificar hardware no Termux: CPU, memória, discos, placa de vídeo, rede, USB, sensores e drivers."
         difficulty="iniciante"
         timeToRead="25 min"
       >
         <p>
-          O Ubuntu oferece diversas ferramentas para identificar, monitorar e diagnosticar
+          O Termux oferece diversas ferramentas para identificar, monitorar e diagnosticar
           o hardware do seu computador. Saber usar essas ferramentas é essencial para
           verificar compatibilidade, diagnosticar problemas e otimizar a performance.
         </p>
@@ -38,7 +38,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
   sudo dmidecode -t system    # Fabricante, modelo
 
   # Resumo rápido
-  neofetch    # Se instalado: sudo apt install neofetch
+  neofetch    # Se instalado: pkg install neofetch
   # Ou: screenfetch`}
         />
 
@@ -112,7 +112,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
   # -h = human readable, -T = tipo de filesystem
 
   # Informações SMART (saúde do disco)
-  sudo apt install -y smartmontools
+  pkg install -y smartmontools
   sudo smartctl -a /dev/sda
   # Ver: temperatura, horas de uso, erros
   sudo smartctl -H /dev/sda    # Apenas saúde (PASSED = OK)
@@ -151,14 +151,14 @@ import { PageContainer } from "@/components/layout/PageContainer";
   # Mostra: modelo, memória, uso, temperatura
 
   # Instalar driver NVIDIA (recomendado)
-  ubuntu-drivers list
-  sudo ubuntu-drivers install
+  termux-drivers list
+  sudo Termux-drivers install
   # Ou versão específica:
-  sudo apt install nvidia-driver-535
+  pkg install nvidia-driver-535
 
   # AMD/Intel
   glxinfo | grep "OpenGL renderer"
-  # Instalar: sudo apt install mesa-utils
+  # Instalar: pkg install mesa-utils
 
   # Verificar driver em uso
   lspci -k | grep -A 2 VGA`}
@@ -187,16 +187,16 @@ import { PageContainer } from "@/components/layout/PageContainer";
   bluetoothctl show
 
   # Sensores de temperatura
-  sudo apt install -y lm-sensors
+  pkg install -y lm-sensors
   sudo sensors-detect    # Detectar sensores (responda YES)
   sensors
   # Mostra temperatura da CPU, GPU, disco
 
   # Monitorar hardware em tempo real
-  sudo apt install -y htop
+  pkg install -y htop
   htop
   # Ou: btop (mais bonito)
-  sudo apt install -y btop
+  pkg install -y btop
   btop`}
         />
 
@@ -212,7 +212,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
   # Identificar a placa:
   lspci | grep -i wireless
   # Instalar drivers:
-  sudo ubuntu-drivers install
+  sudo Termux-drivers install
 
   # USB não detectado
   # Verificar dmesg ao conectar:
@@ -226,14 +226,14 @@ import { PageContainer } from "@/components/layout/PageContainer";
   # Testar memória RAM (erros de memória)
   # Reiniciar → GRUB → "Memory test (memtest86+)"
   # Ou via terminal:
-  sudo apt install -y memtester
+  pkg install -y memtester
   sudo memtester 1G 1    # Testar 1GB, 1 vez`}
         />
 
         <AlertBox type="info" title="Ferramentas gráficas de hardware">
           Para uma visão gráfica: <code>hardinfo</code> (Informações do Sistema),
           <code>gnome-disks</code> (Discos), <code>nvidia-settings</code> (GPU NVIDIA).
-          Instale com <code>sudo apt install hardinfo gnome-disk-utility</code>.
+          Instale com <code>pkg install hardinfo gnome-disk-utility</code>.
         </AlertBox>
       </PageContainer>
     );

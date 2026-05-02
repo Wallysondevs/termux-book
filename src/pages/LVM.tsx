@@ -6,7 +6,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
     return (
       <PageContainer
         title="LVM — Gerenciamento de Volumes Lógicos"
-        subtitle="Guia completo de LVM no Ubuntu: criar, redimensionar, snapshots, migrar dados entre discos e gerenciar armazenamento flexível."
+        subtitle="Guia completo de LVM no Termux: criar, redimensionar, snapshots, migrar dados entre discos e gerenciar armazenamento flexível."
         difficulty="avancado"
         timeToRead="30 min"
       >
@@ -28,7 +28,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
         <CodeBlock
           title="Configurar LVM do zero"
           code={`# Instalar ferramentas LVM
-  sudo apt install -y lvm2
+  pkg install -y lvm2
 
   # Passo 1: Criar Physical Volumes (PV)
   sudo pvcreate /dev/sdb

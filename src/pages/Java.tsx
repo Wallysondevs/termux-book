@@ -5,15 +5,15 @@ import { PageContainer } from "@/components/layout/PageContainer";
   export default function Java() {
     return (
       <PageContainer
-        title="Java no Ubuntu"
-        subtitle="Instalação, configuração e gerenciamento do Java Development Kit (JDK) e Java Runtime Environment (JRE) no Ubuntu. Do OpenJDK ao Oracle JDK."
+        title="Java no Termux"
+        subtitle="Instalação, configuração e gerenciamento do Java Development Kit (JDK) e Java Runtime Environment (JRE) no Termux. Do OpenJDK ao Oracle JDK."
         difficulty="intermediario"
         timeToRead="30 min"
       >
         <p>
           O <strong>Java</strong> é uma das linguagens de programação mais utilizadas no mundo,
           especialmente em aplicações empresariais, desenvolvimento Android, servidores web e
-          sistemas embarcados. No Ubuntu, o Java está disponível principalmente através do
+          sistemas embarcados. No Termux, o Java está disponível principalmente através do
           <strong> OpenJDK</strong>, a implementação open source mantida pela comunidade e pela Oracle.
         </p>
 
@@ -39,12 +39,12 @@ import { PageContainer } from "@/components/layout/PageContainer";
   java -version
   # Saída esperada (se instalado):
   # openjdk version "21.0.3" 2024-04-16
-  # OpenJDK Runtime Environment (build 21.0.3+9-Ubuntu-1ubuntu1)
-  # OpenJDK 64-Bit Server VM (build 21.0.3+9-Ubuntu-1ubuntu1, mixed mode)
+  # OpenJDK Runtime Environment (build 21.0.3+9-Termux-termux)
+  # OpenJDK 64-Bit Server VM (build 21.0.3+9-Termux-termux, mixed mode)
 
   # Se não estiver instalado, você verá:
   # Command 'java' not found, but can be installed with:
-  # sudo apt install default-jdk
+  # pkg install default-jdk
 
   # Verificar o compilador Java (JDK)
   javac -version
@@ -63,24 +63,24 @@ import { PageContainer } from "@/components/layout/PageContainer";
         <CodeBlock
           title="Instalação do OpenJDK"
           code={`# Atualizar a lista de pacotes
-  sudo apt update
+  pkg update
 
-  # Instalar o JDK padrão (versão recomendada pelo Ubuntu)
-  # No Ubuntu 24.04, o padrão é o OpenJDK 21
-  sudo apt install -y default-jdk
+  # Instalar o JDK padrão (versão recomendada pelo Termux)
+  # No Termux 0.118, o padrão é o OpenJDK 21
+  pkg install -y default-jdk
 
   # Instalar apenas o JRE (sem ferramentas de desenvolvimento)
-  sudo apt install -y default-jre
+  pkg install -y default-jre
 
   # Instalar uma versão específica do OpenJDK
-  sudo apt install -y openjdk-21-jdk    # Java 21 (LTS atual)
-  sudo apt install -y openjdk-17-jdk    # Java 17 (LTS anterior)
-  sudo apt install -y openjdk-11-jdk    # Java 11 (LTS legado)
-  sudo apt install -y openjdk-8-jdk     # Java 8 (projetos antigos)
+  pkg install -y openjdk-21-jdk    # Java 21 (LTS atual)
+  pkg install -y openjdk-17-jdk    # Java 17 (LTS anterior)
+  pkg install -y openjdk-11-jdk    # Java 11 (LTS legado)
+  pkg install -y openjdk-8-jdk     # Java 8 (projetos antigos)
 
   # Instalar apenas o JRE de uma versão específica
-  sudo apt install -y openjdk-21-jre
-  sudo apt install -y openjdk-17-jre
+  pkg install -y openjdk-21-jre
+  pkg install -y openjdk-17-jre
 
   # Verificar pacotes Java disponíveis
   apt search openjdk | grep -E "^openjdk-[0-9]+-jdk"
@@ -94,7 +94,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
         <AlertBox type="info" title="Versões LTS do Java">
           O Java segue um ciclo de lançamentos a cada 6 meses, mas apenas algumas versões
           recebem suporte de longo prazo (LTS): Java 8, 11, 17, 21. Para produção, sempre
-          prefira versões LTS. O Ubuntu 24.04 usa o Java 21 como padrão.
+          prefira versões LTS. O Termux 0.118 usa o Java 21 como padrão.
         </AlertBox>
 
         <h2>3. Instalar o Oracle JDK</h2>
@@ -107,26 +107,26 @@ import { PageContainer } from "@/components/layout/PageContainer";
           title="Instalação do Oracle JDK via PPA"
           code={`# Adicionar o repositório do Linux Uprising (mantém o Oracle JDK atualizado)
   sudo add-apt-repository ppa:linuxuprising/java
-  sudo apt update
+  pkg update
 
   # Instalar o Oracle JDK 21
   # Você precisará aceitar a licença da Oracle durante a instalação
-  sudo apt install -y oracle-java21-installer
+  pkg install -y oracle-java21-installer
 
   # Definir o Oracle JDK como padrão
-  sudo apt install -y oracle-java21-set-default
+  pkg install -y oracle-java21-set-default
 
   # Alternativa: Instalar manualmente do site da Oracle
   # 1. Baixe o .deb do site: https://www.oracle.com/java/technologies/downloads/
   # 2. Instale com:
   sudo dpkg -i jdk-21_linux-x64_bin.deb
   # 3. Se houver erros de dependência:
-  sudo apt -f install`}
+  pkg -f install`}
         />
 
         <h2>4. Gerenciar Múltiplas Versões do Java</h2>
         <p>
-          É comum ter mais de uma versão do Java instalada. O Ubuntu usa o sistema
+          É comum ter mais de uma versão do Java instalada. O Termux usa o sistema
           <code>update-alternatives</code> para gerenciar qual versão é a padrão.
         </p>
         <CodeBlock
@@ -200,7 +200,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
   cat > HelloWorld.java << 'EOF'
   public class HelloWorld {
       public static void main(String[] args) {
-          System.out.println("Olá, Ubuntu!");
+          System.out.println("Olá, Termux!");
           System.out.println("Java version: " + System.getProperty("java.version"));
           System.out.println("OS: " + System.getProperty("os.name"));
       }
@@ -214,7 +214,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
   # Executar o programa compilado
   java HelloWorld
   # Saída:
-  # Olá, Ubuntu!
+  # Olá, Termux!
   # Java version: 21.0.3
   # OS: Linux
 
@@ -236,14 +236,14 @@ import { PageContainer } from "@/components/layout/PageContainer";
           title="Instalar Maven e Gradle"
           code={`# === MAVEN ===
   # Instalar o Maven (gerenciador de dependências e build mais usado em Java)
-  sudo apt install -y maven
+  pkg install -y maven
 
   # Verificar a versão
   mvn --version
   # Saída:
   # Apache Maven 3.9.6
   # Maven home: /usr/share/maven
-  # Java version: 21.0.3, vendor: Ubuntu
+  # Java version: 21.0.3, vendor: Termux
 
   # Criar um novo projeto Maven
   mvn archetype:generate -DgroupId=com.exemplo -DartifactId=meu-projeto \
@@ -263,7 +263,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
   sdk install gradle
 
   # Ou instalar via apt (versão pode ser mais antiga)
-  sudo apt install -y gradle
+  pkg install -y gradle
 
   # Verificar a versão
   gradle --version
@@ -314,7 +314,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
 
         <h2>9. Configurar IDEs para Java</h2>
         <CodeBlock
-          title="Instalar IDEs Java no Ubuntu"
+          title="Instalar IDEs Java no Termux"
           code={`# === IntelliJ IDEA (IDE mais popular para Java) ===
   # Instalar via Snap (Community Edition — gratuita)
   sudo snap install intellij-idea-community --classic
@@ -347,7 +347,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
         <CodeBlock
           title="Instalar o Apache Tomcat"
           code={`# Instalar o Tomcat 10 (servidor de aplicações Java)
-  sudo apt install -y tomcat10 tomcat10-admin
+  pkg install -y tomcat10 tomcat10-admin
 
   # Iniciar o Tomcat
   sudo systemctl start tomcat10
@@ -379,10 +379,10 @@ import { PageContainer } from "@/components/layout/PageContainer";
 
         <h2>Troubleshooting</h2>
         <CodeBlock
-          title="Problemas comuns com Java no Ubuntu"
+          title="Problemas comuns com Java no Termux"
           code={`# Erro: "java: command not found"
   # Solução: Instalar o Java
-  sudo apt install -y default-jdk
+  pkg install -y default-jdk
 
   # Erro: "JAVA_HOME is not set"
   # Solução: Configurar a variável
@@ -404,8 +404,8 @@ import { PageContainer } from "@/components/layout/PageContainer";
   mvn --version  # mostra qual Java o Maven está usando
 
   # Desinstalar completamente o Java
-  sudo apt purge -y 'openjdk-*' 'default-jdk*' 'default-jre*'
-  sudo apt autoremove -y
+  pkg purge -y 'openjdk-*' 'default-jdk*' 'default-jre*'
+  pkg autoclean -y
 
   # Verificar quais pacotes Java estão instalados
   dpkg -l | grep -E '(jdk|jre|java)'`}

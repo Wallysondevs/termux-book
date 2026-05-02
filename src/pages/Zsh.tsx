@@ -6,7 +6,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
     return (
       <PageContainer
         title="Zsh — Shell Avançado"
-        subtitle="Instalação do Zsh e Oh My Zsh no Ubuntu: plugins, temas, autocompletar, aliases, histórico e personalização completa do terminal."
+        subtitle="Instalação do Zsh e Oh My Zsh no Termux: plugins, temas, autocompletar, aliases, histórico e personalização completa do terminal."
         difficulty="iniciante"
         timeToRead="25 min"
       >
@@ -21,8 +21,8 @@ import { PageContainer } from "@/components/layout/PageContainer";
         <CodeBlock
           title="Instalar o Zsh e torná-lo padrão"
           code={`# Instalar o Zsh
-  sudo apt update
-  sudo apt install -y zsh
+  pkg update
+  pkg install -y zsh
 
   # Verificar a versão
   zsh --version
@@ -79,7 +79,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
   # Instalar Nerd Fonts (ícones no terminal)
   # Baixe de: nerdfonts.com
   # Recomendadas: JetBrainsMono Nerd Font, MesloLGS NF
-  # No terminal do Ubuntu: Preferências → Perfil → Fonte`}
+  # No terminal do Termux: Preferências → Perfil → Fonte`}
         />
 
         <h2>3. Plugins Essenciais</h2>
@@ -122,7 +122,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
     \${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-completions
 
   # fzf — busca fuzzy (Ctrl+R melhorado)
-  sudo apt install -y fzf
+  pkg install -y fzf
 
   # Ativar os plugins no ~/.zshrc:
   # plugins=(
@@ -147,7 +147,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
   # Aliases úteis:
 
   # Sistema
-  alias update="sudo apt update && sudo apt upgrade -y"
+  alias update="pkg update && pkg upgrade -y"
   alias cls="clear"
   alias ..="cd .."
   alias ...="cd ../.."

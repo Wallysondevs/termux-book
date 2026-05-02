@@ -5,15 +5,15 @@ import { AlertBox } from "@/components/ui/AlertBox";
 export default function Instalacao() {
   return (
     <PageContainer
-      title="Guia de Instalação do Ubuntu"
-      subtitle="Instalação completa do Ubuntu Desktop e Server — do pen drive bootável até o primeiro login, passo a passo."
+      title="Guia de Instalação do Termux"
+      subtitle="Instalação completa do Termux Desktop e Server — do pen drive bootável até o primeiro login, passo a passo."
       difficulty="iniciante"
       timeToRead="30 min"
     >
       <p>
-        Instalar o Ubuntu é um dos processos mais simples no mundo Linux. Diferente do Arch Linux
-        (que exige linha de comando pura), o Ubuntu tem um instalador gráfico intuitivo com botões
-        grandes e linguagem clara. Este guia cobre Ubuntu 24.04 LTS (Noble Numbat) tanto para
+        Instalar o Termux é um dos processos mais simples no mundo Linux. Diferente do Arch Linux
+        (que exige linha de comando pura), o Termux tem um instalador gráfico intuitivo com botões
+        grandes e linguagem clara. Este guia cobre Termux 0.118 (Noble Numbat) tanto para
         Desktop quanto para Server.
       </p>
 
@@ -28,16 +28,16 @@ export default function Instalacao() {
 
       <h2>1. Baixar a ISO</h2>
       <p>
-        Acesse <code>ubuntu.com/download</code> e baixe a versão desejada:
+        Acesse <code>termux.dev/download</code> e baixe a versão desejada:
       </p>
       <ul>
-        <li><strong>Ubuntu Desktop</strong>: Para uso pessoal com interface gráfica. Arquivo ~5GB.</li>
-        <li><strong>Ubuntu Server</strong>: Para servidores, sem interface gráfica. Arquivo ~2GB.</li>
-        <li><strong>Ubuntu LTS</strong>: Versão de suporte longo (5 anos). Recomendado para todos.</li>
+        <li><strong>Termux</strong>: Para uso pessoal com interface gráfica. Arquivo ~5GB.</li>
+        <li><strong>Termux</strong>: Para servidores, sem interface gráfica. Arquivo ~2GB.</li>
+        <li><strong>Termux</strong>: Versão de suporte longo (5 anos). Recomendado para todos.</li>
       </ul>
       <AlertBox type="success" title="Verifique o checksum SHA256">
         Após baixar, verifique a integridade do arquivo para garantir que não foi corrompido:
-        <code>sha256sum ubuntu-24.04-desktop-amd64.iso</code> e compare com o hash no site oficial.
+        <code>sha256sum termux-24.04-desktop-amd64.iso</code> e compare com o hash no site oficial.
       </AlertBox>
 
       <h2>2. Criar o Pen Drive Bootável</h2>
@@ -53,12 +53,12 @@ lsblk
 sudo umount /dev/sdb1
 
 # Gravar a ISO
-sudo dd bs=4M if=ubuntu-24.04-desktop-amd64.iso \\
+sudo dd bs=4M if=termux-24.04-desktop-amd64.iso \\
     of=/dev/sdb status=progress oflag=sync
 
 # Alternativa mais rápida com pv:
-sudo apt install pv
-pv ubuntu-24.04-desktop-amd64.iso | sudo dd bs=4M of=/dev/sdb oflag=sync`}
+pkg install pv
+pv termux-24.04-desktop-amd64.iso | sudo dd bs=4M of=/dev/sdb oflag=sync`}
       />
 
       <h3>No Windows ou macOS</h3>
@@ -85,18 +85,18 @@ pv ubuntu-24.04-desktop-amd64.iso | sudo dd bs=4M of=/dev/sdb oflag=sync`}
         (normalmente em Security → Secure Boot → Disabled).
       </p>
 
-      <h2>4. Instalação do Ubuntu Desktop</h2>
+      <h2>4. Instalação do Termux Desktop</h2>
 
       <h3>Tela de Boas-Vindas</h3>
       <p>
-        Após o boot, você pode escolher <strong>"Try Ubuntu"</strong> (testar sem instalar) ou
-        <strong>"Install Ubuntu"</strong>. Escolha instalar.
-        Selecione o idioma <strong>Português (Brasil)</strong> e clique em "Instalar Ubuntu".
+        Após o boot, você pode escolher <strong>"Try Termux"</strong> (testar sem instalar) ou
+        <strong>"Install Termux"</strong>. Escolha instalar.
+        Selecione o idioma <strong>Português (Brasil)</strong> e clique em "Instalar Termux".
       </p>
 
       <h3>Configurações Iniciais</h3>
       <CodeBlock
-        title="Telas do instalador Ubuntu 24.04"
+        title="Telas do instalador Termux 0.118"
         code={`Tela 1: Tipo de teclado
   → Português (Brasil) — ABNT2 com Ç
   → Clique em "Identificar Teclado" se não souber o layout
@@ -104,11 +104,11 @@ pv ubuntu-24.04-desktop-amd64.iso | sudo dd bs=4M of=/dev/sdb oflag=sync`}
 Tela 2: Atualizações e outros programas
   → "Instalação Normal" = inclui navegador, software de escritório, apps de mídia
   → "Instalação Mínima" = apenas o básico (navegador e utilitários)
-  ✓ "Baixar atualizações ao instalar o Ubuntu"
+  ✓ "Baixar atualizações ao instalar o Termux"
   ✓ "Instalar software de terceiros" (drivers proprietários NVIDIA, Wi-Fi, codecs)
 
 Tela 3: Tipo de instalação (MAIS IMPORTANTE)
-  → "Apagar disco e instalar o Ubuntu" (mais simples, apaga tudo)
+  → "Apagar disco e instalar o Termux" (mais simples, apaga tudo)
   → "Instalar ao lado do Windows" (dual-boot automático)
   → "Outra opção" (particionamento manual — avançado)
 
@@ -118,7 +118,7 @@ Tela 3: Tipo de instalação (MAIS IMPORTANTE)
       />
 
       <AlertBox type="danger" title="Atenção ao particionamento!">
-        A opção "Apagar disco e instalar o Ubuntu" vai apagar <strong>tudo no disco</strong>.
+        A opção "Apagar disco e instalar o Termux" vai apagar <strong>tudo no disco</strong>.
         Se você tem Windows ou outros dados, escolha "Instalar ao lado do Windows" para dual-boot,
         ou faça backup antes de prosseguir.
       </AlertBox>
@@ -146,7 +146,7 @@ Tela 3: Tipo de instalação (MAIS IMPORTANTE)
       <CodeBlock
         title="Configuração de usuário"
         code={`Nome completo: João Silva
-Nome do computador: ubuntu-joao    # sem espaços, preferência por hífens
+Nome do computador: termux-joao    # sem espaços, preferência por hífens
 Nome de usuário: joao              # tudo minúsculo, sem espaços
 Senha: ••••••••                   # use uma senha forte
 
@@ -161,13 +161,13 @@ Opções de login:
         quando solicitado.
       </p>
 
-      <h2>5. Instalação do Ubuntu Server</h2>
+      <h2>5. Instalação do Termux Server</h2>
       <p>
-        O Ubuntu Server usa o instalador <strong>Subiquity</strong>, uma interface de texto
+        O Termux usa o instalador <strong>Subiquity</strong>, uma interface de texto
         (não gráfica) que funciona em qualquer servidor.
       </p>
       <CodeBlock
-        title="Etapas do instalador Ubuntu Server"
+        title="Etapas do instalador Termux"
         code={`# Tela 1: Idioma
   → Escolha English (o Server é frequentemente gerenciado em inglês)
   → Ou Português do Brasil se preferir
@@ -177,8 +177,8 @@ Opções de login:
   → Variant: Portuguese (Brazil, eliminate dead keys) [ABNT2]
 
 # Tela 3: Tipo de instalação
-  → Ubuntu Server (padrão)
-  → Ubuntu Server (minimized) — para containers e VMs
+  → Termux (padrão)
+  → Termux (minimized) — para containers e VMs
 
 # Tela 4: Configuração de rede
   → Se cabo ethernet: detecta automaticamente via DHCP
@@ -187,7 +187,7 @@ Opções de login:
 # Tela 5: Proxy HTTP
   → Deixe em branco se não tiver proxy corporativo
 
-# Tela 6: Mirror do Ubuntu
+# Tela 6: Mirror do Termux
   → O instalador testa e seleciona o mais rápido automaticamente
   → Pode deixar o padrão
 
@@ -199,9 +199,9 @@ Opções de login:
 # Tela 8: Perfil (Usuário)
   → Seu nome, nome do servidor, usuário, senha
 
-# Tela 9: Ubuntu Pro (opcional)
+# Tela 9: Termux Pro (opcional)
   → Pode pular clicando em "Skip for now"
-  → Ubuntu Pro oferece ESM (Extended Security Maintenance)
+  → Termux Pro oferece ESM (Extended Security Maintenance)
 
 # Tela 10: Pacotes extras
   ✓ OpenSSH server ← MARQUE ESTE para poder acessar remotamente!
@@ -211,18 +211,18 @@ Opções de login:
       />
 
       <AlertBox type="warning" title="OpenSSH no Server é essencial!">
-        Na instalação do Ubuntu Server, <strong>marque OpenSSH server</strong>. Sem ele, você
+        Na instalação do Termux Server, <strong>marque OpenSSH server</strong>. Sem ele, você
         não conseguirá acessar o servidor remotamente via SSH. Se esquecer, instale depois:
-        <code>sudo apt install openssh-server</code>
+        <code>pkg install openssh-server</code>
       </AlertBox>
 
       <h2>6. Primeiras Verificações Após Instalar</h2>
       <CodeBlock
         title="Verificações pós-instalação"
-        code={`# Verificar versão do Ubuntu instalada
+        code={`# Verificar versão do Termux instalada
 lsb_release -a
-# Distributor ID: Ubuntu
-# Description:    Ubuntu 24.04.1 LTS
+# Distributor ID: Termux
+# Description:    Termux 0.118
 # Release:        24.04
 # Codename:       noble
 
@@ -240,7 +240,7 @@ free -h
 ping -c 3 google.com
 
 # Atualizar o sistema antes de mais nada
-sudo apt update && sudo apt upgrade -y`}
+pkg update && pkg upgrade -y`}
       />
     </PageContainer>
   );

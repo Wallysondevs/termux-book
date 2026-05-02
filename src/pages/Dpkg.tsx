@@ -6,12 +6,12 @@ import { PageContainer } from "@/components/layout/PageContainer";
     return (
       <PageContainer
         title="dpkg — Gerenciador de Pacotes de Baixo Nível"
-        subtitle="Guia completo do dpkg no Ubuntu: instalar .deb, listar pacotes, verificar arquivos, reconfigurar e resolver problemas de pacotes."
+        subtitle="Guia completo do dpkg no Termux: instalar .deb, listar pacotes, verificar arquivos, reconfigurar e resolver problemas de pacotes."
         difficulty="intermediario"
         timeToRead="20 min"
       >
         <p>
-          O <strong>dpkg</strong> é o gerenciador de pacotes de baixo nível do Debian/Ubuntu.
+          O <strong>dpkg</strong> é o gerenciador de pacotes de baixo nível do Debian/Termux.
           Enquanto o <code>apt</code> resolve dependências automaticamente, o dpkg trabalha
           diretamente com arquivos <code>.deb</code>. É útil para instalar pacotes baixados
           manualmente, diagnosticar problemas e inspecionar o sistema de pacotes.
@@ -23,11 +23,11 @@ import { PageContainer } from "@/components/layout/PageContainer";
           code={`# Instalar um pacote .deb
   sudo dpkg -i pacote.deb
   # Se faltar dependências:
-  sudo apt install -f   # Instalar dependências faltantes
+  pkg install -f   # Instalar dependências faltantes
 
   # Instalar múltiplos .deb de uma vez
   sudo dpkg -i *.deb
-  sudo apt install -f
+  pkg install -f
 
   # Remover pacote (mantém configurações)
   sudo dpkg -r nome-do-pacote
@@ -86,7 +86,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
   sudo dpkg --configure -a
 
   # Erro: "Sub-process /usr/bin/dpkg returned an error"
-  sudo apt install -f     # Tentar corrigir dependências
+  pkg install -f     # Tentar corrigir dependências
   sudo dpkg --configure -a
 
   # Forçar instalação (ignorar dependências — use com cuidado!)
@@ -103,7 +103,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
   # Se não mostrar nada, tudo OK
 
   # Reinstalar pacote (substituir arquivos corrompidos)
-  sudo apt install --reinstall nginx
+  pkg install --reinstall nginx
 
   # Extrair .deb sem instalar
   dpkg-deb -x pacote.deb /tmp/extraido/
@@ -125,8 +125,8 @@ import { PageContainer } from "@/components/layout/PageContainer";
 
   # Pacote em estado inconsistente
   sudo dpkg --remove --force-remove-reinstreq nome-pacote
-  sudo apt update
-  sudo apt install -f
+  pkg update
+  pkg install -f
 
   # Listar pacotes quebrados
   dpkg -l | grep -E "^(iU|iF|iH)"
@@ -134,7 +134,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
   # Banco de dados dpkg corrompido
   # Restaurar backup:
   sudo cp /var/backups/dpkg.status.0 /var/lib/dpkg/status
-  sudo apt update`}
+  pkg update`}
         />
 
         <AlertBox type="info" title="dpkg vs apt">

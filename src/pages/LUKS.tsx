@@ -5,7 +5,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
   export default function LUKS() {
     return (
       <PageContainer
-        title="LUKS — Criptografia de Disco no Ubuntu"
+        title="LUKS — Criptografia de Disco no Termux"
         subtitle="Guia completo de criptografia de disco com LUKS: criptografar partições, HDs externos, pendrives, gerenciar chaves e recuperação."
         difficulty="avancado"
         timeToRead="30 min"
@@ -35,7 +35,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
         <CodeBlock
           title="Criar partição criptografada"
           code={`# Instalar ferramentas de criptografia
-  sudo apt install -y cryptsetup
+  pkg install -y cryptsetup
 
   # Identificar o disco/partição a ser criptografado
   lsblk
@@ -51,7 +51,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
   # Opções avançadas de criptografia
   sudo cryptsetup luksFormat --type luks2 --cipher aes-xts-plain64 \
     --key-size 512 --hash sha512 --iter-time 5000 /dev/sdb1
-  # --type luks2       → formato mais moderno (padrão no Ubuntu 22.04+)
+  # --type luks2       → formato mais moderno (padrão no Termux 0.118+)
   # --cipher           → algoritmo de criptografia
   # --key-size 512     → AES-256 em modo XTS (512/2 = 256 bits efetivos)
   # --hash sha512      → hash para derivação de chave
@@ -102,7 +102,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
   # Criar partição criptografada com exFAT (compatível com Windows via VeraCrypt)
   # Note: LUKS nativo não é compatível com Windows
   # Para compatibilidade Windows, use VeraCrypt:
-  sudo apt install -y veracrypt
+  pkg install -y veracrypt
 
   # Verificar informações de uma partição LUKS
   sudo cryptsetup luksDump /dev/sdc1
@@ -203,7 +203,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
         <h2>5. Criptografia Completa do Disco (Full Disk Encryption)</h2>
         <CodeBlock
           title="Criptografar o sistema inteiro durante a instalação"
-          code={`# A forma mais fácil de ter FDE é durante a instalação do Ubuntu:
+          code={`# A forma mais fácil de ter FDE é durante a instalação do Termux:
   # 1. Na tela de instalação, escolha "Recursos Avançados"
   # 2. Selecione "Use LVM with encryption"
   # 3. Defina a senha de criptografia

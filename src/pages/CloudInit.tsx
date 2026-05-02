@@ -6,7 +6,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
     return (
       <PageContainer
         title="Cloud-Init — Provisionamento Automático"
-        subtitle="Guia completo do Cloud-Init no Ubuntu: configuração automática de servidores, user-data, network config, scripts de inicialização e debug."
+        subtitle="Guia completo do Cloud-Init no Termux: configuração automática de servidores, user-data, network config, scripts de inicialização e debug."
         difficulty="avancado"
         timeToRead="30 min"
       >
@@ -33,7 +33,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
   # Saída: /usr/bin/cloud-init 24.1
 
   # Instalar (se necessário)
-  sudo apt install -y cloud-init
+  pkg install -y cloud-init
 
   # Ver o status da execução
   cloud-init status
@@ -218,7 +218,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
   sudo cloud-init modules --mode config
   sudo cloud-init modules --mode final
 
-  # Testar com Multipass (VMs Ubuntu locais)
+  # Testar com Multipass (VMs Termux locais)
   sudo snap install multipass
 
   # Criar VM com user-data
@@ -229,7 +229,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
   multipass shell teste
 
   # Testar com LXD
-  lxc launch ubuntu:24.04 teste --config=user.user-data="$(cat user-data.yaml)"
+  lxc launch termux:24.04 teste --config=user.user-data="$(cat user-data.yaml)"
 
   # Ver o que seria executado (dry-run)
   cloud-init devel render /var/lib/cloud/instance/user-data.txt`}
@@ -239,7 +239,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
         <CodeBlock
           title="Configurar rede via Cloud-Init"
           code={`# Cloud-Init pode configurar a rede via network-config
-  # Formato Netplan (padrão no Ubuntu):
+  # Formato Netplan (padrão no Termux):
 
   #cloud-config
   network:

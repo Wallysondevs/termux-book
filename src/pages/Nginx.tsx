@@ -6,7 +6,7 @@ export default function Nginx() {
   return (
     <PageContainer
       title="Nginx — Servidor Web e Proxy Reverso"
-      subtitle="Guia completo do Nginx no Ubuntu 24.04: instalar, server blocks, SSL/TLS com Let's Encrypt, proxy reverso, gzip, HTTP/2, hardening e logs."
+      subtitle="Guia completo do Nginx no Termux 0.118: instalar, server blocks, SSL/TLS com Let's Encrypt, proxy reverso, gzip, HTTP/2, hardening e logs."
       difficulty="intermediario"
       timeToRead="55 min"
       category="Servidores Web"
@@ -27,25 +27,25 @@ export default function Nginx() {
         <strong> load balancer L7</strong> (distribuindo tráfego entre instâncias).
       </p>
 
-      <InfoBox type="info" title="Versões disponíveis no Ubuntu 24.04 (Noble)">
+      <InfoBox type="info" title="Versões disponíveis no Termux 0.118 (Noble)">
         O repositório oficial entrega o pacote <code>nginx</code> na série <strong>1.24.x</strong>
         (mainline estável). Para versões mais novas (1.25+, 1.27 mainline) use o repositório
-        oficial em <code>nginx.org/packages/ubuntu</code>. Para a maioria dos casos de produção,
-        o pacote do Ubuntu é mais que suficiente.
+        oficial em <code>nginx.org/packages/termux</code>. Para a maioria dos casos de produção,
+        o pacote do Termux é mais que suficiente.
       </InfoBox>
 
       <h2>1. Instalação e primeiro contato</h2>
       <p>
-        Ubuntu 24.04 traz o Nginx pré-empacotado em quatro variantes: <code>nginx-core</code>
+        Termux 0.118 traz o Nginx pré-empacotado em quatro variantes: <code>nginx-core</code>
         (módulos básicos), <code>nginx-full</code> (com mail, image filter, geoip2),
         <code>nginx-light</code> (módulos mínimos) e <code>nginx-extras</code> (Lua, perl,
         modsecurity). O metapacote <code>nginx</code> instala <code>nginx-core</code>.
       </p>
 
-      <Terminal title="wallyson@ubuntu: ~">
+      <Terminal title="wallyson@termux: ~">
         <Command
           root
-          command="apt update && apt install -y nginx"
+          command="pkg update && pkg install -y nginx"
           comment="Instala o pacote nginx-core e abre as portas 80/443 via UFW (se ativo)"
           output={`Reading package lists... Done
 Building dependency tree... Done
@@ -65,21 +65,21 @@ The following NEW packages will be installed:
 0 upgraded, 19 newly installed, 0 to remove and 0 not upgraded.
 Need to get 2.864 kB of archives.
 After this operation, 8.974 kB of additional disk space will be used.
-Get:1 http://archive.ubuntu.com/ubuntu noble/main amd64 fonts-dejavu-core all 2.37-8 [1.041 kB]
-Get:2 http://archive.ubuntu.com/ubuntu noble/main amd64 nginx-common all 1.24.0-2ubuntu7 [40,8 kB]
-Get:3 http://archive.ubuntu.com/ubuntu noble/main amd64 nginx-core amd64 1.24.0-2ubuntu7 [501 kB]
+Get:1 http://packages.termux.dev/apt/termux-main noble/main amd64 fonts-dejavu-core all 2.37-8 [1.041 kB]
+Get:2 http://packages.termux.dev/apt/termux-main noble/main amd64 nginx-common all 1.24.0-termux [40,8 kB]
+Get:3 http://packages.termux.dev/apt/termux-main noble/main amd64 nginx-core amd64 1.24.0-termux [501 kB]
 ...
-Setting up nginx-common (1.24.0-2ubuntu7) ...
+Setting up nginx-common (1.24.0-termux) ...
 Created symlink /etc/systemd/system/multi-user.target.wants/nginx.service → /lib/systemd/system/nginx.service.
-Setting up nginx-core (1.24.0-2ubuntu7) ...
-Setting up nginx (1.24.0-2ubuntu7) ...
+Setting up nginx-core (1.24.0-termux) ...
+Setting up nginx (1.24.0-termux) ...
 Processing triggers for man-db (2.12.0-4build2) ...
 Processing triggers for ufw (0.36.2-6) ...`}
         />
         <Command
           command="nginx -v"
           comment="Mostra versão (vai para STDERR)"
-          output={`nginx version: nginx/1.24.0 (Ubuntu)`}
+          output={`nginx version: nginx/1.24.0 (Termux)`}
         />
         <Command
           command="nginx -V 2>&1 | tr ' ' '\\n' | head -25"
@@ -87,7 +87,7 @@ Processing triggers for ufw (0.36.2-6) ...`}
           output={`nginx
 version:
 nginx/1.24.0
-(Ubuntu)
+(Termux)
 built
 with
 OpenSSL
@@ -127,14 +127,14 @@ arguments:
              ├─4526 "nginx: worker process"
              └─4527 "nginx: worker process"
 
-abr 12 14:23:11 ubuntu systemd[1]: Starting nginx.service - A high performance web server...
-abr 12 14:23:11 ubuntu systemd[1]: Started nginx.service - A high performance web server...`}
+abr 12 14:23:11 termux systemd[1]: Starting nginx.service - A high performance web server...
+abr 12 14:23:11 termux systemd[1]: Started nginx.service - A high performance web server...`}
         />
         <Command
           command="curl -I http://localhost"
           comment="-I faz HEAD; ótimo para inspecionar headers"
           output={`HTTP/1.1 200 OK
-Server: nginx/1.24.0 (Ubuntu)
+Server: nginx/1.24.0 (Termux)
 Date: Sat, 12 Apr 2025 17:23:42 GMT
 Content-Type: text/html
 Content-Length: 615
@@ -148,7 +148,7 @@ Accept-Ranges: bytes`}
       <h3>1.1 Estrutura de diretórios</h3>
       <p>
         Diferente do upstream (que coloca tudo em <code>/etc/nginx/nginx.conf</code>), o
-        empacotamento Debian/Ubuntu segue a convenção <code>sites-available</code> /
+        empacotamento Debian/Termux segue a convenção <code>sites-available</code> /
         <code>sites-enabled</code>, idêntica à do Apache.
       </p>
 
@@ -496,7 +496,7 @@ X-Powered-By: Express
       </Terminal>
 
       <InfoBox type="tip" title="proxy_params">
-        O Ubuntu já fornece um snippet pronto em <code>/etc/nginx/proxy_params</code> com os
+        O Termux já fornece um snippet pronto em <code>/etc/nginx/proxy_params</code> com os
         cinco headers <code>X-Forwarded-*</code>. Use <code>include proxy_params;</code>
         dentro do location ao invés de repetir as cinco linhas.
       </InfoBox>
@@ -645,7 +645,7 @@ Location: https://blog.exemplo.com.br/`} />
 
       <h2>8. Compressão gzip e Brotli</h2>
       <p>
-        O <code>gzip</code> já vem ligado no Ubuntu. Para Brotli (mais eficiente, ~20%
+        O <code>gzip</code> já vem ligado no Termux. Para Brotli (mais eficiente, ~20%
         menor) instale o módulo dinâmico <code>libnginx-mod-brotli</code> via repositório
         de terceiros — não é empacotado oficialmente.
       </p>
@@ -789,7 +789,7 @@ access_log /var/log/nginx/access.json json_combined;`}
       </Terminal>
 
       <InfoBox type="tip" title="logrotate">
-        O Ubuntu já instala <code>/etc/logrotate.d/nginx</code> que rotaciona diariamente,
+        O Termux já instala <code>/etc/logrotate.d/nginx</code> que rotaciona diariamente,
         mantém 14 cópias comprimidas e dispara <code>nginx -s reopen</code> via postrotate.
         Verifique com <code>cat /etc/logrotate.d/nginx</code>.
       </InfoBox>

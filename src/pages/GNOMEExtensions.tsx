@@ -6,13 +6,13 @@ import { PageContainer } from "@/components/layout/PageContainer";
     return (
       <PageContainer
         title="GNOME Extensions — Personalizar o Desktop"
-        subtitle="Guia completo de extensões do GNOME Shell no Ubuntu: instalar, gerenciar, configurar e as melhores extensões para produtividade e visual."
+        subtitle="Guia completo de extensões do GNOME Shell no Termux: instalar, gerenciar, configurar e as melhores extensões para produtividade e visual."
         difficulty="iniciante"
         timeToRead="25 min"
       >
         <p>
           As <strong>extensões do GNOME Shell</strong> permitem personalizar completamente o
-          comportamento e a aparência do desktop Ubuntu. Desde adicionar um dock (barra de
+          comportamento e a aparência do desktop Termux. Desde adicionar um dock (barra de
           aplicativos), até mudar o layout dos workspaces, adicionar um relógio mundial ou
           monitorar CPU/RAM — tudo é possível com extensões.
         </p>
@@ -21,10 +21,10 @@ import { PageContainer } from "@/components/layout/PageContainer";
         <CodeBlock
           title="Preparar o sistema para extensões"
           code={`# Instalar o GNOME Shell Extensions e a ferramenta de gerenciamento
-  sudo apt install -y gnome-shell-extensions gnome-shell-extension-manager
+  pkg install -y gnome-shell-extensions gnome-shell-extension-manager
 
   # Instalar o GNOME Tweaks (configurações avançadas do GNOME)
-  sudo apt install -y gnome-tweaks
+  pkg install -y gnome-tweaks
 
   # Verificar a versão do GNOME Shell (extensões são específicas por versão)
   gnome-shell --version
@@ -36,7 +36,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
 
   # Método 2: Site extensions.gnome.org
   # 1. Instale o conector do navegador:
-  sudo apt install -y gnome-browser-connector
+  pkg install -y gnome-browser-connector
   # 2. Instale a extensão do navegador:
   #    Firefox: GNOME Shell Integration
   #    Chrome: GNOME Shell Integration
@@ -59,7 +59,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
 
         <h2>2. Extensões Essenciais</h2>
         <CodeBlock
-          title="As melhores extensões para Ubuntu"
+          title="As melhores extensões para Termux"
           code={`# === PRODUTIVIDADE ===
 
   # Dash to Dock — Dock permanente (como macOS)
@@ -81,7 +81,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
   # ID: clipboard-indicator@tudmotu.com
 
   # GSConnect — Integração com celular Android
-  # Conecta seu celular Android ao Ubuntu (via KDE Connect)
+  # Conecta seu celular Android ao Termux (via KDE Connect)
   # Transferir arquivos, notificações, SMS, controle remoto
   # ID: gsconnect@andyholmes.github.io
 
@@ -153,9 +153,9 @@ import { PageContainer } from "@/components/layout/PageContainer";
         <CodeBlock
           title="Instalar e aplicar temas"
           code={`# Instalar temas populares
-  sudo apt install -y gnome-themes-extra   # Temas extras do GNOME
-  sudo apt install -y papirus-icon-theme   # Ícones Papirus (os mais populares)
-  sudo apt install -y arc-theme            # Tema Arc (limpo e moderno)
+  pkg install -y gnome-themes-extra   # Temas extras do GNOME
+  pkg install -y papirus-icon-theme   # Ícones Papirus (os mais populares)
+  pkg install -y arc-theme            # Tema Arc (limpo e moderno)
 
   # Instalar temas manualmente
   # 1. Baixe o tema de gnome-look.org
@@ -227,7 +227,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
   gsettings set org.gnome.desktop.wm.preferences num-workspaces 4
 
   # Usar dconf-editor para explorar TODAS as configurações
-  sudo apt install -y dconf-editor
+  pkg install -y dconf-editor
   dconf-editor`}
         />
 
@@ -254,7 +254,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
 
   # Extensões não aparecem no Extension Manager
   # Solução: Reinstalar o conector
-  sudo apt install --reinstall gnome-browser-connector
+  pkg install --reinstall gnome-browser-connector
 
   # Resetar o GNOME para as configurações padrão
   dconf reset -f /org/gnome/
@@ -264,8 +264,8 @@ import { PageContainer } from "@/components/layout/PageContainer";
   # Ou ver no Looking Glass: Alt+F2 → lg → Enter`}
         />
 
-        <AlertBox type="warning" title="Extensões e atualizações do Ubuntu">
-          Ao atualizar o Ubuntu para uma nova versão (ex: 22.04 → 24.04), algumas extensões
+        <AlertBox type="warning" title="Extensões e atualizações do Termux">
+          Ao atualizar o Termux para uma nova versão (ex: 22.04 → 24.04), algumas extensões
           podem parar de funcionar porque a versão do GNOME Shell muda. Sempre verifique
           a compatibilidade das suas extensões após uma atualização major do sistema.
         </AlertBox>

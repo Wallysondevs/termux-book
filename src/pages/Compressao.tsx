@@ -6,7 +6,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
     return (
       <PageContainer
         title="Compressão e Arquivamento"
-        subtitle="Guia completo de compressão no Ubuntu: tar, gzip, bzip2, xz, zip, 7z, zstd — criar, extrair, listar e comparar formatos."
+        subtitle="Guia completo de compressão no Termux: tar, gzip, bzip2, xz, zip, 7z, zstd — criar, extrair, listar e comparar formatos."
         difficulty="iniciante"
         timeToRead="20 min"
       >
@@ -96,7 +96,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
   xzcat arquivo.txt.xz
 
   # zstd (Zstandard — rápido E boa compressão)
-  sudo apt install -y zstd
+  pkg install -y zstd
   zstd arquivo.txt
   zstd -k arquivo.txt
   zstd -19 arquivo.txt       # Máxima (1-19)
@@ -114,7 +114,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
         <CodeBlock
           title="Formatos compatíveis com Windows"
           code={`# === ZIP (universal, compatível com Windows) ===
-  sudo apt install -y zip unzip
+  pkg install -y zip unzip
 
   # Criar
   zip arquivo.zip arquivo.txt
@@ -129,7 +129,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
   unzip -o backup.zip              # Sobrescrever sem perguntar
 
   # === 7-Zip (melhor compressão) ===
-  sudo apt install -y p7zip-full
+  pkg install -y p7zip-full
 
   # Criar
   7z a backup.7z pasta/
@@ -144,7 +144,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
   7z l backup.7z
 
   # === RAR (proprietário) ===
-  sudo apt install -y unrar
+  pkg install -y unrar
   unrar x arquivo.rar              # Extrair
   unrar l arquivo.rar              # Listar`}
         />

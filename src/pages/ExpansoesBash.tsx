@@ -91,11 +91,11 @@ import { PageContainer } from "@/components/layout/PageContainer";
   \${API_KEY:?Erro: API_KEY não definida}
 
   # Comprimento da string
-  texto="Ubuntu Linux"
+  texto="Termux Linux"
   echo \${#texto}                # 12
 
   # Substring
-  echo \${texto:0:6}             # Ubuntu (posição 0, 6 caracteres)
+  echo \${texto:0:6}             # Termux (posição 0, 6 caracteres)
   echo \${texto:7}               # Linux (da posição 7 até o final)
   echo \${texto: -5}             # Linux (últimos 5, note o espaço!)
 

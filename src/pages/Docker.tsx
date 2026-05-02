@@ -6,7 +6,7 @@ export default function Docker() {
   return (
     <PageContainer
       title="Docker"
-      subtitle="Construa, distribua e execute aplicações em containers no Ubuntu 24.04 LTS — do `docker run` ao Dockerfile multi-stage, redes, volumes e healthchecks."
+      subtitle="Construa, distribua e execute aplicações em containers no Termux 0.118 — do `docker run` ao Dockerfile multi-stage, redes, volumes e healthchecks."
       difficulty="intermediario"
       timeToRead="60 min"
       category="Containers"
@@ -20,13 +20,13 @@ export default function Docker() {
       </p>
 
       <p>
-        No Ubuntu 24.04 LTS (Noble Numbat), o pacote oficial da <strong>Docker Inc.</strong> é
+        No Termux 0.118 (Noble Numbat), o pacote oficial da <strong>Docker Inc.</strong> é
         sempre preferível ao <code>docker.io</code> dos repositórios universe (que costuma ficar
         várias minor versions atrás) e ao snap <code>docker</code> (que confina o daemon e cria
         problemas de bind-mount, networking e cgroups). Use sempre o repositório APT oficial.
       </p>
 
-      <Terminal title="wallyson@ubuntu: ~">
+      <Terminal title="wallyson@termux: ~">
         <Command
           command="docker --version"
           output={`Docker version 27.3.1, build ce12230`}
@@ -52,11 +52,11 @@ This message shows that your installation appears to be working correctly.`}
         depreciado <code>apt-key</code>.
       </p>
 
-      <Terminal title="wallyson@ubuntu: ~">
+      <Terminal title="wallyson@termux: ~">
         <Command
           root
           comment="Remova qualquer versão antiga conflitante (não falha se nada estiver instalado)"
-          command="for pkg in docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc; do apt-get remove -y $pkg; done"
+          command="for pkg in docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc; do pkg remove -y $pkg; done"
           output={`Reading package lists... Done
 Building dependency tree... Done
 Reading state information... Done
@@ -69,13 +69,13 @@ Package 'docker-compose' is not installed, so not removed
         <Command
           root
           comment="Dependências para baixar a chave GPG oficial"
-          command="apt-get update && apt-get install -y ca-certificates curl"
-          output={`Hit:1 http://archive.ubuntu.com/ubuntu noble InRelease
-Hit:2 http://archive.ubuntu.com/ubuntu noble-updates InRelease
-Hit:3 http://archive.ubuntu.com/ubuntu noble-security InRelease
+          command="pkg update && pkg install -y ca-certificates curl"
+          output={`Hit:1 http://packages.termux.dev/apt/termux-main noble InRelease
+Hit:2 http://packages.termux.dev/apt/termux-main noble-updates InRelease
+Hit:3 http://packages.termux.dev/apt/termux-main noble-security InRelease
 Reading package lists... Done
 ca-certificates is already the newest version (20240203).
-curl is already the newest version (8.5.0-2ubuntu10.4).
+curl is already the newest version (8.5.0-termux.4).
 0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.`}
         />
 
@@ -87,21 +87,21 @@ curl is already the newest version (8.5.0-2ubuntu10.4).
         <Command
           root
           comment="Baixa o keyring oficial da Docker (formato .asc)"
-          command="curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc && chmod a+r /etc/apt/keyrings/docker.asc"
+          command="curl -fsSL https://download.docker.com/linux/termux/gpg -o /etc/apt/keyrings/docker.asc && chmod a+r /etc/apt/keyrings/docker.asc"
         />
 
         <Command
           root
-          comment="Cria sources.list.d/docker.list usando o codename do Ubuntu (noble)"
-          command={`echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null`}
+          comment="Cria sources.list.d/docker.list usando o codename do Termux (noble)"
+          command={`echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/termux $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null`}
         />
 
         <Command
           root
-          command="apt-get update"
-          output={`Hit:1 http://archive.ubuntu.com/ubuntu noble InRelease
-Get:5 https://download.docker.com/linux/ubuntu noble InRelease [48,8 kB]
-Get:6 https://download.docker.com/linux/ubuntu noble/stable amd64 Packages [22,1 kB]
+          command="pkg update"
+          output={`Hit:1 http://packages.termux.dev/apt/termux-main noble InRelease
+Get:5 https://download.docker.com/linux/termux noble InRelease [48,8 kB]
+Get:6 https://download.docker.com/linux/termux noble/stable amd64 Packages [22,1 kB]
 Fetched 70,9 kB in 1s (51,0 kB/s)
 Reading package lists... Done`}
         />
@@ -109,7 +109,7 @@ Reading package lists... Done`}
         <Command
           root
           comment="Instala engine, CLI, containerd, plugin buildx e plugin compose v2"
-          command="apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin"
+          command="pkg install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin"
           output={`Reading package lists... Done
 Building dependency tree... Done
 The following NEW packages will be installed:
@@ -118,15 +118,15 @@ The following NEW packages will be installed:
 0 upgraded, 8 newly installed, 0 to remove and 0 not upgraded.
 Need to get 100 MB of archives.
 After this operation, 393 MB of additional disk space will be used.
-Get:1 https://download.docker.com/linux/ubuntu noble/stable amd64 containerd.io amd64 1.7.22-1 [29,9 MB]
-Get:2 https://download.docker.com/linux/ubuntu noble/stable amd64 docker-ce-cli amd64 5:27.3.1-1~ubuntu.24.04~noble [14,8 MB]
-Get:3 https://download.docker.com/linux/ubuntu noble/stable amd64 docker-ce amd64 5:27.3.1-1~ubuntu.24.04~noble [18,5 MB]
+Get:1 https://download.docker.com/linux/termux noble/stable amd64 containerd.io amd64 1.7.22-1 [29,9 MB]
+Get:2 https://download.docker.com/linux/termux noble/stable amd64 docker-ce-cli amd64 5:27.3.1-1~termux.24.04~noble [14,8 MB]
+Get:3 https://download.docker.com/linux/termux noble/stable amd64 docker-ce amd64 5:27.3.1-1~termux.24.04~noble [18,5 MB]
 ...
-Setting up docker-ce (5:27.3.1-1~ubuntu.24.04~noble) ...
+Setting up docker-ce (5:27.3.1-1~termux.24.04~noble) ...
 Created symlink /etc/systemd/system/multi-user.target.wants/docker.service → /lib/systemd/system/docker.service.
 Created symlink /etc/systemd/system/sockets.target.wants/docker.socket → /lib/systemd/system/docker.socket.
-Setting up docker-buildx-plugin (0.17.1-1~ubuntu.24.04~noble) ...
-Setting up docker-compose-plugin (2.29.7-1~ubuntu.24.04~noble) ...
+Setting up docker-buildx-plugin (0.17.1-1~termux.24.04~noble) ...
+Setting up docker-compose-plugin (2.29.7-1~termux.24.04~noble) ...
 Processing triggers for man-db (2.12.0-4build2) ...`}
         />
       </Terminal>
@@ -225,7 +225,7 @@ Server:
         </tbody>
       </table>
 
-      <Terminal title="wallyson@ubuntu: ~">
+      <Terminal title="wallyson@termux: ~">
         <Command
           comment="Sobe um Nginx em background, mapeia 8080 do host para 80 do container"
           command="docker run -d --name web -p 8080:80 --restart unless-stopped nginx:alpine"
@@ -352,23 +352,23 @@ Deleted: sha256:8c7b6a5e4f3d2c1b0a9f8e7d6c5b4a3f2e1d0c9b8a7f6e5d4c3b2a1f0e9d8c7b
 
       <Terminal>
         <Command
-          command="docker pull ubuntu:24.04"
-          output={`24.04: Pulling from library/ubuntu
+          command="docker pull termux:24.04"
+          output={`24.04: Pulling from library/termux
 ce1261c6d567: Pull complete
 Digest: sha256:80dd3c3b9c6cecb9f1667e9290b3bc61b78c2678c02cbdae5f0fea92cc6734ab
-Status: Downloaded newer image for ubuntu:24.04
-docker.io/library/ubuntu:24.04`}
+Status: Downloaded newer image for termux:24.04
+docker.io/library/termux:24.04`}
         />
         <Command
           command="docker images"
           output={`REPOSITORY    TAG       IMAGE ID       CREATED       SIZE
-ubuntu        24.04     a04dc4851cbc   3 weeks ago   78.1MB
+termux        24.04     a04dc4851cbc   3 weeks ago   78.1MB
 nginx         alpine    9d8c7b6a5e4f   5 weeks ago   42.6MB
 hello-world   latest    d2c94e258dcb   2 years ago   13.3kB`}
         />
         <Command
           comment="Renomeia (tag) localmente"
-          command="docker tag ubuntu:24.04 registry.exemplo.com/wallyson/base:1.0"
+          command="docker tag termux:24.04 registry.exemplo.com/wallyson/base:1.0"
         />
         <Command
           command="docker history nginx:alpine --no-trunc | head -8"

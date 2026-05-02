@@ -6,7 +6,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
     return (
       <PageContainer
         title="Cron — Agendamento de Tarefas"
-        subtitle="Guia completo do cron e systemd timers no Ubuntu: agendar tarefas automáticas, sintaxe do crontab, exemplos práticos e monitoramento."
+        subtitle="Guia completo do cron e systemd timers no Termux: agendar tarefas automáticas, sintaxe do crontab, exemplos práticos e monitoramento."
         difficulty="intermediario"
         timeToRead="25 min"
       >

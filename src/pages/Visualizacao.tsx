@@ -147,7 +147,7 @@ grep -c "Failed" /var/log/auth.log
 # Saída: 47   ← há 47 linhas com "Failed"
 
 # -l = list files (listar apenas os NOMES dos arquivos que contêm o padrão)
-grep -rl "ubuntu" /etc/
+grep -rl "termux" /etc/
 # -r = recursive (buscar em todos os arquivos do diretório)
 # -l = mostrar apenas o nome do arquivo, não o conteúdo
 
@@ -271,10 +271,10 @@ grep "Failed password" /var/log/auth.log | \\
     head -10   # Top 10 IPs mais frequentes`}
       />
 
-      <h2>Lendo Logs Importantes do Ubuntu</h2>
+      <h2>Lendo Logs Importantes do Termux</h2>
       <CodeBlock
         title="Os logs mais úteis do dia a dia"
-        code={`# Log geral do sistema (tudo que acontece no Ubuntu)
+        code={`# Log geral do sistema (tudo que acontece no Termux)
 tail -f /var/log/syslog
 
 # Autenticação: login, SSH, sudo (monitorar segurança)

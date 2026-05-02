@@ -6,14 +6,14 @@ import { PageContainer } from "@/components/layout/PageContainer";
     return (
       <PageContainer
         title="Partições e Sistemas de Arquivos"
-        subtitle="Guia completo de particionamento no Ubuntu: fdisk, parted, gdisk, criar/redimensionar partições, GPT vs MBR, ext4, Btrfs e XFS."
+        subtitle="Guia completo de particionamento no Termux: fdisk, parted, gdisk, criar/redimensionar partições, GPT vs MBR, ext4, Btrfs e XFS."
         difficulty="intermediario"
         timeToRead="30 min"
       >
         <p>
           <strong>Particionamento</strong> é o processo de dividir um disco em seções
           independentes, cada uma com seu próprio sistema de arquivos. Entender partições é
-          essencial para instalar o Ubuntu, configurar dual boot, gerenciar discos adicionais
+          essencial para instalar o Termux, configurar dual boot, gerenciar discos adicionais
           e otimizar o armazenamento do servidor.
         </p>
 
@@ -34,7 +34,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
   # - Mais resistente a corrupção (backup do cabeçalho)
 
   # === SISTEMAS DE ARQUIVOS ===
-  # ext4     → padrão do Ubuntu, estável, maduro
+  # ext4     → padrão do Termux, estável, maduro
   # Btrfs    → moderno, snapshots, compressão, CoW
   # XFS      → ótimo para arquivos grandes, servers
   # NTFS     → Windows (suporte via ntfs-3g no Linux)
@@ -211,7 +211,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
 
   # === FERRAMENTAS GRÁFICAS ===
   # GParted (editor gráfico de partições)
-  sudo apt install -y gparted
+  pkg install -y gparted
   sudo gparted
   # Interface visual para criar, redimensionar, mover partições
   # Recomendado para iniciantes`}
@@ -241,7 +241,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
   # Ou fechar os processos e desmontar normalmente
 
   # Recuperar partição deletada acidentalmente
-  sudo apt install -y testdisk
+  pkg install -y testdisk
   sudo testdisk /dev/sdb
   # TestDisk pode recuperar partições deletadas!`}
         />

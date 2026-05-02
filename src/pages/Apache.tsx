@@ -5,7 +5,7 @@ import { InfoBox } from "@/components/ui/InfoBox";
 export default function Apache() {
   return (
     <PageContainer
-      title="Apache HTTP Server — apache2 no Ubuntu"
+      title="Apache HTTP Server — apache2 no Termux"
       subtitle="O servidor web mais antigo e ainda mais flexível: módulos, virtual hosts, .htaccess, mod_rewrite, mod_ssl, mod_proxy e Let's Encrypt."
       difficulty="intermediario"
       timeToRead="50 min"
@@ -21,21 +21,21 @@ export default function Apache() {
         regras complexas ou integração mod_php embutida.
       </p>
       <p>
-        No Ubuntu o pacote chama-se <code>apache2</code> e o empacotamento Debian introduz
+        No Termux o pacote chama-se <code>apache2</code> e o empacotamento Debian introduz
         diretórios extras (<code>sites-available</code>, <code>mods-available</code>) e
         ferramentas <code>a2ensite</code>/<code>a2enmod</code> que tornam a administração
         bastante agradável.
       </p>
 
-      <InfoBox type="info" title="Apache no Ubuntu 24.04 (Noble)">
+      <InfoBox type="info" title="Apache no Termux 0.118 (Noble)">
         Versão empacotada: <strong>Apache 2.4.58</strong>. Estrutura totalmente Debian-style
         (não confunda com a estrutura "vanilla" usada em CentOS/RHEL).
       </InfoBox>
 
       <h2>1. Instalação</h2>
 
-      <Terminal title="wallyson@ubuntu: ~">
-        <Command root command="apt update && apt install -y apache2"
+      <Terminal title="wallyson@termux: ~">
+        <Command root command="pkg update && pkg install -y apache2"
           output={`Reading package lists... Done
 Building dependency tree... Done
 The following additional packages will be installed:
@@ -50,9 +50,9 @@ The following NEW packages will be installed:
 0 upgraded, 10 newly installed, 0 to remove and 0 not upgraded.
 Need to get 1.957 kB of archives.
 After this operation, 8.302 kB of additional disk space will be used.
-Get:1 http://archive.ubuntu.com/ubuntu noble/main amd64 libapr1t64 amd64 1.7.2-3.1ubuntu0.1 [108 kB]
+Get:1 http://packages.termux.dev/apt/termux-main noble/main amd64 libapr1t64 amd64 1.7.2-3.termux.1 [108 kB]
 ...
-Setting up apache2 (2.4.58-1ubuntu8.4) ...
+Setting up apache2 (2.4.58-termux.4) ...
 Enabling module mpm_event.
 Enabling module authz_core.
 Enabling module authz_host.
@@ -65,7 +65,7 @@ Processing triggers for ufw (0.36.2-6) ...
 Processing triggers for man-db (2.12.0-4build2) ...`}
         />
         <Command command="apache2 -v"
-          output={`Server version: Apache/2.4.58 (Ubuntu)
+          output={`Server version: Apache/2.4.58 (Termux)
 Server built:   2024-04-30T18:28:45`} />
         <Command command="apache2 -M | head -20"
           comment="lista módulos atualmente carregados"
@@ -112,13 +112,13 @@ Server built:   2024-04-30T18:28:45`} />
              ├─5108 /usr/sbin/apache2 -k start
              └─5109 /usr/sbin/apache2 -k start
 
-abr 12 19:00:11 ubuntu systemd[1]: Starting apache2.service - The Apache HTTP Server...
-abr 12 19:00:11 ubuntu apachectl[5105]: AH00558: apache2: Could not reliably determine the server's fully qualified domain name, using 127.0.1.1.
-abr 12 19:00:11 ubuntu systemd[1]: Started apache2.service - The Apache HTTP Server.`} />
+abr 12 19:00:11 termux systemd[1]: Starting apache2.service - The Apache HTTP Server...
+abr 12 19:00:11 termux apachectl[5105]: AH00558: apache2: Could not reliably determine the server's fully qualified domain name, using 127.0.1.1.
+abr 12 19:00:11 termux systemd[1]: Started apache2.service - The Apache HTTP Server.`} />
         <Command command="curl -I http://localhost"
           output={`HTTP/1.1 200 OK
 Date: Sat, 12 Apr 2025 22:00:21 GMT
-Server: Apache/2.4.58 (Ubuntu)
+Server: Apache/2.4.58 (Termux)
 Last-Modified: Sat, 12 Apr 2025 22:00:11 GMT
 ETag: "29cd-633c6bd4b5cba"
 Accept-Ranges: bytes
@@ -365,7 +365,7 @@ NEXT STEPS:
         <Command command="curl -I https://blog.exemplo.com.br"
           output={`HTTP/1.1 200 OK
 Date: Sat, 12 Apr 2025 22:30:11 GMT
-Server: Apache/2.4.58 (Ubuntu)
+Server: Apache/2.4.58 (Termux)
 Strict-Transport-Security: max-age=63072000
 Content-Type: text/html`} />
       </Terminal>
@@ -463,7 +463,7 @@ ProxyPassReverse /api/ balancer://node_cluster/
 
       <h2>9. MPMs: prefork, worker, event</h2>
       <p>
-        O Apache permite trocar o motor de execução. No Ubuntu 24.04 o padrão é
+        O Apache permite trocar o motor de execução. No Termux 0.118 o padrão é
         <code>mpm_event</code> (assíncrono, similar ao Nginx).
       </p>
 
