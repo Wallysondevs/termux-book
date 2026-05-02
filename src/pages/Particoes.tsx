@@ -1,257 +1,205 @@
 import { PageContainer } from "@/components/layout/PageContainer";
-  import { CodeBlock } from "@/components/ui/CodeBlock";
-  import { AlertBox } from "@/components/ui/AlertBox";
+import { CodeBlock } from "@/components/ui/CodeBlock";
+import { AlertBox } from "@/components/ui/AlertBox";
 
-  export default function Particoes() {
-    return (
-      <PageContainer
-        title="Partições e Sistemas de Arquivos"
-        subtitle="Guia completo de particionamento no Termux: fdisk, parted, gdisk, criar/redimensionar partições, GPT vs MBR, ext4, Btrfs e XFS."
-        difficulty="intermediario"
-        timeToRead="30 min"
-      >
-        <p>
-          <strong>Particionamento</strong> é o processo de dividir um disco em seções
-          independentes, cada uma com seu próprio sistema de arquivos. Entender partições é
-          essencial para instalar o Termux, configurar dual boot, gerenciar discos adicionais
-          e otimizar o armazenamento do servidor.
-        </p>
+export default function Particoes() {
+  return (
+    <PageContainer
+      title="Storage do Android e o Termux"
+      subtitle="Entenda /data, /sdcard, scoped storage, OBB e como o Termux acessa o armazenamento compartilhado via termux-setup-storage."
+      difficulty="iniciante"
+      timeToRead="15 min"
+    >
+      <AlertBox type="danger" title="NÃO use fdisk/parted/gparted no Android — risco de brick">
+        O esquema de partições do Android é controlado pelo bootloader e por
+        partições críticas como <code>boot</code>, <code>system</code>,{" "}
+        <code>vendor</code>, <code>vbmeta</code>, <code>userdata</code>. Mexer
+        com <code>fdisk</code>, <code>parted</code> ou <code>gparted</code> no
+        bloco do celular pode <strong>brickar o aparelho permanentemente</strong>
+        . Sem root o Termux nem te deixa fazer isso (os blocos são read-only) —
+        e mesmo com root, <strong>não faça</strong>. Este capítulo é sobre
+        entender o storage existente, não sobre alterá-lo.
+      </AlertBox>
 
-        <h2>1. Conceitos Fundamentais</h2>
-        <CodeBlock
-          title="Tabelas de partição e sistemas de arquivos"
-          code={`# === TABELAS DE PARTIÇÃO ===
-  # MBR (Master Boot Record) — antigo
-  # - Máximo 4 partições primárias
-  # - Limite de 2TB por disco
-  # - Compatível com BIOS legado
-  # - Pode usar partições estendidas + lógicas para ter mais de 4
+      <p>
+        Em vez de gerenciar partições, no Android você lida com{" "}
+        <strong>áreas lógicas de storage</strong> definidas pelo sistema:
+        armazenamento interno do app, armazenamento compartilhado (a "memória"
+        do usuário) e cartão SD opcional. O Termux precisa de uma permissão
+        explícita para ler/escrever fora da própria área.
+      </p>
 
-  # GPT (GUID Partition Table) — moderno
-  # - Até 128 partições
-  # - Suporta discos maiores que 2TB
-  # - Necessário para UEFI
-  # - Mais resistente a corrupção (backup do cabeçalho)
+      <h2>1. As "partições" lógicas que você verá</h2>
+      <CodeBlock
+        title="Áreas de storage do Android"
+        code={`# === ÁREA PRIVADA DO TERMUX (sandbox do app) ===
+# Caminho real:  /data/data/com.termux/files
+# Atalho ($HOME): /data/data/com.termux/files/home
+# $PREFIX:        /data/data/com.termux/files/usr
+# - Só o Termux acessa
+# - Não exige permissão extra
+# - Apagado se você desinstalar o Termux
+echo $HOME
+echo $PREFIX
 
-  # === SISTEMAS DE ARQUIVOS ===
-  # ext4     → padrão do Termux, estável, maduro
-  # Btrfs    → moderno, snapshots, compressão, CoW
-  # XFS      → ótimo para arquivos grandes, servers
-  # NTFS     → Windows (suporte via ntfs-3g no Linux)
-  # FAT32    → universal, limite 4GB por arquivo
-  # exFAT   → FAT sem limite de 4GB, pendrives
-  # swap     → memória virtual (troca)
+# === STORAGE COMPARTILHADO ("memória interna" do usuário) ===
+# Caminho:  /sdcard  (link para /storage/emulated/0)
+# Mesmo lugar onde ficam Downloads, Pictures, DCIM, etc.
+# Acessível por outros apps e pelo cabo USB.
+# REQUER permissão concedida via 'termux-setup-storage'.
 
-  # Verificar discos e partições
-  lsblk
-  # Saída:
-  # NAME   MAJ:MIN RM   SIZE RO TYPE MOUNTPOINTS
-  # sda      8:0    0  500G  0 disk
-  # ├─sda1   8:1    0  512M  0 part /boot/efi
-  # ├─sda2   8:2    0  460G  0 part /
-  # └─sda3   8:3    0 39.5G  0 part [SWAP]
-  # sdb      8:16   0    1T  0 disk
+# === CARTÃO SD EXTERNO (se houver) ===
+# Caminho típico:  /storage/XXXX-XXXX  (UUID do cartão)
+# Em Android moderno, escrita restrita a diretórios do próprio app.
 
-  # Ver detalhes com fdisk
-  sudo fdisk -l
-  sudo fdisk -l /dev/sda
+# === ARMAZENAMENTO INTERNO DO APARELHO (sistema) ===
+# /system, /vendor, /product → read-only, ROM do Android
+# /data                      → dados de todos os apps (acesso só com root)
+# Esses NÃO são para você mexer.
 
-  # Ver UUIDs e tipos
-  sudo blkid
+# Ver montagens visíveis ao Termux
+mount | head -20
+df -h`}
+      />
 
-  # Ver uso de espaço
-  df -hT   # -T mostra o tipo de filesystem`}
-        />
+      <h2>2. termux-setup-storage</h2>
+      <CodeBlock
+        title="Habilitar acesso ao /sdcard"
+        code={`# Roda uma vez para criar links em ~/storage/ apontando
+# para as pastas padrão do Android.
+termux-setup-storage
+# Isso dispara o popup do Android pedindo permissão.
+# Depois de aceitar, você terá:
 
-        <h2>2. Criar Partições com fdisk</h2>
-        <CodeBlock
-          title="Particionar disco com fdisk"
-          code={`# fdisk é interativo — funciona para MBR e GPT
-  sudo fdisk /dev/sdb
+ls ~/storage
+# downloads/    -> /sdcard/Download
+# dcim/         -> /sdcard/DCIM
+# pictures/     -> /sdcard/Pictures
+# music/        -> /sdcard/Music
+# movies/       -> /sdcard/Movies
+# shared/       -> /sdcard
+# external-1/   -> cartão SD (se houver)
 
-  # Comandos dentro do fdisk:
-  # m     → ajuda (lista todos os comandos)
-  # p     → imprimir tabela de partições atual
-  # g     → criar nova tabela GPT (apaga tudo!)
-  # o     → criar nova tabela MBR (apaga tudo!)
-  # n     → criar nova partição
-  # d     → deletar partição
-  # t     → mudar tipo da partição
-  # w     → salvar e sair (ESCREVE no disco)
-  # q     → sair sem salvar
+# Exemplo: copiar um arquivo do Termux para Downloads
+cp ~/relatorio.pdf ~/storage/downloads/
 
-  # Exemplo: Criar uma partição GPT ocupando o disco inteiro
-  # 1. sudo fdisk /dev/sdb
-  # 2. g (criar tabela GPT)
-  # 3. n (nova partição)
-  # 4. Enter (número 1)
-  # 5. Enter (primeiro setor padrão)
-  # 6. Enter (último setor padrão = disco inteiro)
-  # 7. w (salvar)
+# Listar Downloads
+ls ~/storage/downloads/`}
+      />
 
-  # Criar duas partições (50% cada)
-  # 1. g
-  # 2. n → 1 → Enter → +250G
-  # 3. n → 2 → Enter → Enter
-  # 4. w
+      <h2>3. Tipos de Storage do Android (informativo)</h2>
+      <CodeBlock
+        title="Conceitos para você não se perder"
+        code={`# Internal Storage (do app)
+#  → privada, sandbox, sem permissão extra
+#  → no Termux: $HOME e $PREFIX
 
-  # Após particionar, formatar:
-  sudo mkfs.ext4 /dev/sdb1
-  sudo mkfs.xfs /dev/sdb2
+# Shared Storage (a "memória do celular")
+#  → /sdcard, visível ao usuário e a outros apps
+#  → acesso pelo Termux só após termux-setup-storage
 
-  # Montar
-  sudo mkdir -p /mnt/dados
-  sudo mount /dev/sdb1 /mnt/dados`}
-        />
+# Scoped Storage (Android 10+)
+#  → restrição: cada app só vê o que criou (em pastas como
+#    Android/data/<package>/) ou usa MediaStore para fotos/áudio.
+#  → o Termux ainda consegue ler/escrever em /sdcard graças à
+#    permissão MANAGE_EXTERNAL_STORAGE.
 
-        <h2>3. Criar Partições com parted</h2>
-        <CodeBlock
-          title="Particionar disco com parted (mais poderoso)"
-          code={`# parted pode ser usado interativamente ou com comandos diretos
-  # Vantagem: suporta redimensionamento e alinhamento
+# OBB (Opaque Binary Blob)
+#  → /sdcard/Android/obb/<package>/, dados grandes de apps/jogos.
 
-  # Modo interativo
-  sudo parted /dev/sdb
+# External Storage (cartão SD)
+#  → mount em /storage/<uuid>; em Android moderno, escrita
+#    livre só dentro de /storage/<uuid>/Android/data/<seu-app>/.
 
-  # Criar tabela GPT
-  sudo parted /dev/sdb mklabel gpt
+# RESUMO PRÁTICO no Termux:
+# - Para guardar configs/scripts: $HOME (~)
+# - Para compartilhar com outros apps: ~/storage/shared (= /sdcard)
+# - Para fotos: ~/storage/dcim, ~/storage/pictures`}
+      />
 
-  # Criar partição ocupando o disco inteiro
-  sudo parted /dev/sdb mkpart primary ext4 0% 100%
+      <h2>4. Sistemas de arquivos por baixo (informativo)</h2>
+      <CodeBlock
+        title="O que está montado e como"
+        code={`# Ver tudo o que está montado
+mount
 
-  # Criar duas partições
-  sudo parted /dev/sdb mkpart dados ext4 0% 50%
-  sudo parted /dev/sdb mkpart backup ext4 50% 100%
+# Tipos comuns que você vai encontrar no Android:
+# ext4   → /data, /system (em ROMs antigas)
+# f2fs   → muito comum em /data de celulares modernos (otimizado para flash)
+# erofs  → read-only, /system e /vendor em Android 10+
+# tmpfs  → /dev, /run, etc.
+# fuse   → /sdcard (sdcardfs/FUSE expõe /data/media como /sdcard)
+# proc, sysfs, cgroup → pseudo-filesystems do kernel
 
-  # Ver partições
-  sudo parted /dev/sdb print
-  # Saída:
-  # Number  Start   End    Size   File system  Name    Flags
-  #  1      1049kB  250GB  250GB  ext4         dados
-  #  2      250GB   500GB  250GB  ext4         backup
+# Você pode ver com:
+df -hT 2>/dev/null
+cat /proc/mounts | head -20
 
-  # Redimensionar partição (parted pode fazer isso!)
-  # ATENÇÃO: Faça backup antes!
-  sudo parted /dev/sdb resizepart 1 300GB
+# NADA disso você formata, redimensiona ou recria pelo Termux.
+# Tudo é gerenciado pelo Android.`}
+      />
 
-  # Depois redimensione o filesystem:
-  sudo resize2fs /dev/sdb1   # Para ext4
-  sudo xfs_growfs /mnt/dados # Para XFS (precisa estar montado)
+      <h2>5. Espaço em disco e limpeza</h2>
+      <CodeBlock
+        title="Liberar espaço no Termux"
+        code={`# Quanto o Termux ocupa
+du -sh $PREFIX
+du -sh $HOME
 
-  # Deletar partição
-  sudo parted /dev/sdb rm 2
+# Maiores diretórios em $HOME
+du -sh ~/* 2>/dev/null | sort -rh | head -10
 
-  # Alinhar partições para SSD (importante para performance)
-  sudo parted /dev/sdb mkpart primary ext4 1MiB 100%
-  # Usar MiB ao invés de % garante alinhamento`}
-        />
+# Cache do gerenciador de pacotes
+pkg clean
+# Remove .deb baixados em $PREFIX/var/cache/apt/archives
 
-        <h2>4. Formatar Partições</h2>
-        <CodeBlock
-          title="Criar sistemas de arquivos"
-          code={`# ext4 (padrão, recomendado para a maioria dos usos)
-  sudo mkfs.ext4 /dev/sdb1
-  sudo mkfs.ext4 -L "Dados" /dev/sdb1    # Com label
+# Limpar pacotes não usados
+pkg autoclean
 
-  # Btrfs (snapshots, compressão, RAID)
-  sudo mkfs.btrfs /dev/sdb1
-  sudo mkfs.btrfs -L "BtrfsDisco" /dev/sdb1
+# Espaço livre da partição /data (a do Termux)
+df -h $PREFIX
 
-  # XFS (ótimo para arquivos grandes, servidores)
-  sudo mkfs.xfs /dev/sdb1
+# Espaço livre do storage compartilhado
+df -h /sdcard 2>/dev/null`}
+      />
 
-  # FAT32 (pendrives, compatibilidade universal)
-  sudo mkfs.vfat -F 32 /dev/sdb1
+      <h2>Troubleshooting</h2>
+      <CodeBlock
+        title="Problemas comuns de storage"
+        code={`# 'Permission denied' ao escrever em /sdcard
+# → Rode 'termux-setup-storage' e aceite o popup.
+# → Em Android 11+, talvez precise dar "Acesso a todos os
+#   arquivos" manualmente em Configurações → Apps → Termux →
+#   Permissões → Arquivos e mídia → Permitir gerenciar todos.
 
-  # exFAT (pendrives > 4GB)
-  sudo mkfs.exfat /dev/sdb1
+# /sdcard sumiu / link quebrado
+ls -la ~/storage
+# Recrie:
+rm -rf ~/storage
+termux-setup-storage
 
-  # NTFS (compatibilidade com Windows)
-  sudo mkfs.ntfs -f /dev/sdb1    # -f = formatação rápida
+# 'No space left on device' ao instalar pacote
+df -h $PREFIX
+pkg clean
+pkg autoclean
+# Apague caches/projetos grandes em ~/
 
-  # Swap
-  sudo mkswap /dev/sdb1
-  sudo swapon /dev/sdb1
+# Não vejo o cartão SD em ~/storage/external-1
+# → Em Android moderno, o Termux só enxerga /storage/<uuid>/
+#   Android/data/com.termux/. Para o cartão "todo" você precisa
+#   de root ou de um app gerenciador de arquivos do Android.
 
-  # Ver informações do filesystem
-  sudo file -s /dev/sdb1
-  sudo dumpe2fs /dev/sdb1 | head -30   # Para ext4
-  sudo btrfs filesystem show           # Para Btrfs`}
-        />
+# 'fdisk: cannot open /dev/block/...': Permission denied
+# → CORRETO. Não tente. Você não particiona Android pelo Termux.`}
+      />
 
-        <h2>5. Gerenciar Partições Existentes</h2>
-        <CodeBlock
-          title="Redimensionar, verificar e reparar"
-          code={`# === VERIFICAR E REPARAR ===
-  # ext4 (partição deve estar DESMONTADA)
-  sudo umount /dev/sdb1
-  sudo e2fsck -f /dev/sdb1
-
-  # XFS (pode verificar montado)
-  sudo xfs_repair /dev/sdb1
-
-  # Btrfs
-  sudo btrfs check /dev/sdb1
-
-  # === REDIMENSIONAR ===
-  # SEMPRE faça backup antes!
-
-  # Expandir ext4 (após aumentar a partição)
-  sudo resize2fs /dev/sdb1           # Usa todo o espaço disponível
-  sudo resize2fs /dev/sdb1 200G      # Tamanho específico
-
-  # Expandir XFS (deve estar montado)
-  sudo xfs_growfs /mnt/dados
-
-  # Encolher ext4 (DESMONTADO, ext4 only)
-  sudo umount /dev/sdb1
-  sudo e2fsck -f /dev/sdb1
-  sudo resize2fs /dev/sdb1 100G      # Encolher para 100GB
-  # Depois encolher a partição com fdisk/parted
-
-  # === FERRAMENTAS GRÁFICAS ===
-  # GParted (editor gráfico de partições)
-  pkg install -y gparted
-  sudo gparted
-  # Interface visual para criar, redimensionar, mover partições
-  # Recomendado para iniciantes`}
-        />
-
-        <h2>Troubleshooting</h2>
-        <CodeBlock
-          title="Problemas comuns com partições"
-          code={`# Erro: "Can't have a partition outside the disk!"
-  # Causa: Partição ultrapassa o tamanho do disco
-  # Solução: Usar parted com alinhamento correto
-
-  # Disco não aparece (lsblk não mostra)
-  # Verificar no dmesg:
-  dmesg | tail -20
-  # Verificar BIOS/UEFI
-
-  # Partição corrompida
-  sudo e2fsck -fy /dev/sdb1    # -y = responder yes para tudo
-
-  # "Structure needs cleaning"
-  sudo xfs_repair /dev/sdb1
-
-  # Não consigo desmontar (device is busy)
-  sudo fuser -mv /mnt/dados     # Ver quem está usando
-  sudo umount -l /mnt/dados     # Lazy unmount (desmonta quando possível)
-  # Ou fechar os processos e desmontar normalmente
-
-  # Recuperar partição deletada acidentalmente
-  pkg install -y testdisk
-  sudo testdisk /dev/sdb
-  # TestDisk pode recuperar partições deletadas!`}
-        />
-
-        <AlertBox type="info" title="Layout de partições recomendado">
-          Para desktop: partição <code>/</code> (root, 50-100GB), <code>/home</code> 
-          (restante), swap (RAM×1 ou 4-8GB). Para servidor: <code>/</code> (20-50GB),
-          <code>/var</code> (logs e dados), <code>/home</code> (se aplicável), swap.
-          Separar <code>/home</code> permite reinstalar o sistema sem perder dados pessoais.
-        </AlertBox>
-      </PageContainer>
-    );
-  }
+      <AlertBox type="info" title="Backup é o substituto do 'particionar'">
+        Como você não cria partições, a estratégia de backup no Termux é
+        diferente: copie <code>$HOME</code> e (se quiser) <code>$PREFIX</code>{" "}
+        com <code>tar</code>/<code>rsync</code> para <code>~/storage/shared</code>{" "}
+        e de lá envie para nuvem/PC. Veja o capítulo de Backup para o passo a
+        passo.
+      </AlertBox>
+    </PageContainer>
+  );
+}

@@ -1,277 +1,178 @@
 import { PageContainer } from "@/components/layout/PageContainer";
-import { Terminal, Command, File } from "@/components/ui/Terminal";
-import { InfoBox } from "@/components/ui/InfoBox";
+import { CodeBlock } from "@/components/ui/CodeBlock";
+import { AlertBox } from "@/components/ui/AlertBox";
 
 export default function AppArmor() {
   return (
     <PageContainer
-      title="AppArmor — MAC do Termux"
-      subtitle="Mandatory Access Control nativo do Termux: perfis, modos enforce/complain, criação de perfis novos com aa-genprof e comparação com SELinux."
+      title="Sandbox no Android (sem AppArmor)"
+      subtitle="O Android usa SELinux sempre em Enforcing + sandbox por UID. Veja como o Termux se encaixa nesse modelo e por que você não configura MAC no celular."
       difficulty="avancado"
-      timeToRead="25 min"
-      category="Segurança"
+      timeToRead="15 min"
     >
+      <AlertBox type="danger" title="AppArmor NÃO é configurável no Android">
+        AppArmor é específico de Ubuntu/SUSE e exige um kernel com LSM
+        AppArmor habilitado e ferramentas em userspace (<code>aa-genprof</code>,{" "}
+        <code>apparmor_parser</code>, <code>aa-status</code>). Nenhuma dessas
+        coisas existe no Android. O kernel Android usa{" "}
+        <strong>SELinux em modo Enforcing</strong> — fixo, definido pelo
+        fabricante e <strong>não-mutável sem root</strong> (e mesmo com root é
+        difícil mudar sem comprometer a integridade do sistema). Esqueça{" "}
+        <code>aa-complain</code>, <code>aa-enforce</code> e perfis em{" "}
+        <code>/etc/apparmor.d/</code>.
+      </AlertBox>
+
+      <h2>1. SELinux do Android — sempre Enforcing</h2>
+
       <p>
-        O <strong>AppArmor</strong> é um <em>Mandatory Access Control</em> (MAC) que confina
-        processos a um conjunto explícito de recursos: arquivos, capabilities do kernel, sockets
-        de rede, sinais. Diferente do <strong>DAC</strong> (permissões rwx + uid/gid) que é
-        discricionário, o MAC é imposto pelo kernel <em>mesmo se o processo for root</em>. No
-        Termux o AppArmor vem ligado por padrão e protege serviços como CUPS, snapd, dhclient,
-        evince, firefox (snap), nginx (opcional), apache, mysqld.
+        Desde o Android 5.0 (2014) o SELinux está em modo{" "}
+        <em>fully enforced</em> em todo aparelho certificado pelo Google. Cada
+        processo do sistema tem um <em>domain</em> SELinux
+        (<code>untrusted_app</code>, <code>system_server</code>,{" "}
+        <code>zygote</code>, <code>init</code>, etc.) e cada arquivo um{" "}
+        <em>label</em>. As políticas vêm pré-compiladas em{" "}
+        <code>/sepolicy</code> (ou <code>/system/etc/selinux/</code>) e são
+        carregadas pelo <code>init</code> antes de qualquer app subir.
       </p>
 
-      <Terminal title="wallyson@termux: ~">
-        <Command command="aa-enabled" output={`Yes`} />
-        <Command command="cat /sys/kernel/security/apparmor/profiles | head -10" output={`/usr/bin/man (enforce)
-/usr/lib/snapd/snap-confine (enforce)
-/usr/lib/snapd/snap-confine//mount-namespace-capture-helper (enforce)
-/usr/sbin/cups-browsed (enforce)
-/usr/sbin/cupsd (enforce)
-man_filter (enforce)
-man_groff (enforce)
-nvidia_modprobe (enforce)
-nvidia_modprobe//kmod (enforce)
-snap.firefox.firefox (enforce)`} />
-      </Terminal>
+      <CodeBlock
+        title="Inspecionando SELinux a partir do Termux"
+        code={`# Estado global (sempre "Enforcing" em aparelhos de fábrica)
+getenforce
 
-      <h2>1. Instalando as ferramentas e estrutura</h2>
+# Contexto do shell atual do Termux
+id -Z
+# Saída típica:
+# u:r:untrusted_app_27:s0:c123,c256,c512,c768
 
-      <Terminal title="root@termux: ~">
-        <Command root command="pkg install -y apparmor apparmor-utils apparmor-profiles apparmor-profiles-extra" output={`Reading package lists... Done
-The following NEW packages will be installed:
-  apparmor-profiles apparmor-profiles-extra apparmor-utils python3-apparmor python3-libapparmor
-0 upgraded, 5 newly installed, 0 to remove and 0 not upgraded.
-Need to get 712 kB of archives.
-Setting up apparmor-utils (4.0.1-termux1) ...
-Setting up apparmor-profiles (4.0.1-termux1) ...`} />
-        <Command root command="ls /etc/apparmor.d/" output={`abstractions/         tunables/
-local/                usr.bin.evince
-disable/              usr.bin.man
-cups-browsed          usr.lib.snapd.snap-confine.real
-nvidia_modprobe       usr.sbin.cupsd
-sbin.dhclient         usr.sbin.dhclient
-snap-update-ns.firefox usr.sbin.haveged
-                      usr.sbin.tcpdump`} />
-        <Command root command="ls /etc/apparmor.d/abstractions/ | head -8" output={`apache2-common
-audio
-authentication
-base
-bash
-consoles
-crypto
-cups-client`} />
-      </Terminal>
+# Contexto de um arquivo
+ls -Z $PREFIX/bin/bash`}
+      />
 
-      <h2>2. aa-status — radiografia do sistema</h2>
+      <AlertBox type="warning" title="setenforce 0 não funciona">
+        Tentar <code>setenforce 0</code> sem root retorna{" "}
+        <em>Permission denied</em>. Mesmo como root via Magisk a maioria das
+        ROMs modernas remonta o sepolicy a cada boot — colocar Permissive
+        quebra Play Integrity, SafetyNet, apps bancários e diversos
+        verificadores.
+      </AlertBox>
 
-      <Terminal title="root@termux: ~">
-        <Command root command="aa-status" output={`apparmor module is loaded.
-46 profiles are loaded.
-40 profiles are in enforce mode.
-   /snap/snapd/21184/usr/lib/snapd/snap-confine
-   /snap/snapd/21184/usr/lib/snapd/snap-confine//mount-namespace-capture-helper
-   /usr/bin/evince
-   /usr/bin/man
-   /usr/lib/cups/backend/cups-pdf
-   /usr/sbin/cups-browsed
-   /usr/sbin/cupsd
-   /usr/sbin/dhclient
-   /usr/sbin/haveged
-   /usr/sbin/tcpdump
-   man_filter
-   man_groff
-   nvidia_modprobe
-   nvidia_modprobe//kmod
-   snap.firefox.firefox
-   snap.firefox.geckodriver
-6 profiles are in complain mode.
-   /usr/sbin/mysqld
-   /usr/sbin/named
-   /usr/sbin/ntpd
-   /usr/sbin/smbd
-0 profiles are in kill mode.
-0 profiles are in unconfined mode.
-20 processes have profiles defined.
-17 processes are in enforce mode.
-   /usr/sbin/cupsd (1421)
-   /usr/sbin/cups-browsed (1599)
-   snap.firefox.firefox (4321) firefox
-3 processes are in complain mode.
-0 processes are unconfined but have a profile defined.`} />
-      </Terminal>
+      <h2>2. Sandbox por UID — o modelo real do Android</h2>
 
-      <InfoBox type="info" title="Os modos de um perfil">
+      <p>
+        A defesa principal do Android é mais simples e mais eficaz que
+        qualquer MAC: <strong>cada app instalado recebe um UID Linux único</strong>{" "}
+        (<code>u0_aXXX</code>). O kernel impõe DAC (rwx + uid/gid) e dois apps
+        diferentes simplesmente <em>não enxergam</em> os arquivos um do outro
+        em <code>/data/data/&lt;pkg&gt;/</code>.
+      </p>
+
+      <CodeBlock
+        title="Vendo o sandbox do Termux"
+        code={`id
+# uid=10234(u0_a234) gid=10234(u0_a234) groups=10234(u0_a234),...
+
+# O home do Termux pertence só a este UID
+ls -ld $PREFIX/../home
+
+# Tente listar os dados de outro app -> Permission denied
+ls /data/data/com.android.chrome/  2>&1`}
+      />
+
+      <p>
+        Esse isolamento por UID é reforçado pelo SELinux: o domínio{" "}
+        <code>untrusted_app_*</code> só consegue escrever em paths{" "}
+        <code>app_data_file</code> com seu próprio rótulo de categoria
+        (<code>c123,c256,...</code>).
+      </p>
+
+      <h2>3. Permissões do Android (Manifest.permission)</h2>
+
+      <p>
+        Acima do DAC + SELinux fica a camada de <em>permissions</em> Android.
+        Acessos a câmera, microfone, contatos, localização, armazenamento
+        compartilhado, SMS etc. exigem que o app declare a permissão no
+        <code> AndroidManifest.xml</code> e — para "perigosas" — peça
+        autorização ao usuário em runtime.
+      </p>
+
+      <ul>
+        <li>
+          O Termux declara: <code>INTERNET</code>, <code>WAKE_LOCK</code>,{" "}
+          <code>FOREGROUND_SERVICE</code>, <code>RECEIVE_BOOT_COMPLETED</code>{" "}
+          (Termux:Boot), <code>VIBRATE</code>, <code>POST_NOTIFICATIONS</code>.
+        </li>
+        <li>
+          <code>termux-setup-storage</code> dispara o pedido de{" "}
+          <code>READ_EXTERNAL_STORAGE</code>/<code>WRITE_EXTERNAL_STORAGE</code>{" "}
+          e cria links em <code>~/storage/</code>.
+        </li>
+        <li>
+          Câmera, GPS, contatos etc. só pelo app{" "}
+          <strong>Termux:API</strong>, que declara essas permissões e expõe
+          comandos (<code>termux-camera-photo</code>,{" "}
+          <code>termux-location</code>...).
+        </li>
+      </ul>
+
+      <CodeBlock
+        title="Pedindo storage explicitamente"
+        code={`termux-setup-storage
+# Android mostra um diálogo "Permitir acesso a fotos/mídia?"
+# Após aceitar, ~/storage/shared aponta para /sdcard.`}
+      />
+
+      <h2>4. Por que tentar instalar AppArmor é furada</h2>
+
+      <ul>
+        <li>
+          Não existe pacote <code>apparmor</code> no repositório do Termux —
+          o LSM precisaria estar no kernel, e o kernel já carrega SELinux
+          (são exclusivos: dois LSMs majoritários ao mesmo tempo não rolam
+          em kernels Android).
+        </li>
+        <li>
+          Mesmo dentro de <code>proot-distro</code> (Ubuntu/Debian emulado),
+          o AppArmor instalado dentro do chroot <strong>não tem efeito</strong>:
+          o LSM real é o do kernel hospedeiro, que ignora os perfis do guest.
+        </li>
+        <li>
+          Para sandboxes adicionais dentro do Termux use o que existe:{" "}
+          <code>chroot</code>, <code>proot</code>, namespaces de usuário (sem
+          root só user namespace, e mesmo assim limitado em vários OEMs).
+        </li>
+      </ul>
+
+      <h2>5. Tabela: AppArmor × realidade Android</h2>
+
+      <CodeBlock
+        title="Equivalências"
+        code={`Ubuntu / AppArmor                       Android / Termux
+--------------------------------------  ----------------------------------
+aa-status                               getenforce  +  id -Z
+aa-complain / aa-enforce                NÃO existe (SELinux fixo)
+/etc/apparmor.d/usr.sbin.nginx          /system/etc/selinux/*.cil (read-only)
+perfis path-based                       políticas label-based pré-compiladas
+isolamento por perfil                   isolamento por UID + categoria SELinux
+aa-genprof para confinar app            ADB / sepolicy-analyze (pesquisa)`}
+      />
+
+      <AlertBox type="info" title="Quer mais isolamento dentro do Termux?">
         <ul>
-          <li><strong>enforce</strong> — viola o perfil = ação BLOQUEADA + log no auditd.</li>
-          <li><strong>complain</strong> — viola o perfil = log apenas (não bloqueia). Modo de aprendizado/teste.</li>
-          <li><strong>disable</strong> — perfil desativado, processo roda sem MAC.</li>
-          <li><strong>kill</strong> (raro) — viola o perfil = SIGKILL no processo.</li>
+          <li>Use <code>proot-distro</code> para empacotar uma distro inteira separada do <code>$PREFIX</code>.</li>
+          <li>Use <code>chroot</code> manual para dirs específicos.</li>
+          <li>Para apps Android adicionais isolados, instale em um <em>perfil de trabalho</em> ou <em>usuário secundário</em> do Android — cada perfil tem seus próprios UIDs.</li>
         </ul>
-      </InfoBox>
+      </AlertBox>
 
-      <h2>3. Trocar modo de um perfil</h2>
-
-      <Terminal title="root@termux: ~">
-        <Command root command="aa-complain /usr/sbin/nginx" output={`Setting /usr/sbin/nginx to complain mode.`} />
-        <Command root command="aa-enforce /usr/sbin/nginx" output={`Setting /usr/sbin/nginx to enforce mode.`} />
-        <Command root command="aa-disable /usr/sbin/mysqld" comment="Cria link em /etc/apparmor.d/disable/" output={`Disabling /usr/sbin/mysqld.`} />
-        <Command root command="ls /etc/apparmor.d/disable/" output={`usr.sbin.mysqld`} />
-        <Command root command="aa-enforce /etc/apparmor.d/usr.sbin.mysqld" comment="Reabilita removendo o link e aplicando" output={`Setting /etc/apparmor.d/usr.sbin.mysqld to enforce mode.`} />
-      </Terminal>
-
-      <h2>4. Anatomia de um perfil</h2>
-
-      <File path="/etc/apparmor.d/usr.sbin.tcpdump">
-{`# vim:syntax=apparmor
-#include <tunables/global>
-
-/usr/sbin/tcpdump {
-  #include <abstractions/base>
-  #include <abstractions/nameservice>
-  #include <abstractions/user-tmp>
-
-  capability net_raw,
-  capability setuid,
-  capability setgid,
-  capability dac_override,
-  capability dac_read_search,
-
-  network raw,
-  network packet,
-
-  capability net_admin,
-
-  /dev/bpf*               rw,
-  /etc/ethers             r,
-  /usr/sbin/tcpdump       mr,
-
-  @{HOME}/**.pcap*        rw,
-  /var/log/tcpdump/**     rw,
-  /tmp/tcpdump_*          rw,
-
-  deny /home/*/.bash_history rw,
-  deny /etc/shadow r,
-}`}
-      </File>
-
-      <p>
-        <strong>Vocabulário do perfil:</strong> cada linha é uma regra. <code>r</code>=read,
-        <code>w</code>=write, <code>x</code>=execute (com modificadores Px/Cx/Ux), <code>m</code>=mmap,
-        <code>k</code>=lock, <code>l</code>=link. <code>@{`{HOME}`}</code> é uma <em>tunable</em>
-        definida em <code>/etc/apparmor.d/tunables/</code>. <code>capability</code> controla as
-        capabilities POSIX. <code>deny</code> tem prioridade sobre allow.
-      </p>
-
-      <h2>5. Recarregar perfis e diagnosticar</h2>
-
-      <Terminal title="root@termux: ~">
-        <Command root command="apparmor_parser -r /etc/apparmor.d/usr.sbin.tcpdump" comment="-r recarrega; -a adiciona; -R remove" />
-        <Command root command="systemctl reload apparmor" />
-        <Command root command="dmesg | grep -i apparmor | tail -10" output={`[ 8423.221] audit: type=1400 audit(1731412821.221:43): apparmor="DENIED" operation="open" profile="/usr/sbin/tcpdump" name="/etc/shadow" pid=4421 comm="tcpdump" requested_mask="r" denied_mask="r" fsuid=0 ouid=0
-[ 8425.912] audit: type=1400 audit(1731412825.912:44): apparmor="ALLOWED" operation="capable" profile="/usr/sbin/tcpdump" pid=4421 comm="tcpdump" capability=13 capname="net_raw"`} />
-        <Command root command="journalctl -k | grep -i apparmor | tail -5" />
-      </Terminal>
-
-      <h2>6. Criando um perfil novo do zero — aa-genprof</h2>
-      <p>
-        Vamos confinar um script <code>/usr/local/bin/backup.sh</code> que faz backup. O fluxo:
-        rodar <code>aa-genprof</code>, em outra aba executar o programa, voltar e responder
-        Allow/Deny para cada acesso descoberto.
-      </p>
-
-      <Terminal title="root@termux: ~">
-        <Command root command="aa-genprof /usr/local/bin/backup.sh" output={`Updating AppArmor profiles in /etc/apparmor.d.
-Writing updated profile for /usr/local/bin/backup.sh.
-Setting /usr/local/bin/backup.sh to complain mode.
-
-Before you begin, you may wish to check if a
-profile already exists for the application you
-wish to confine.
-
-Please start the application to be profiled in
-another window and exercise its functionality now.
-
-Once completed, select the "Scan" option below in
-order to scan the system logs for AppArmor events.
-
-[(S)can system log for AppArmor events] / (F)inish`} />
-        <Command root command="# em outra aba: bash /usr/local/bin/backup.sh" />
-        <Command root command="# voltar e digitar S — aa-genprof mostrará cada acesso:" output={`Reading log entries from /var/log/syslog.
-
-Profile:  /usr/local/bin/backup.sh
-Path:     /etc/passwd
-New Mode: r
-Severity: 4
-
- [1 - #include <abstractions/nameservice>]
-  2 - /etc/passwd r,
-(A)llow / [(D)eny] / (I)gnore / (G)lob / Glob with (E)xtension / (N)ew / Audi(t) / (O)wner permissions / Abo(r)t / (F)inish`} />
-        <Command root command="# escolha A para aprovar; depois F para terminar" />
-      </Terminal>
-
-      <h2>7. aa-logprof — refinar perfil já em uso</h2>
-      <p>
-        Quando um perfil em <em>complain</em> registra novas violações, <code>aa-logprof</code>
-        lê os logs e propõe regras incrementais.
-      </p>
-
-      <Terminal title="root@termux: ~">
-        <Command root command="aa-logprof" output={`Reading log entries from /var/log/audit/audit.log.
-Updating AppArmor profiles in /etc/apparmor.d.
-
-Profile:  /usr/sbin/mysqld
-Path:     /var/lib/mysql/binlog.000123
-New Mode: rw
-Severity: unknown
-
- [1 - /var/lib/mysql/** rw,]
-   2 - /var/lib/mysql/binlog.000123 rw,
-
-(A)llow / [(D)eny] / (I)gnore / (G)lob / Glob with (E)xtension / (N)ew / Audi(t) / (O)wner permissions / Abo(r)t / (F)inish
-
-Adding /var/lib/mysql/** rw, to profile.
-
-Save changes to profile /etc/apparmor.d/usr.sbin.mysqld? [(Y)es / (N)o / (V)iew Changes / Save Selec(t)ed Profile / Abo(r)t]
-=> Y
-Writing updated profile for /usr/sbin/mysqld.`} />
-      </Terminal>
-
-      <h2>8. Local override — sem mexer no perfil original</h2>
-      <p>
-        Atualizações de pacote sobrescrevem perfis em <code>/etc/apparmor.d/</code>. Para
-        adicionar regras suas e sobreviver a upgrades, use <code>/etc/apparmor.d/local/</code>.
-      </p>
-
-      <File path="/etc/apparmor.d/local/usr.sbin.nginx">
-{`# Regras locais aplicadas em cima do perfil principal de nginx
-/srv/intranet/static/** r,
-/var/lib/nginx/uploads/** rw,
-deny /etc/passwd r,
-deny /etc/shadow r,`}
-      </File>
-
-      <h2>9. AppArmor vs SELinux — escolha consciente</h2>
-
-      <table>
-        <thead>
-          <tr><th>Aspecto</th><th>AppArmor (Termux/SUSE)</th><th>SELinux (RHEL/Fedora)</th></tr>
-        </thead>
-        <tbody>
-          <tr><td><strong>Modelo</strong></td><td>Path-based (caminhos)</td><td>Label-based (xattr nos inodes)</td></tr>
-          <tr><td><strong>Aprendizado</strong></td><td>Suave — perfis em texto plano</td><td>Íngreme — políticas complexas</td></tr>
-          <tr><td><strong>Granularidade</strong></td><td>Boa para apps individuais</td><td>Excelente em todo o sistema</td></tr>
-          <tr><td><strong>Modo de teste</strong></td><td><code>complain</code></td><td><code>permissive</code></td></tr>
-          <tr><td><strong>Ferramentas</strong></td><td>aa-status, aa-genprof, aa-logprof</td><td>sestatus, audit2allow, semanage, restorecon</td></tr>
-          <tr><td><strong>Quando muda mount-point</strong></td><td>Perde proteção (paths mudaram)</td><td>Mantém (labels viajam com o inode)</td></tr>
-          <tr><td><strong>Termux padrão</strong></td><td>✅ ATIVO</td><td>❌ Não vem</td></tr>
-        </tbody>
-      </table>
-
-      <InfoBox type="tip" title="Dica de produção">
-        Em servidores Termux mantenha AppArmor sempre ligado. Se um pacote está crashando por
-        AppArmor, NUNCA o desabilite globalmente — coloque <em>esse perfil específico</em> em
-        complain, abra o issue/audit, gere as regras necessárias e volte para enforce.
-      </InfoBox>
+      <AlertBox type="success" title="Resumo">
+        <ol>
+          <li>Não há AppArmor no Android. Há SELinux Enforcing imutável.</li>
+          <li>O isolamento principal é por UID + permissões do Manifest.</li>
+          <li>O Termux roda como <code>untrusted_app</code>, igual qualquer outro app.</li>
+          <li>Para mais sandbox: <code>proot-distro</code> ou perfil de usuário do Android.</li>
+        </ol>
+      </AlertBox>
     </PageContainer>
   );
 }

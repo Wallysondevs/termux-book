@@ -1,197 +1,115 @@
 import { PageContainer } from "@/components/layout/PageContainer";
-  import { CodeBlock } from "@/components/ui/CodeBlock";
-  import { AlertBox } from "@/components/ui/AlertBox";
+import { CodeBlock } from "@/components/ui/CodeBlock";
+import { AlertBox } from "@/components/ui/AlertBox";
 
-  export default function LVM() {
-    return (
-      <PageContainer
-        title="LVM — Gerenciamento de Volumes Lógicos"
-        subtitle="Guia completo de LVM no Termux: criar, redimensionar, snapshots, migrar dados entre discos e gerenciar armazenamento flexível."
-        difficulty="avancado"
-        timeToRead="30 min"
-      >
-        <p>
-          O <strong>LVM</strong> (Logical Volume Manager) adiciona uma camada de abstração
-          entre discos físicos e sistemas de arquivos. Com LVM, você pode redimensionar
-          partições sem desmontar, combinar múltiplos discos em um único volume, criar
-          snapshots e migrar dados entre discos — tudo sem parar o sistema.
-        </p>
+export default function LVM() {
+  return (
+    <PageContainer
+      title="LVM no Android — por que não funciona e como o storage realmente é organizado"
+      subtitle="LVM (pvcreate/vgcreate/lvcreate) não existe no Android. Entenda o layout real do storage do Android: /data, /sdcard, OBB e como o Termux acessa cada parte."
+      difficulty="intermediario"
+      timeToRead="10 min"
+    >
+      <AlertBox type="danger" title="LVM não funciona no Android">
+        O <strong>LVM</strong> precisa criar e gerenciar partições em block devices
+        (<code>/dev/sdX</code>, <code>/dev/nvmeXn1</code>) — coisa que <strong>não existe</strong>
+        no Android sem root completo + reflash da partição <code>/data</code>. O pacote
+        <code> lvm2</code> <strong>não está nos repositórios do Termux</strong>, e mesmo se
+        você compilasse, comandos como <code>pvcreate</code>, <code>vgcreate</code>,
+        <code> lvcreate</code> falhariam porque o storage interno é uma única partição
+        formatada em F2FS/ext4 gerenciada pelo Android. Esqueça LVM no celular.
+      </AlertBox>
 
-        <h2>Conceitos do LVM</h2>
-        <ul>
-          <li><strong>PV (Physical Volume)</strong> — Disco ou partição física preparada para LVM</li>
-          <li><strong>VG (Volume Group)</strong> — Pool de armazenamento formado por um ou mais PVs</li>
-          <li><strong>LV (Logical Volume)</strong> — "Partição virtual" criada dentro de um VG</li>
-        </ul>
+      <h2>Como o storage realmente é organizado no Android</h2>
+      <p>
+        Android não expõe discos como Linux desktop. Em vez de <code>/dev/sda1</code>,
+        <code> /dev/sda2</code> etc, você tem partições fixas definidas pelo fabricante e
+        montadas pelo bootloader. As mais relevantes para quem usa Termux:
+      </p>
 
-        <h2>1. Criar Infraestrutura LVM</h2>
-        <CodeBlock
-          title="Configurar LVM do zero"
-          code={`# Instalar ferramentas LVM
-  pkg install -y lvm2
+      <CodeBlock
+        title="Partições principais do Android"
+        code={`/data        → partição de userdata. Onde ficam apps + Termux.
+              Caminho do Termux: /data/data/com.termux/files/
+              ($PREFIX = /data/data/com.termux/files/usr)
 
-  # Passo 1: Criar Physical Volumes (PV)
-  sudo pvcreate /dev/sdb
-  sudo pvcreate /dev/sdc
-  # Saída: Physical volume "/dev/sdb" successfully created.
+/sdcard      → storage compartilhado (Internal Shared Storage).
+              É um symlink para /storage/emulated/0/.
+              Aqui ficam Downloads, DCIM, Music, Documents...
 
-  # Ver PVs
-  sudo pvs
-  sudo pvdisplay
+/storage/XXXX-XXXX → cartão SD físico (se houver), montado com FUSE.
+                     Acesso limitado em Android 11+ (Scoped Storage).
 
-  # Passo 2: Criar Volume Group (VG)
-  sudo vgcreate meu-vg /dev/sdb /dev/sdc
-  # Combina os dois discos em um único pool
+/system, /vendor, /product → read-only, parte da imagem do Android.
+                              Termux não toca nelas.
 
-  # Ver VGs
-  sudo vgs
-  sudo vgdisplay meu-vg
+Android/data/<package>     → diretório privado de cada app no /sdcard
+Android/obb/<package>      → "Opaque Binary Blobs" (assets de jogos)`}
+      />
 
-  # Passo 3: Criar Logical Volumes (LV)
-  sudo lvcreate -L 100G -n dados meu-vg        # 100GB
-  sudo lvcreate -L 50G -n backup meu-vg        # 50GB
-  sudo lvcreate -l 100%FREE -n logs meu-vg     # Resto do espaço
+      <h2>Vendo o storage do Termux</h2>
+      <CodeBlock
+        title="Comandos que funcionam"
+        code={`# Espaço total e usado das partições visíveis ao Termux
+df -h
 
-  # -L = tamanho absoluto
-  # -l = tamanho relativo (100%FREE = todo espaço livre)
+# Tamanho do $PREFIX (toda a instalação do Termux)
+du -sh $PREFIX
 
-  # Ver LVs
-  sudo lvs
-  sudo lvdisplay
+# Tamanho da home
+du -sh ~
 
-  # Passo 4: Formatar e montar
-  sudo mkfs.ext4 /dev/meu-vg/dados
-  sudo mkfs.ext4 /dev/meu-vg/backup
-  sudo mkfs.ext4 /dev/meu-vg/logs
+# Habilitar acesso ao /sdcard a partir do Termux
+termux-setup-storage
+# Após autorizar, surge ~/storage/ com symlinks:
+ls -l ~/storage/
 
-  sudo mkdir -p /mnt/{dados,backup,logs}
-  sudo mount /dev/meu-vg/dados /mnt/dados
-  sudo mount /dev/meu-vg/backup /mnt/backup
-  sudo mount /dev/meu-vg/logs /mnt/logs
+# Ver tamanho do storage compartilhado
+du -sh ~/storage/shared/`}
+      />
 
-  # Adicionar ao fstab
-  echo '/dev/meu-vg/dados  /mnt/dados  ext4  defaults  0  2' | sudo tee -a /etc/fstab`}
-        />
+      <h2>Por que não dá para criar “volumes lógicos” no Android</h2>
+      <CodeBlock
+        title="O que falta"
+        code={`# Para LVM funcionar você precisaria:
+#  1. Acesso a block devices reais (/dev/block/sdaXX) — exige root.
+#  2. Poder reformatar /data — exige reflash via fastboot/recovery.
+#  3. Kernel com módulo dm-mod habilitado.
+#  4. Aceitar que o Android não bootaria mais (ele espera /data
+#     ext4/f2fs, não dm-linear).
 
-        <h2>2. Redimensionar Volumes</h2>
-        <CodeBlock
-          title="Expandir e encolher volumes lógicos"
-          code={`# === EXPANDIR (mais comum) ===
-  # Expandir LV + filesystem em um comando
-  sudo lvextend -L +50G /dev/meu-vg/dados --resizefs
-  # Adiciona 50GB e redimensiona o filesystem automaticamente
+# Tentativas de "particionar" o storage interno via fdisk falham:
+fdisk -l
+# Mostra apenas dispositivos read-only ou nada (sem root).
 
-  # Expandir para usar todo espaço livre
-  sudo lvextend -l +100%FREE /dev/meu-vg/dados --resizefs
+# A "alternativa" mais próxima de volumes flexíveis no Android é:
+#  - Adoptable Storage (cartão SD vira parte do /data, fabricante-dependente)
+#  - Loop devices em arquivos (proot-distro usa isso para o rootfs)`}
+      />
 
-  # Expandir para tamanho específico
-  sudo lvextend -L 200G /dev/meu-vg/dados --resizefs
+      <h2>Equivalentes práticos no Termux</h2>
+      <CodeBlock
+        title="O que substitui LVM no dia a dia"
+        code={`# "Quero juntar dois discos num pool"           → impossível sem root + reflash
+# "Quero snapshot de um diretório"               → tar / rsync / btrfs (em proot-distro)
+# "Quero redimensionar partição sem desmontar"   → não se aplica (storage é gerido pelo Android)
+# "Quero migrar dados para outro storage"        → cp -a / rsync para ~/storage/shared/
+# "Quero criptografar um volume"                 → gocryptfs / cryfs (rodam no Termux)
 
-  # === ENCOLHER (cuidado!) ===
-  # ATENÇÃO: Sempre faça backup antes de encolher!
-  # Ext4 permite encolher, XFS NÃO permite
-  sudo umount /mnt/dados
-  sudo e2fsck -f /dev/meu-vg/dados
-  sudo lvreduce -L 80G /dev/meu-vg/dados --resizefs
-  sudo mount /dev/meu-vg/dados /mnt/dados
+# Exemplo: criptografar uma pasta privada com gocryptfs
+pkg install -y gocryptfs
+mkdir -p ~/cripto-cifra ~/cripto-clara
+gocryptfs -init ~/cripto-cifra
+gocryptfs ~/cripto-cifra ~/cripto-clara`}
+      />
 
-  # === ADICIONAR DISCO AO VG ===
-  # Novo disco adicionado ao servidor
-  sudo pvcreate /dev/sdd
-  sudo vgextend meu-vg /dev/sdd
-  # Agora o VG tem mais espaço!
-  sudo lvextend -l +100%FREE /dev/meu-vg/dados --resizefs`}
-        />
-
-        <h2>3. Snapshots LVM</h2>
-        <CodeBlock
-          title="Criar e gerenciar snapshots"
-          code={`# Criar snapshot (captura o estado atual)
-  sudo lvcreate -L 10G -s -n dados-snap /dev/meu-vg/dados
-  # -s = snapshot
-  # -L 10G = espaço para armazenar mudanças (não o tamanho do volume)
-
-  # Listar snapshots
-  sudo lvs
-
-  # Montar snapshot (somente leitura, para backup)
-  sudo mkdir /mnt/snap
-  sudo mount -o ro /dev/meu-vg/dados-snap /mnt/snap
-  # Fazer backup do snapshot:
-  tar czf backup.tar.gz /mnt/snap/
-  sudo umount /mnt/snap
-
-  # Restaurar snapshot (reverter para o estado capturado)
-  # CUIDADO: Isso reverte TODAS as mudanças!
-  sudo umount /mnt/dados
-  sudo lvconvert --merge /dev/meu-vg/dados-snap
-  sudo mount /dev/meu-vg/dados /mnt/dados
-
-  # Remover snapshot (sem restaurar)
-  sudo lvremove /dev/meu-vg/dados-snap`}
-        />
-
-        <h2>4. Migrar Dados Entre Discos</h2>
-        <CodeBlock
-          title="Mover dados de um disco para outro sem downtime"
-          code={`# O LVM pode migrar dados entre PVs sem desmontar!
-
-  # Situação: Trocar /dev/sdb (antigo) por /dev/sdd (novo)
-
-  # 1. Adicionar novo disco ao VG
-  sudo pvcreate /dev/sdd
-  sudo vgextend meu-vg /dev/sdd
-
-  # 2. Migrar dados do disco antigo para o novo
-  sudo pvmove /dev/sdb /dev/sdd
-  # Isso move todos os dados de sdb para sdd
-  # O sistema continua funcionando durante a migração!
-
-  # 3. Remover o disco antigo do VG
-  sudo vgreduce meu-vg /dev/sdb
-  sudo pvremove /dev/sdb
-  # Agora pode remover fisicamente o disco antigo`}
-        />
-
-        <h2>Troubleshooting</h2>
-        <CodeBlock
-          title="Problemas comuns com LVM"
-          code={`# VG não aparece após reboot
-  sudo vgchange -ay
-  # Ativa todos os VGs
-
-  # Disco LVM de outro computador
-  sudo pvscan
-  sudo vgscan
-  sudo lvscan
-  sudo vgchange -ay
-
-  # Snapshot cheio (100% usado)
-  # O snapshot fica inválido! Remova-o:
-  sudo lvremove /dev/meu-vg/dados-snap
-  # Crie um novo com mais espaço
-
-  # Verificar integridade
-  sudo pvck /dev/sdb
-  sudo vgck meu-vg
-
-  # Remover LVM completamente
-  sudo umount /mnt/dados
-  sudo lvremove /dev/meu-vg/dados
-  sudo vgremove meu-vg
-  sudo pvremove /dev/sdb
-
-  # Ver estrutura completa
-  sudo lsblk
-  sudo pvs && sudo vgs && sudo lvs`}
-        />
-
-        <AlertBox type="info" title="Quando usar LVM?">
-          Use LVM em <strong>servidores</strong> (redimensionar sem downtime), quando tem
-          <strong>múltiplos discos</strong> (combinar em um pool), e quando precisa de
-          <strong>snapshots</strong>. Para desktops simples com um único SSD, partições
-          tradicionais são suficientes.
-        </AlertBox>
-      </PageContainer>
-    );
-  }
+      <AlertBox type="info" title="Resumo">
+        No Android, storage é um recurso fechado gerenciado pelo SO. Use{" "}
+        <code>termux-setup-storage</code> para ganhar acesso a <code>~/storage/shared</code>,
+        e organize seus dados em diretórios — não em volumes lógicos. Para flexibilidade
+        real (snapshots, pools, criptografia em nível de volume) use um servidor Linux
+        remoto e acesse via SSH a partir do Termux.
+      </AlertBox>
+    </PageContainer>
+  );
+}

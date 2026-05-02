@@ -1,358 +1,313 @@
 import { PageContainer } from "@/components/layout/PageContainer";
-  import { CodeBlock } from "@/components/ui/CodeBlock";
-  import { AlertBox } from "@/components/ui/AlertBox";
+import { CodeBlock } from "@/components/ui/CodeBlock";
+import { AlertBox } from "@/components/ui/AlertBox";
 
-  export default function PostgreSQL() {
-    return (
-      <PageContainer
-        title="PostgreSQL no Termux"
-        subtitle="Instalação, configuração, gerenciamento de bancos, usuários, backup, replicação, tunning de performance e segurança do PostgreSQL."
-        difficulty="intermediario"
-        timeToRead="35 min"
-      >
-        <p>
-          O <strong>PostgreSQL</strong> é o banco de dados relacional open source mais avançado
-          do mundo. Suporta JSON, full-text search, tipos geoespaciais (PostGIS), replicação,
-          particionamento e extensibilidade via extensões. É usado por empresas como Apple,
-          Instagram, Spotify e o governo brasileiro.
-        </p>
+export default function PostgreSQL() {
+  return (
+    <PageContainer
+      title="PostgreSQL no Termux"
+      subtitle="Instalação, inicialização do cluster, autenticação, backup e tunning do PostgreSQL rodando nativo no Termux."
+      difficulty="intermediario"
+      timeToRead="35 min"
+    >
+      <AlertBox type="info" title="Caveats no Termux">
+        O PostgreSQL roda <strong>nativo</strong> via <code>pkg install postgresql</code>,
+        sem precisar de proot. Algumas diferenças importantes em relação ao Linux desktop:
+        <br />• Não há <code>systemd</code> — o cluster é iniciado com <code>pg_ctl</code> ou via runit.
+        <br />• O socket fica em <code>$PREFIX/var/run/postgresql</code>.
+        <br />• O <code>initdb</code> precisa ser executado manualmente na primeira vez.
+        <br />• Não existe usuário <code>postgres</code> de sistema — você é o "superusuário"
+        do seu próprio cluster.
+      </AlertBox>
 
-        <h2>1. Instalação</h2>
-        <CodeBlock
-          title="Instalar o PostgreSQL no Termux"
-          code={`# Instalar o PostgreSQL (versão dos repositórios do Termux)
-  pkg update
-  pkg install -y postgresql postgresql-contrib
+      <p>
+        O <strong>PostgreSQL</strong> é o banco de dados relacional open source mais avançado
+        do mundo: JSONB, full-text search, tipos geoespaciais (PostGIS), CTEs, replicação
+        e extensibilidade via extensões. No Termux ele roda muito bem para desenvolvimento,
+        APIs locais e pequenas aplicações.
+      </p>
 
-  # postgresql-contrib inclui extensões úteis como:
-  # - pg_stat_statements (análise de queries)
-  # - pgcrypto (criptografia)
-  # - uuid-ossp (geração de UUIDs)
-  # - hstore (key-value store)
+      <h2>1. Instalação</h2>
+      <CodeBlock
+        title="Instalar o PostgreSQL no Termux"
+        code={`pkg update
+pkg install -y postgresql
 
-  # Verificar a versão
-  psql --version
-  # Saída: psql (PostgreSQL) 16.3
+# Verificar versão
+psql --version
+postgres --version
 
-  # Verificar o status do serviço
-  sudo systemctl status postgresql
-  sudo systemctl enable postgresql
+# Diretório de dados (você escolhe — convenção comum):
+export PGDATA="$PREFIX/var/lib/postgresql"
+mkdir -p "$PGDATA"
 
-  # Instalar versão específica via repositório oficial
-  sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
-  wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | pkg add -
-  pkg update
-  pkg install -y postgresql-16`}
-        />
+# Inicializar o cluster (apenas na primeira vez)
+initdb "$PGDATA"
+# Saída: "Success. You can now start the database server"
 
-        <h2>2. Acessar e Gerenciar o PostgreSQL</h2>
-        <CodeBlock
-          title="Comandos básicos do psql"
-          code={`# O PostgreSQL cria um usuário de sistema "postgres" durante a instalação
-  # Acessar o psql como superusuário
-  sudo -u postgres psql
-  # Você está agora no prompt: postgres=#
+# Diretório do socket (criado automaticamente)
+mkdir -p $PREFIX/var/run/postgresql`}
+      />
 
-  # Comandos internos do psql (começam com \):
-  # \l         → listar todos os bancos de dados
-  # \du        → listar todos os usuários/roles
-  # \dt        → listar tabelas do banco atual
-  # \d tabela  → descrever estrutura de uma tabela
-  # \c banco   → conectar a outro banco
-  # \i arquivo → executar arquivo SQL
-  # \q         → sair do psql
-  # \?         → ajuda dos comandos internos
-  # \h CREATE  → ajuda sobre um comando SQL
+      <h2>2. Iniciar e Parar o Servidor</h2>
+      <CodeBlock
+        title="Subir o postgres no Termux"
+        code={`export PGDATA="$PREFIX/var/lib/postgresql"
 
-  # Criar um novo usuário (role)
-  sudo -u postgres createuser --interactive
-  # Ou via SQL:
-  sudo -u postgres psql -c "CREATE USER meuusuario WITH PASSWORD 'senha_segura';"
+# Iniciar via pg_ctl (recomendado)
+pg_ctl -D "$PGDATA" -l "$PGDATA/server.log" start
 
-  # Criar um banco de dados
-  sudo -u postgres createdb meubanco
-  # Ou via SQL:
-  sudo -u postgres psql -c "CREATE DATABASE meubanco OWNER meuusuario;"
+# Status
+pg_ctl -D "$PGDATA" status
 
-  # Dar todas as permissões ao usuário no banco
-  sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE meubanco TO meuusuario;"
+# Parar
+pg_ctl -D "$PGDATA" stop
 
-  # Conectar com usuário e banco específicos
-  psql -U meuusuario -d meubanco -h localhost
-  # Se der erro de autenticação, veja a seção de configuração abaixo
+# Como serviço persistente via runit
+pkg install -y termux-services
+sv-enable postgresql
+sv up postgresql
+sv status postgresql
 
-  # Executar SQL diretamente do terminal
-  psql -U meuusuario -d meubanco -c "SELECT version();"
+# Evitar que o Android mate o processo
+termux-wake-lock`}
+      />
 
-  # Executar arquivo SQL
-  psql -U meuusuario -d meubanco -f script.sql`}
-        />
+      <h2>3. Acessar e Gerenciar</h2>
+      <CodeBlock
+        title="Comandos básicos do psql"
+        code={`# No Termux, seu usuário do sistema (Android) é o superusuário do cluster.
+# Conectar ao banco padrão (o nome do usuário Termux):
+psql postgres
 
-        <h2>3. Configuração de Autenticação</h2>
-        <CodeBlock
-          title="Configurar pg_hba.conf e postgresql.conf"
-          code={`# O PostgreSQL controla autenticação via pg_hba.conf
-  # Localizar o arquivo:
-  sudo -u postgres psql -c "SHOW hba_file;"
-  # Geralmente: /etc/postgresql/16/main/pg_hba.conf
+# Comandos internos do psql:
+# \\l         → listar bancos
+# \\du        → listar usuários/roles
+# \\dt        → listar tabelas
+# \\d tabela  → estrutura da tabela
+# \\c banco   → conectar a outro banco
+# \\i arq.sql → executar arquivo
+# \\q         → sair
 
-  # Editar a autenticação
-  sudo nano /etc/postgresql/16/main/pg_hba.conf
+# Criar usuário (role)
+createuser --interactive
+# ou via SQL:
+psql -c "CREATE USER meuusuario WITH PASSWORD 'senha_segura';"
 
-  # Formato: TYPE  DATABASE  USER  ADDRESS  METHOD
-  # Métodos comuns:
-  # peer     → usa o usuário do sistema (sem senha, apenas local)
-  # md5      → senha com hash MD5
-  # scram-sha-256 → senha com SCRAM (mais seguro, padrão no PG 14+)
-  # trust    → sem autenticação (NUNCA em produção!)
+# Criar banco
+createdb meubanco
+psql -c "CREATE DATABASE meubanco OWNER meuusuario;"
 
-  # Configuração recomendada para desenvolvimento:
-  # local   all   all                     peer
-  # host    all   all   127.0.0.1/32      scram-sha-256
-  # host    all   all   ::1/128           scram-sha-256
+# Permissões
+psql -c "GRANT ALL PRIVILEGES ON DATABASE meubanco TO meuusuario;"
 
-  # Para permitir conexões de qualquer IP (produção com firewall):
-  # host    all   all   0.0.0.0/0         scram-sha-256
+# Conectar com usuário e banco
+psql -U meuusuario -d meubanco -h localhost
 
-  # Configurar o PostgreSQL para aceitar conexões externas
-  sudo nano /etc/postgresql/16/main/postgresql.conf
-  # Altere:
-  # listen_addresses = 'localhost'  →  listen_addresses = '*'
-  # port = 5432
+# SQL inline / arquivo
+psql -d meubanco -c "SELECT version();"
+psql -d meubanco -f script.sql`}
+      />
 
-  # Reiniciar após mudanças
-  sudo systemctl restart postgresql
+      <h2>4. Configuração de Autenticação</h2>
+      <CodeBlock
+        title="pg_hba.conf e postgresql.conf no Termux"
+        code={`# Localizar arquivos
+psql -c "SHOW hba_file;"
+psql -c "SHOW config_file;"
+# Geralmente:
+#   $PREFIX/var/lib/postgresql/pg_hba.conf
+#   $PREFIX/var/lib/postgresql/postgresql.conf
 
-  # Testar a conexão
-  psql -U meuusuario -d meubanco -h 127.0.0.1`}
-        />
+nano $PREFIX/var/lib/postgresql/pg_hba.conf
 
-        <h2>4. Operações SQL Comuns</h2>
-        <CodeBlock
-          title="SQL essencial no PostgreSQL"
-          code={`# Conectar ao banco
-  psql -U meuusuario -d meubanco -h localhost
+# Formato: TYPE  DATABASE  USER  ADDRESS  METHOD
+# Métodos:
+#   trust          → sem senha (NUNCA em produção!)
+#   md5            → senha com hash MD5
+#   scram-sha-256  → padrão moderno e mais seguro
+#   peer           → usa o user do SO (no Termux funciona pra você mesmo)
 
-  # Criar tabela
-  CREATE TABLE usuarios (
-      id SERIAL PRIMARY KEY,
-      nome VARCHAR(100) NOT NULL,
-      email VARCHAR(255) UNIQUE NOT NULL,
-      idade INTEGER CHECK (idade >= 0),
-      ativo BOOLEAN DEFAULT true,
-      criado_em TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+# Recomendado para uso local no Termux:
+# local   all   all                     peer
+# host    all   all   127.0.0.1/32      scram-sha-256
+# host    all   all   ::1/128           scram-sha-256
+
+# Para acessar de outros aparelhos na LAN:
+# host    all   all   192.168.0.0/24    scram-sha-256
+
+nano $PREFIX/var/lib/postgresql/postgresql.conf
+# listen_addresses = 'localhost'   → 'localhost,192.168.0.10'  ou '*'
+# port = 5432
+
+# Recarregar configuração
+pg_ctl -D "$PGDATA" reload`}
+      />
+
+      <h2>5. SQL Essencial</h2>
+      <CodeBlock
+        title="SQL no PostgreSQL"
+        code={`psql -U meuusuario -d meubanco -h localhost
+
+CREATE TABLE usuarios (
+    id SERIAL PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    idade INTEGER CHECK (idade >= 0),
+    ativo BOOLEAN DEFAULT true,
+    criado_em TIMESTAMPTZ DEFAULT NOW()
+);
+
+INSERT INTO usuarios (nome, email, idade) VALUES
+    ('João Silva', 'joao@email.com', 28),
+    ('Maria Santos', 'maria@email.com', 34);
+
+SELECT * FROM usuarios;
+SELECT nome FROM usuarios WHERE idade > 25 ORDER BY nome;
+
+UPDATE usuarios SET idade = 29 WHERE email = 'joao@email.com';
+DELETE FROM usuarios WHERE id = 3;
+
+CREATE INDEX idx_usuarios_email ON usuarios(email);
+
+-- JSONB (matador do PostgreSQL)
+CREATE TABLE configuracoes (
+    id SERIAL PRIMARY KEY,
+    dados JSONB NOT NULL
+);
+INSERT INTO configuracoes (dados) VALUES
+    ('{"tema":"escuro","idioma":"pt-BR","notificacoes":true}');
+SELECT dados->>'tema' FROM configuracoes;
+SELECT * FROM configuracoes WHERE dados @> '{"idioma":"pt-BR"}';`}
+      />
+
+      <h2>6. Backup e Restauração</h2>
+      <CodeBlock
+        title="pg_dump / pg_restore no Termux"
+        code={`# Backup SQL puro
+pg_dump meubanco > backup-$(date +%Y%m%d).sql
+
+# Comprimido
+pg_dump meubanco | gzip > backup-$(date +%Y%m%d).sql.gz
+
+# Formato custom (mais eficiente, permite restore parcial)
+pg_dump -Fc meubanco > backup-$(date +%Y%m%d).dump
+
+# Todos os bancos + roles
+pg_dumpall > backup-todos-$(date +%Y%m%d).sql
+
+# Apenas estrutura ou apenas dados
+pg_dump --schema-only meubanco > estrutura.sql
+pg_dump --data-only   meubanco > dados.sql
+
+# Restaurar
+psql meubanco < backup.sql
+pg_restore -d meubanco backup.dump
+
+# Restaurar uma única tabela
+pg_restore -d meubanco -t usuarios backup.dump
+
+# Backup automático para o storage compartilhado do Android
+termux-setup-storage
+cat > $PREFIX/bin/backup-postgres.sh << 'SCRIPT'
+#!/data/data/com.termux/files/usr/bin/bash
+DIR="$HOME/storage/shared/Backups/postgres"
+mkdir -p "$DIR"
+DATE=$(date +%Y%m%d_%H%M)
+pg_dumpall | gzip > "$DIR/all-$DATE.sql.gz"
+find "$DIR" -name "*.sql.gz" -mtime +7 -delete
+echo "Backup PostgreSQL: $DATE"
+SCRIPT
+chmod +x $PREFIX/bin/backup-postgres.sh`}
+      />
+
+      <h2>7. Tunning de Performance (modo celular)</h2>
+      <CodeBlock
+        title="Ajustes para o ambiente Termux"
+        code={`nano $PREFIX/var/lib/postgresql/postgresql.conf
+
+# Celulares têm pouca RAM compartilhada — vá leve!
+# shared_buffers = 64MB
+# effective_cache_size = 256MB
+# work_mem = 4MB
+# maintenance_work_mem = 32MB
+# max_connections = 20
+
+# SSD/UFS: o storage do Android é flash:
+# random_page_cost = 1.1
+# effective_io_concurrency = 100
+
+# Logs (queries lentas)
+# log_min_duration_statement = 500
+
+pg_ctl -D "$PGDATA" restart
+
+# Ver e analisar
+psql -c "SHOW shared_buffers;"
+psql -d meubanco -c "EXPLAIN ANALYZE SELECT * FROM usuarios WHERE email='joao@email.com';"
+vacuumdb --all --analyze
+psql -c "SELECT datname, pg_size_pretty(pg_database_size(datname))
+         FROM pg_database ORDER BY pg_database_size(datname) DESC;"`}
+      />
+
+      <h2>8. Extensões Úteis</h2>
+      <CodeBlock
+        title="Extensões disponíveis"
+        code={`-- listar extensões
+SELECT * FROM pg_available_extensions ORDER BY name;
+
+-- ativar dentro de um banco
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+CREATE EXTENSION IF NOT EXISTS "pg_trgm";
+CREATE EXTENSION IF NOT EXISTS "hstore";
+CREATE EXTENSION IF NOT EXISTS "pg_stat_statements";
+
+SELECT uuid_generate_v4();
+
+SELECT * FROM usuarios
+WHERE similarity(nome, 'João') > 0.3
+ORDER BY similarity(nome, 'João') DESC;`}
+      />
+
+      <h2>Troubleshooting</h2>
+      <CodeBlock
+        title="Problemas comuns no Termux"
+        code={`# "could not connect to server: No such file or directory"
+# O servidor não está rodando, ou o socket está em outro lugar.
+pg_ctl -D "$PGDATA" status
+pg_ctl -D "$PGDATA" start
+
+# "FATAL: role 'X' does not exist"
+createuser X
+# ou
+psql -c "CREATE USER X;"
+
+# "FATAL: database 'meubanco' does not exist"
+createdb meubanco
+
+# Trocar senha
+psql -c "ALTER USER meuusuario WITH PASSWORD 'nova_senha';"
+
+# Conexões ativas
+psql -c "SELECT pid, usename, datname, state FROM pg_stat_activity;"
+
+# Matar conexão
+psql -c "SELECT pg_terminate_backend(PID);"
+
+# Logs do servidor
+tail -f $PGDATA/server.log
+
+# Processo morre quando a tela apaga
+termux-wake-lock`}
+      />
+
+      <AlertBox type="success" title="Dica">
+        Para acessar do PC ou de outro celular, descubra o IP do aparelho com{" "}
+        <code>ifconfig</code> (ou veja em Configurações &gt; Wi-Fi). Lembre-se: em rede móvel
+        o IP muda — para acesso estável, use Wi-Fi ou um túnel reverso (SSH, ngrok,
+        cloudflared).
+      </AlertBox>
+    </PageContainer>
   );
-
-  # Inserir dados
-  INSERT INTO usuarios (nome, email, idade) VALUES
-      ('João Silva', 'joao@email.com', 28),
-      ('Maria Santos', 'maria@email.com', 34),
-      ('Pedro Costa', 'pedro@email.com', 22);
-
-  # Consultar dados
-  SELECT * FROM usuarios;
-  SELECT nome, email FROM usuarios WHERE idade > 25 ORDER BY nome;
-  SELECT COUNT(*) FROM usuarios WHERE ativo = true;
-
-  # Atualizar dados
-  UPDATE usuarios SET idade = 29 WHERE email = 'joao@email.com';
-
-  # Deletar dados
-  DELETE FROM usuarios WHERE id = 3;
-
-  # Criar índice (acelerar consultas)
-  CREATE INDEX idx_usuarios_email ON usuarios(email);
-  CREATE INDEX idx_usuarios_nome ON usuarios USING gin(to_tsvector('portuguese', nome));
-
-  # Full-text search em português
-  SELECT * FROM usuarios
-  WHERE to_tsvector('portuguese', nome) @@ to_tsquery('portuguese', 'João');
-
-  # JSON no PostgreSQL
-  CREATE TABLE configuracoes (
-      id SERIAL PRIMARY KEY,
-      dados JSONB NOT NULL
-  );
-
-  INSERT INTO configuracoes (dados) VALUES
-      ('{"tema": "escuro", "idioma": "pt-BR", "notificacoes": true}');
-
-  SELECT dados->>'tema' FROM configuracoes;
-  SELECT * FROM configuracoes WHERE dados @> '{"idioma": "pt-BR"}';`}
-        />
-
-        <h2>5. Backup e Restauração</h2>
-        <CodeBlock
-          title="Backup do PostgreSQL"
-          code={`# Backup de um banco (formato SQL)
-  sudo -u postgres pg_dump meubanco > backup-$(date +%Y%m%d).sql
-
-  # Backup comprimido
-  sudo -u postgres pg_dump meubanco | gzip > backup-$(date +%Y%m%d).sql.gz
-
-  # Backup em formato custom (mais eficiente, permite restauração parcial)
-  sudo -u postgres pg_dump -Fc meubanco > backup-$(date +%Y%m%d).dump
-
-  # Backup de todos os bancos
-  sudo -u postgres pg_dumpall > backup-todos-$(date +%Y%m%d).sql
-
-  # Backup apenas da estrutura (sem dados)
-  sudo -u postgres pg_dump --schema-only meubanco > estrutura.sql
-
-  # Backup apenas dos dados (sem estrutura)
-  sudo -u postgres pg_dump --data-only meubanco > dados.sql
-
-  # === RESTAURAÇÃO ===
-
-  # Restaurar de SQL
-  sudo -u postgres psql meubanco < backup.sql
-
-  # Restaurar de dump custom
-  sudo -u postgres pg_restore -d meubanco backup.dump
-
-  # Restaurar para um banco novo
-  sudo -u postgres createdb meubanco_restaurado
-  sudo -u postgres pg_restore -d meubanco_restaurado backup.dump
-
-  # Restaurar apenas uma tabela
-  sudo -u postgres pg_restore -d meubanco -t usuarios backup.dump
-
-  # Script de backup automático
-  cat > /usr/local/bin/backup-postgres.sh << 'SCRIPT'
-  #!/bin/bash
-  BACKUP_DIR="/backup/postgres"
-  RETENTION=7
-  mkdir -p "$BACKUP_DIR"
-  DATE=$(date +%Y%m%d_%H%M)
-
-  sudo -u postgres pg_dumpall | gzip > "$BACKUP_DIR/all-$DATE.sql.gz"
-
-  find "$BACKUP_DIR" -name "*.sql.gz" -mtime +$RETENTION -delete
-
-  echo "Backup PostgreSQL concluído: $DATE"
-  SCRIPT
-  chmod +x /usr/local/bin/backup-postgres.sh`}
-        />
-
-        <h2>6. Tunning de Performance</h2>
-        <CodeBlock
-          title="Otimizar o PostgreSQL"
-          code={`# Editar postgresql.conf
-  sudo nano /etc/postgresql/16/main/postgresql.conf
-
-  # Configurações recomendadas (ajustar conforme RAM do servidor):
-
-  # Para servidor com 8GB de RAM:
-  # shared_buffers = 2GB            # 25% da RAM (cache de dados)
-  # effective_cache_size = 6GB      # 75% da RAM (estimativa de cache do SO)
-  # work_mem = 64MB                 # Memória por operação de sort/hash
-  # maintenance_work_mem = 512MB    # Memória para VACUUM, CREATE INDEX
-  # wal_buffers = 64MB              # Buffer para WAL (Write-Ahead Log)
-
-  # Para SSDs:
-  # random_page_cost = 1.1          # Padrão é 4.0 (para HDDs)
-  # effective_io_concurrency = 200  # Padrão é 1
-
-  # Conexões:
-  # max_connections = 100           # Ajustar conforme necessidade
-  # Usar PgBouncer para connection pooling em produção
-
-  # Logging:
-  # log_min_duration_statement = 1000  # Logar queries > 1 segundo
-  # log_statement = 'ddl'           # Logar DDL (CREATE, ALTER, DROP)
-
-  # Aplicar mudanças
-  sudo systemctl restart postgresql
-
-  # Verificar configuração atual
-  sudo -u postgres psql -c "SHOW shared_buffers;"
-  sudo -u postgres psql -c "SHOW work_mem;"
-
-  # Analisar uma query lenta
-  EXPLAIN ANALYZE SELECT * FROM usuarios WHERE email = 'joao@email.com';
-
-  # VACUUM — limpar dados mortos e atualizar estatísticas
-  sudo -u postgres vacuumdb --all --analyze
-
-  # Ver tamanho dos bancos
-  sudo -u postgres psql -c "SELECT pg_database.datname, pg_size_pretty(pg_database_size(pg_database.datname)) FROM pg_database ORDER BY pg_database_size(pg_database.datname) DESC;"`}
-        />
-
-        <h2>7. Extensões Úteis</h2>
-        <CodeBlock
-          title="Instalar e usar extensões do PostgreSQL"
-          code={`# Listar extensões disponíveis
-  sudo -u postgres psql -c "SELECT * FROM pg_available_extensions ORDER BY name;"
-
-  # Instalar extensões (dentro do psql, conectado ao banco)
-  CREATE EXTENSION IF NOT EXISTS "uuid-ossp";    -- Gerar UUIDs
-  CREATE EXTENSION IF NOT EXISTS "pgcrypto";     -- Criptografia
-  CREATE EXTENSION IF NOT EXISTS "pg_trgm";      -- Busca fuzzy/similar
-  CREATE EXTENSION IF NOT EXISTS "hstore";       -- Key-value store
-  CREATE EXTENSION IF NOT EXISTS "pg_stat_statements"; -- Análise de queries
-
-  # Gerar UUID
-  SELECT uuid_generate_v4();
-
-  # Busca fuzzy (encontrar nomes parecidos)
-  SELECT * FROM usuarios
-  WHERE similarity(nome, 'João') > 0.3
-  ORDER BY similarity(nome, 'João') DESC;
-
-  # PostGIS — dados geoespaciais
-  pkg install -y postgresql-16-postgis-3
-  # No psql:
-  CREATE EXTENSION postgis;
-
-  # pgAdmin — Interface gráfica para gerenciar PostgreSQL
-  pkg install -y pgadmin4
-  # Ou via container:
-  # docker run -p 5050:80 -e PGADMIN_DEFAULT_EMAIL=admin@admin.com -e PGADMIN_DEFAULT_PASSWORD=admin dpage/pgadmin4`}
-        />
-
-        <h2>Troubleshooting</h2>
-        <CodeBlock
-          title="Problemas comuns com PostgreSQL"
-          code={`# Erro: "FATAL: Peer authentication failed"
-  # Causa: pg_hba.conf usa "peer" mas você está tentando com senha
-  # Solução: Mudar para md5 ou scram-sha-256 no pg_hba.conf
-  sudo nano /etc/postgresql/16/main/pg_hba.conf
-  # Mudar "peer" para "scram-sha-256" na linha do local
-  sudo systemctl restart postgresql
-
-  # Erro: "could not connect to server: Connection refused"
-  # Verificar se o PostgreSQL está rodando:
-  sudo systemctl status postgresql
-  # Verificar se está escutando na porta correta:
-  sudo ss -tlnp | grep 5432
-
-  # Erro: "FATAL: role 'meuusuario' does not exist"
-  # Criar o usuário:
-  sudo -u postgres createuser meuusuario
-
-  # Erro: "FATAL: database 'meubanco' does not exist"
-  # Criar o banco:
-  sudo -u postgres createdb meubanco
-
-  # Reset de senha do PostgreSQL
-  sudo -u postgres psql -c "ALTER USER meuusuario WITH PASSWORD 'nova_senha';"
-
-  # Ver conexões ativas
-  sudo -u postgres psql -c "SELECT * FROM pg_stat_activity;"
-
-  # Matar uma conexão travada
-  sudo -u postgres psql -c "SELECT pg_terminate_backend(PID);"
-
-  # Ver logs do PostgreSQL
-  sudo tail -f /var/log/postgresql/postgresql-16-main.log`}
-        />
-
-        <AlertBox type="info" title="PostgreSQL vs MySQL">
-          O PostgreSQL é geralmente preferido para: dados complexos, JSON, full-text search,
-          integridade referencial forte e compliance. O MySQL é mais usado em: hospedagem
-          compartilhada, WordPress, aplicações web simples. Para novos projetos, o PostgreSQL
-          é a escolha mais versátil.
-        </AlertBox>
-      </PageContainer>
-    );
-  }
+}

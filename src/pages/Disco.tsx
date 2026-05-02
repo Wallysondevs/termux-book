@@ -1,193 +1,170 @@
 import { PageContainer } from "@/components/layout/PageContainer";
-  import { CodeBlock } from "@/components/ui/CodeBlock";
-  import { AlertBox } from "@/components/ui/AlertBox";
+import { CodeBlock } from "@/components/ui/CodeBlock";
+import { AlertBox } from "@/components/ui/AlertBox";
 
-  export default function Disco() {
-    return (
-      <PageContainer
-        title="Gerenciamento de Disco"
-        subtitle="Guia completo de gerenciamento de disco no Termux: espaço, uso, limpeza, montagem, quotas, SMART e monitoramento."
-        difficulty="iniciante"
-        timeToRead="20 min"
-      >
-        <p>
-          Gerenciar o espaço em disco é fundamental para manter o sistema saudável.
-          Disco cheio causa falhas em serviços, travamentos e perda de dados. Este guia
-          cobre como verificar uso, limpar espaço, montar discos e monitorar a saúde.
-        </p>
+export default function Disco() {
+  return (
+    <PageContainer
+      title="Gerenciamento de Storage no Termux"
+      subtitle="Como verificar uso de espaço, limpar cache do Termux e inspecionar o storage compartilhado do Android — sem cair na armadilha de ferramentas que precisam de root."
+      difficulty="iniciante"
+      timeToRead="15 min"
+    >
+      <AlertBox type="warning" title="O que NÃO funciona no Termux puro">
+        <ul>
+          <li>
+            <code>lsblk</code> — instala, mas mostra lista vazia: o Android não expõe
+            block devices ao app sem root.
+          </li>
+          <li>
+            <code>smartctl</code> / <code>smartmontools</code> — não há disco SATA/NVMe
+            no celular; o storage é eMMC/UFS gerenciado pelo controlador interno e não
+            responde a comandos SMART.
+          </li>
+          <li>
+            <code>badblocks</code>, <code>fdisk</code>, <code>parted</code>,{" "}
+            <code>mkfs.*</code> — nada disso encosta no storage real do Android sem root
+            completo + reflash.
+          </li>
+        </ul>
+        Use as ferramentas listadas abaixo, todas funcionam puro no Termux.
+      </AlertBox>
 
-        <h2>1. Verificar Uso de Disco</h2>
-        <CodeBlock
-          title="Comandos para verificar espaço"
-          code={`# Uso de disco por filesystem
-  df -h
-  # -h = human readable (GB, MB)
-  # -T = mostrar tipo do filesystem
-  df -hT
+      <h2>1. Verificar espaço em disco</h2>
+      <CodeBlock
+        title="df e du — funcionam normalmente"
+        code={`# Espaço por filesystem (visível ao Termux)
+df -h
+# Saídas típicas que importam:
+# /data           → onde está o $PREFIX (instalação do Termux)
+# /storage/emulated → storage compartilhado (DCIM, Downloads, etc.)
 
-  # Uso por diretório
-  du -sh /var/log          # Tamanho total de um diretório
-  du -sh /*                # Tamanho de cada diretório na raiz
-  du -sh /home/* | sort -rh  # Ordenar por tamanho
+# Espaço com tipo de filesystem
+df -hT
 
-  # Top 10 maiores diretórios
-  du -ah / 2>/dev/null | sort -rh | head -20
+# Tamanho de um diretório
+du -sh $PREFIX
+du -sh ~
 
-  # Ferramenta interativa (ncdu)
-  pkg install -y ncdu
-  ncdu /                   # Navegar visualmente
-  # Setas para navegar, d para deletar, q para sair
+# Tamanho de cada item dentro de uma pasta, ordenado
+du -sh ~/* 2>/dev/null | sort -rh | head
 
-  # Listar discos e partições
-  lsblk
-  lsblk -f    # Com filesystem e UUID
+# Top 20 maiores diretórios na home
+du -ah ~ 2>/dev/null | sort -rh | head -20
 
-  # Uso de inodes (número de arquivos)
-  df -ih    # Disco cheio de inodes = muitos arquivos pequenos`}
-        />
+# Espaço usado pelo storage compartilhado (após termux-setup-storage)
+du -sh ~/storage/shared/ 2>/dev/null
+du -sh ~/storage/dcim/ 2>/dev/null
+du -sh ~/storage/downloads/ 2>/dev/null
 
-        <h2>2. Limpar Espaço em Disco</h2>
-        <CodeBlock
-          title="Liberar espaço no Termux"
-          code={`# === PACOTES ===
-  # Limpar cache do apt
-  pkg clean          # Remove todos os .deb do cache
-  pkg autoclean      # Remove .deb de pacotes obsoletos
+# Inodes (número de arquivos)
+df -ih`}
+      />
 
-  # Remover pacotes não usados
-  pkg autoclean --purge
+      <h2>2. Navegador interativo — ncdu</h2>
+      <CodeBlock
+        title="Encontrar o que está enchendo o storage"
+        code={`pkg install -y ncdu
 
-  # === LOGS ===
-  # Logs antigos do journalctl
-  sudo journalctl --disk-usage
-  sudo journalctl --vacuum-size=100M   # Limitar a 100MB
-  sudo journalctl --vacuum-time=7d     # Manter só 7 dias
+# Analisar a home do Termux
+ncdu ~
 
-  # Logs antigos em /var/log
-  sudo find /var/log -name "*.gz" -delete
-  sudo find /var/log -name "*.old" -delete
+# Analisar o storage compartilhado
+ncdu ~/storage/shared
 
-  # === SNAP ===
-  # Remover versões antigas de snaps
-  snap list --all | awk '/disabled/{print $1, $3}' | \
-    while read name rev; do sudo snap remove "$name" --revision="$rev"; done
+# Atalhos:
+#   setas → navegar
+#   d     → deletar item
+#   q     → sair`}
+      />
 
-  # === CACHE DO USUÁRIO ===
-  du -sh ~/.cache
-  rm -rf ~/.cache/thumbnails/*
+      <h2>3. Informações de storage do Android (Termux:API)</h2>
+      <CodeBlock
+        title="termux-api: dados que só o Android tem"
+        code={`# Instalar (precisa também do app Termux:API da F-Droid)
+pkg install -y termux-api
 
-  # === DOCKER ===
-  docker system prune -af --volumes
+# Informações de storage do dispositivo
+termux-storage-get /tmp/escolhido.txt   # abre seletor de arquivo do Android
+termux-info | grep -i storage           # caminhos do Termux
 
-  # === KERNELS ANTIGOS ===
-  dpkg -l linux-image-* | grep ^ii
-  pkg autoclean --purge
+# Espaço total/livre do storage compartilhado em JSON
+df --output=source,size,used,avail,pcent ~/storage/shared`}
+      />
 
-  # === LIXEIRA ===
-  rm -rf ~/.local/share/Trash/*
+      <h2>4. Liberar espaço no Termux</h2>
+      <CodeBlock
+        title="Limpezas seguras"
+        code={`# Cache de pacotes (pkg/apt)
+pkg clean
+# Equivale a: apt clean — apaga ~/$PREFIX/var/cache/apt/archives/*.deb
 
-  # === ARQUIVOS TEMPORÁRIOS ===
-  sudo rm -rf /tmp/*`}
-        />
+# Pacotes que não são mais dependência de ninguém
+apt autoremove -y
 
-        <h2>3. Montar e Desmontar Discos</h2>
-        <CodeBlock
-          title="Montar discos e partições"
-          code={`# Montar disco/partição
-  sudo mkdir -p /mnt/dados
-  sudo mount /dev/sdb1 /mnt/dados
+# Cache do pip
+pip cache purge 2>/dev/null
 
-  # Montar com opções
-  sudo mount -o rw,noexec /dev/sdb1 /mnt/dados
-  # rw = leitura e escrita
-  # ro = somente leitura
-  # noexec = não permitir execução de programas
-  # nosuid = ignorar setuid
+# Cache do npm
+npm cache clean --force 2>/dev/null
 
-  # Montar pendrive
-  # Geralmente monta automaticamente no desktop
-  # Manual:
-  sudo mount /dev/sdc1 /mnt/pendrive
+# Cache do cargo
+rm -rf ~/.cargo/registry/cache/* 2>/dev/null
 
-  # Montar ISO
-  sudo mount -o loop imagem.iso /mnt/iso
+# Logs do Termux (se você gerou algum)
+ls -lh $PREFIX/var/log/ 2>/dev/null
 
-  # Desmontar
-  sudo umount /mnt/dados
-  # Se "device is busy":
-  sudo umount -l /mnt/dados     # Lazy unmount
-  sudo fuser -mv /mnt/dados     # Ver quem está usando
+# Lixeira do gerenciador de arquivos do Android (não é do Termux,
+# mas costuma ocupar espaço): apague pelo app de arquivos do celular.
 
-  # Montagem automática (fstab)
-  sudo blkid /dev/sdb1    # Obter UUID
-  # Adicionar ao /etc/fstab:
-  # UUID=xxxx-xxxx  /mnt/dados  ext4  defaults  0  2
+# Arquivos temporários
+rm -rf $PREFIX/tmp/* /data/data/com.termux/cache/* 2>/dev/null`}
+      />
 
-  # Testar fstab sem reiniciar
-  sudo mount -a`}
-        />
+      <h2>5. Backup do Termux antes de limpar</h2>
+      <CodeBlock
+        title="tar para o storage compartilhado"
+        code={`# Backup completo da home + $PREFIX (cuidado: pode dar 1-2 GB)
+termux-setup-storage   # garantir acesso
+tar --exclude='$PREFIX/tmp' -cJf \\
+  ~/storage/shared/termux-backup-$(date +%F).tar.xz \\
+  -C /data/data/com.termux/files home usr
 
-        <h2>4. Saúde do Disco (SMART)</h2>
-        <CodeBlock
-          title="Monitorar saúde do disco"
-          code={`# Instalar smartmontools
-  pkg install -y smartmontools
+# Backup só da home
+tar -cJf ~/storage/shared/home-$(date +%F).tar.xz -C ~ .`}
+      />
 
-  # Verificar saúde
-  sudo smartctl -H /dev/sda
-  # PASSED = OK, FAILED = disco morrendo!
+      <h2>6. Troubleshooting</h2>
+      <CodeBlock
+        title="Problemas comuns"
+        code={`# "No space left on device"
+df -h
+du -sh ~/* | sort -rh | head
+# Limpar cache de pacotes:
+pkg clean
 
-  # Informações detalhadas
-  sudo smartctl -a /dev/sda
+# pkg install falhando por falta de espaço
+apt clean && pkg autoclean
 
-  # Teste curto (poucos minutos)
-  sudo smartctl -t short /dev/sda
-  # Ver resultado:
-  sudo smartctl -l selftest /dev/sda
+# /sdcard cheio mas df mostra livre
+# Pode ser cache de apps Android (não dá para limpar pelo Termux):
+# vá em Configurações > Armazenamento > limpar cache no próprio Android.
 
-  # Teste longo (pode levar horas)
-  sudo smartctl -t long /dev/sda
+# ~/storage/ não existe ou está vazio
+termux-setup-storage
+# E aceite o popup de permissão.
 
-  # Monitoramento automático
-  sudo systemctl enable smartd
-  # Alerta por email se disco começar a falhar`}
-        />
+# Quero ver tamanho de cada app Android instalado
+# Não é possível pelo Termux (sem root). Use o app
+# Configurações > Apps do próprio Android.`}
+      />
 
-        <h2>Troubleshooting</h2>
-        <CodeBlock
-          title="Problemas comuns com disco"
-          code={`# Disco cheio — encontrar o que está usando espaço
-  du -sh /* 2>/dev/null | sort -rh | head -10
-  # Investigar os maiores:
-  du -sh /var/* | sort -rh | head
-
-  # "No space left on device" mas df mostra espaço livre
-  # Pode ser inodes esgotados:
-  df -ih
-  # Solução: Encontrar diretórios com muitos arquivos
-  find / -xdev -printf '%h\n' | sort | uniq -c | sort -rn | head
-
-  # Disco não aparece
-  sudo fdisk -l
-  dmesg | tail -20
-
-  # Filesystem corrompido
-  sudo umount /dev/sdb1
-  sudo fsck /dev/sdb1          # Verificar e reparar
-  sudo e2fsck -f /dev/sdb1     # Forçar verificação (ext4)
-
-  # Disco lento
-  # Verificar SMART:
-  sudo smartctl -H /dev/sda
-  # Verificar I/O:
-  iostat -x 1 5`}
-        />
-
-        <AlertBox type="warning" title="Monitore seus discos">
-          Discos falham sem aviso. Configure o <code>smartd</code> para monitoramento
-          automático e faça backups regulares. Se o SMART mostrar setores realocados
-          crescentes, <strong>substitua o disco imediatamente</strong>.
-        </AlertBox>
-      </PageContainer>
-    );
-  }
+      <AlertBox type="info" title="Resumo">
+        Para storage no Termux você só precisa de <code>df</code>, <code>du</code>,{" "}
+        <code>ncdu</code> e <code>pkg clean</code>. Tudo que envolve block devices, SMART
+        ou particionamento <strong>não é território do Termux</strong> — é território do
+        firmware Android.
+      </AlertBox>
+    </PageContainer>
+  );
+}

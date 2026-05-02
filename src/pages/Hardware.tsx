@@ -1,240 +1,219 @@
 import { PageContainer } from "@/components/layout/PageContainer";
-  import { CodeBlock } from "@/components/ui/CodeBlock";
-  import { AlertBox } from "@/components/ui/AlertBox";
+import { CodeBlock } from "@/components/ui/CodeBlock";
+import { AlertBox } from "@/components/ui/AlertBox";
 
-  export default function Hardware() {
-    return (
-      <PageContainer
-        title="Hardware — Informações e Diagnóstico"
-        subtitle="Guia completo para identificar hardware no Termux: CPU, memória, discos, placa de vídeo, rede, USB, sensores e drivers."
-        difficulty="iniciante"
-        timeToRead="25 min"
-      >
-        <p>
-          O Termux oferece diversas ferramentas para identificar, monitorar e diagnosticar
-          o hardware do seu computador. Saber usar essas ferramentas é essencial para
-          verificar compatibilidade, diagnosticar problemas e otimizar a performance.
-        </p>
+export default function Hardware() {
+  return (
+    <PageContainer
+      title="Hardware do Celular — Diagnóstico via Termux"
+      subtitle="Como inspecionar CPU, memória, bateria, sensores, Wi-Fi e telefonia do Android usando /proc, getprop e a Termux:API."
+      difficulty="iniciante"
+      timeToRead="20 min"
+    >
+      <AlertBox type="warning" title="Esqueça lspci, lsusb, dmidecode, lshw">
+        Essas ferramentas de PC <strong>não existem ou retornam vazio no
+        Android</strong>. O kernel do celular não expõe um barramento PCI/USB
+        tradicional para o espaço de usuário, e não há tabelas SMBIOS/DMI. Para
+        ver hardware do celular use <code>/proc/*</code>, <code>getprop</code> e
+        os comandos da <strong>Termux:API</strong>.
+      </AlertBox>
 
-        <h2>1. Visão Geral do Sistema</h2>
-        <CodeBlock
-          title="Informações gerais do hardware"
-          code={`# Resumo completo do hardware
-  sudo lshw -short
-  # Lista: CPU, memória, discos, rede, vídeo, etc.
+      <p>
+        Diferente de um PC, o hardware de um Android é fixo (não tem placas
+        plugáveis). Em troca, o aparelho tem coisas que PC não tem: bateria,
+        sensores (acelerômetro, giroscópio, luz), modem celular, GPS, NFC,
+        múltiplas câmeras e Wi-Fi/Bluetooth integrados. O Termux acessa parte
+        disso via a API do Android.
+      </p>
 
-  # Versão detalhada (muito longo!)
-  sudo lshw > hardware-completo.txt
+      <h2>1. Visão Geral do Aparelho</h2>
+      <CodeBlock
+        title="Identificação básica via getprop"
+        code={`# 'getprop' lê propriedades do sistema Android
+getprop ro.product.manufacturer    # ex: samsung, xiaomi, google
+getprop ro.product.model           # ex: SM-G998B, Pixel 7
+getprop ro.product.brand
+getprop ro.product.device
+getprop ro.build.version.release   # versão Android (ex: 14)
+getprop ro.build.version.sdk       # API level (ex: 34)
+getprop ro.product.cpu.abi         # arquitetura (ex: arm64-v8a)
+getprop ro.serialno                # geralmente vazio sem root no Android moderno
 
-  # Versão HTML (abre no navegador)
-  sudo lshw -html > hardware.html
+# Snapshot completo (centenas de linhas)
+getprop | head -50
 
-  # Informações do sistema
-  hostnamectl
-  # Mostra: hostname, kernel, arquitetura, etc.
+# Resumo "neofetch-like" no Termux
+pkg install neofetch
+neofetch`}
+      />
 
-  # Informações da BIOS/UEFI
-  sudo dmidecode -t bios
-  sudo dmidecode -t system    # Fabricante, modelo
+      <h2>2. CPU</h2>
+      <CodeBlock
+        title="Processador do celular"
+        code={`# Detalhes da CPU (cada núcleo aparece separadamente)
+cat /proc/cpuinfo
 
-  # Resumo rápido
-  neofetch    # Se instalado: pkg install neofetch
-  # Ou: screenfetch`}
-        />
+# Quantos núcleos
+nproc
 
-        <h2>2. CPU (Processador)</h2>
-        <CodeBlock
-          title="Informações do processador"
-          code={`# Informações detalhadas da CPU
-  lscpu
-  # Mostra: modelo, cores, threads, cache, flags
+# Frequência atual de cada núcleo (kHz)
+for c in /sys/devices/system/cpu/cpu[0-9]*/cpufreq/scaling_cur_freq; do
+  echo "$c: $(cat $c 2>/dev/null) kHz"
+done
 
-  # Via /proc
-  cat /proc/cpuinfo
-  # Cada core é listado separadamente
+# Frequência máxima/mínima suportada
+cat /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq 2>/dev/null
+cat /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_min_freq 2>/dev/null
 
-  # Resumo rápido
-  lscpu | grep "Model name"
-  nproc    # Número de cores/threads
+# Governador atual (geralmente 'schedutil' no Android)
+cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor 2>/dev/null
+# Sem root você NÃO consegue mudar o governador.
 
-  # Frequência atual
-  cat /proc/cpuinfo | grep "MHz"
-  # Ou: watch -n1 "grep MHz /proc/cpuinfo"
+# Big.LITTLE: muitos celulares têm núcleos rápidos + econômicos.
+# Veja com:
+cat /sys/devices/system/cpu/possible
+cat /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq
+cat /sys/devices/system/cpu/cpu7/cpufreq/cpuinfo_max_freq 2>/dev/null`}
+      />
 
-  # Governador de frequência (performance vs economia)
-  cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-  # Valores: performance, powersave, ondemand, schedutil
+      <h2>3. Memória RAM e Armazenamento</h2>
+      <CodeBlock
+        title="RAM, swap e espaço livre"
+        code={`# Uso de memória
+free -h
+# Em Android, 'Swap' geralmente vem do ZRAM (compressão em RAM),
+# não de partição de disco.
 
-  # Alterar para performance
-  echo "performance" | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
+# Detalhe completo
+cat /proc/meminfo | head -20
 
-  # Verificar vulnerabilidades de CPU (Spectre, Meltdown)
-  grep -r . /sys/devices/system/cpu/vulnerabilities/`}
-        />
+# Espaço de armazenamento visível ao Termux
+df -h $PREFIX                 # partição /data (interna do Termux)
+df -h /sdcard 2>/dev/null     # storage compartilhado (após termux-setup-storage)
 
-        <h2>3. Memória RAM</h2>
-        <CodeBlock
-          title="Informações de memória"
-          code={`# Uso de memória
-  free -h
-  # Saída:
-  #               total   used   free  shared  buff/cache  available
-  # Mem:          16Gi    8.2Gi  2.1Gi  512Mi   5.7Gi      7.0Gi
-  # Swap:          4Gi    0.0Gi  4.0Gi
+# Tamanho do PREFIX (instalação do Termux)
+du -sh $PREFIX
 
-  # "available" = memória realmente disponível
-  # "buff/cache" = memória usada como cache (liberável)
+# Monitor em tempo real
+pkg install htop
+htop`}
+      />
 
-  # Detalhes dos módulos de RAM
-  sudo dmidecode -t memory
-  # Mostra: slots, tamanho por módulo, tipo (DDR4/DDR5), velocidade
+      <h2>4. Bateria (Termux:API)</h2>
+      <CodeBlock
+        title="Status da bateria via termux-api"
+        code={`# Instalar
+pkg install termux-api
+# E instale o app companion 'Termux:API' do F-Droid.
 
-  # Slots de memória
-  sudo dmidecode -t memory | grep -E "Size|Type:|Speed"
+# Status completo (JSON)
+termux-battery-status
+# Saída exemplo:
+# {
+#   "health": "GOOD",
+#   "percentage": 87,
+#   "plugged": "UNPLUGGED",
+#   "status": "DISCHARGING",
+#   "temperature": 31.2,
+#   "current": -512000
+# }
 
-  # Uso detalhado
-  cat /proc/meminfo
+# Extrair só a porcentagem
+termux-battery-status | jq -r .percentage
 
-  # Monitorar uso em tempo real
-  watch -n1 free -h
-  # Ou: vmstat 1`}
-        />
+# Monitorar continuamente
+while true; do
+  echo "$(date +%T) -> $(termux-battery-status | jq -r .percentage)%"
+  sleep 30
+done`}
+      />
 
-        <h2>4. Discos e Armazenamento</h2>
-        <CodeBlock
-          title="Informações de discos"
-          code={`# Listar discos e partições
-  lsblk
-  # Saída formatada com tipo e tamanho
+      <h2>5. Sensores e Telefonia</h2>
+      <CodeBlock
+        title="Acelerômetro, Wi-Fi, telefonia, localização"
+        code={`# Listar todos os sensores disponíveis
+termux-sensor -l
 
-  # Espaço em disco
-  df -hT
-  # -h = human readable, -T = tipo de filesystem
+# Ler 3 amostras do acelerômetro
+termux-sensor -s accelerometer -n 3
 
-  # Informações SMART (saúde do disco)
-  pkg install -y smartmontools
-  sudo smartctl -a /dev/sda
-  # Ver: temperatura, horas de uso, erros
-  sudo smartctl -H /dev/sda    # Apenas saúde (PASSED = OK)
+# Wi-Fi conectado (SSID, frequência, IP, RSSI)
+termux-wifi-connectioninfo
 
-  # Benchmark de disco
-  # Velocidade de leitura:
-  sudo hdparm -tT /dev/sda
-  # Velocidade de escrita:
-  dd if=/dev/zero of=/tmp/test bs=1M count=1024 oflag=direct
-  rm /tmp/test
+# Redes Wi-Fi visíveis (varredura)
+termux-wifi-scaninfo
 
-  # Identificar SSD vs HDD
-  cat /sys/block/sda/queue/rotational
-  # 0 = SSD, 1 = HDD
+# Informações da telefonia (operadora, tipo de rede)
+termux-telephony-deviceinfo
+termux-telephony-cellinfo     # torres celulares próximas
 
-  # Informações detalhadas de disco
-  sudo hdparm -I /dev/sda
+# Localização (GPS / network)
+termux-location -p gps
 
-  # NVMe
-  sudo nvme list
-  sudo nvme smart-log /dev/nvme0n1`}
-        />
+# Volume de áudio
+termux-volume
 
-        <h2>5. Placa de Vídeo (GPU)</h2>
-        <CodeBlock
-          title="Informações e drivers de vídeo"
-          code={`# Identificar GPU
-  lspci | grep -i vga
-  lspci | grep -i 3d    # GPU dedicada NVIDIA
+# Lanterna / câmera flash
+termux-torch on
+termux-torch off
 
-  # Detalhes
-  sudo lshw -c video
+# Câmera — listar e tirar foto
+termux-camera-info
+termux-camera-photo -c 0 ~/foto.jpg`}
+      />
 
-  # NVIDIA
-  nvidia-smi    # Se driver NVIDIA instalado
-  # Mostra: modelo, memória, uso, temperatura
+      <h2>6. Rede e Conectividade</h2>
+      <CodeBlock
+        title="Interfaces e endereços (read-only)"
+        code={`# Interfaces de rede (ifconfig pode estar limitado)
+ifconfig 2>/dev/null
+ip addr show 2>/dev/null
 
-  # Instalar driver NVIDIA (recomendado)
-  termux-drivers list
-  sudo Termux-drivers install
-  # Ou versão específica:
-  pkg install nvidia-driver-535
+# IP público (precisa internet)
+curl -s https://ifconfig.me
 
-  # AMD/Intel
-  glxinfo | grep "OpenGL renderer"
-  # Instalar: pkg install mesa-utils
+# Termux:API para Wi-Fi
+termux-wifi-connectioninfo | jq
 
-  # Verificar driver em uso
-  lspci -k | grep -A 2 VGA`}
-        />
+# Sem root NÃO dá pra:
+# - alterar IP, rotas ou MAC
+# - escanear pacotes em modo monitor
+# - abrir portas < 1024
+# Tudo isso é restrição do Android.`}
+      />
 
-        <h2>6. Dispositivos USB e Rede</h2>
-        <CodeBlock
-          title="USB, rede e outros dispositivos"
-          code={`# Dispositivos USB
-  lsusb
-  # Lista todos os dispositivos USB conectados
-  lsusb -t    # Estrutura em árvore
+      <h2>Troubleshooting</h2>
+      <CodeBlock
+        title="Problemas comuns"
+        code={`# 'lspci' / 'lsusb' / 'dmidecode' não retornam nada
+# → Esperado. Esses comandos pressupõem barramentos do PC que o
+#   Android não expõe ao espaço de usuário. Use getprop e /proc.
 
-  # Dispositivos PCI
-  lspci
-  lspci -v    # Detalhado
+# termux-* dizem "API not available"
+# → Você instalou o pacote 'termux-api' mas falta o APP companion
+#   'Termux:API' (F-Droid ou GitHub). Os dois são necessários.
 
-  # Interfaces de rede
-  ip link show
-  lspci | grep -i net     # Placa de rede
-  lsusb | grep -i net     # Adaptador USB de rede
-  iwconfig                 # Info de Wi-Fi
+# termux-sensor / termux-location não retornam dados
+# → Permissões. No Android, vá em:
+#   Configurações → Apps → Termux:API → Permissões → conceda
+#   Localização, Sensores, etc.
 
-  # Bluetooth
-  hciconfig -a
-  bluetoothctl show
+# Frequência da CPU sempre mostra o mínimo
+# → Android pode estar economizando energia. Plugue na tomada
+#   e cheque sob carga. Não tente forçar o governador sem root.
 
-  # Sensores de temperatura
-  pkg install -y lm-sensors
-  sudo sensors-detect    # Detectar sensores (responda YES)
-  sensors
-  # Mostra temperatura da CPU, GPU, disco
+# Bateria esquenta ou drena rápido com Termux
+# → Provavelmente um wake-lock esquecido ou laço apertado.
+termux-wake-unlock
+# E revise scripts em ~/.termux/boot/.`}
+      />
 
-  # Monitorar hardware em tempo real
-  pkg install -y htop
-  htop
-  # Ou: btop (mais bonito)
-  pkg install -y btop
-  btop`}
-        />
-
-        <h2>Troubleshooting</h2>
-        <CodeBlock
-          title="Problemas comuns de hardware"
-          code={`# Hardware não reconhecido
-  # Verificar no dmesg:
-  dmesg | tail -30
-  dmesg | grep -i error
-
-  # Driver de Wi-Fi não funciona
-  # Identificar a placa:
-  lspci | grep -i wireless
-  # Instalar drivers:
-  sudo Termux-drivers install
-
-  # USB não detectado
-  # Verificar dmesg ao conectar:
-  dmesg -w    # Modo "watch" — mostra em tempo real
-  # Conectar o USB e ver a saída
-
-  # Verificar logs de hardware
-  journalctl -b | grep -i error
-  journalctl -b | grep -i firmware
-
-  # Testar memória RAM (erros de memória)
-  # Reiniciar → GRUB → "Memory test (memtest86+)"
-  # Ou via terminal:
-  pkg install -y memtester
-  sudo memtester 1G 1    # Testar 1GB, 1 vez`}
-        />
-
-        <AlertBox type="info" title="Ferramentas gráficas de hardware">
-          Para uma visão gráfica: <code>hardinfo</code> (Informações do Sistema),
-          <code>gnome-disks</code> (Discos), <code>nvidia-settings</code> (GPU NVIDIA).
-          Instale com <code>pkg install hardinfo gnome-disk-utility</code>.
-        </AlertBox>
-      </PageContainer>
-    );
-  }
+      <AlertBox type="info" title="Quer mais detalhes do hardware?">
+        Apps Android como <strong>CPU-Z</strong>, <strong>AIDA64</strong> e{" "}
+        <strong>Device Info HW</strong> mostram informações do SoC, sensores e
+        câmeras com muito mais profundidade que o Termux consegue ler. Use-os em
+        paralelo quando precisar de inventário completo do aparelho.
+      </AlertBox>
+    </PageContainer>
+  );
+}

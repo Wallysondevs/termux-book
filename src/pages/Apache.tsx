@@ -1,425 +1,276 @@
 import { PageContainer } from "@/components/layout/PageContainer";
-import { Terminal, Command, File } from "@/components/ui/Terminal";
-import { InfoBox } from "@/components/ui/InfoBox";
+import { CodeBlock } from "@/components/ui/CodeBlock";
+import { AlertBox } from "@/components/ui/AlertBox";
 
 export default function Apache() {
   return (
     <PageContainer
-      title="Apache HTTP Server — apache2 no Termux"
-      subtitle="O servidor web mais antigo e ainda mais flexível: módulos, virtual hosts, .htaccess, mod_rewrite, mod_ssl, mod_proxy e Let's Encrypt."
+      title="Apache HTTP Server no Termux"
+      subtitle="Instalar e configurar o apache2 rodando nativo no Termux: virtual hosts, mod_rewrite e .htaccess no Android sem root."
       difficulty="intermediario"
-      timeToRead="50 min"
-      category="Servidores Web"
+      timeToRead="25 min"
     >
       <p>
-        O <strong>Apache HTTP Server</strong> nasceu em 1995 como sucessor do servidor NCSA
-        HTTPd e literalmente carregou a web nas costas durante a década de 90 e 2000. Foi
-        projetado em torno de uma arquitetura de <strong>módulos carregáveis</strong>: o
-        núcleo é minúsculo e tudo (PHP, SSL, autenticação, compressão, rewrite, proxy) entra
-        como módulo dinâmico. Essa modularidade é justamente o que ainda o torna a primeira
-        escolha quando precisamos de <code>.htaccess</code>, <code>mod_rewrite</code> com
-        regras complexas ou integração mod_php embutida.
-      </p>
-      <p>
-        No Termux o pacote chama-se <code>apache2</code> e o empacotamento Debian introduz
-        diretórios extras (<code>sites-available</code>, <code>mods-available</code>) e
-        ferramentas <code>a2ensite</code>/<code>a2enmod</code> que tornam a administração
-        bastante agradável.
+        O <strong>Apache HTTP Server</strong> nasceu em 1995 e é famoso pela
+        arquitetura de <strong>módulos carregáveis</strong> e pelo suporte a
+        <code> .htaccess</code>. No Termux ele roda nativo (pacote
+        <code> apache2</code>) — útil quando você precisa testar regras
+        complexas de <code>mod_rewrite</code>, hospedar um WordPress local ou
+        ensinar/estudar virtual hosts diretamente do celular.
       </p>
 
-      <InfoBox type="info" title="Apache no Termux 0.118 (Noble)">
-        Versão empacotada: <strong>Apache 2.4.58</strong>. Estrutura totalmente Debian-style
-        (não confunda com a estrutura "vanilla" usada em CentOS/RHEL).
-      </InfoBox>
+      <AlertBox type="info" title="Caveats do Apache no Termux">
+        <ul>
+          <li><strong>Portas &lt; 1024 não bindam sem root</strong>. Use <code>8080</code> em vez de <code>80</code> e <code>8443</code> em vez de <code>443</code>.</li>
+          <li>Não existe <code>systemd</code>, <code>www-data</code>, <code>sudo</code>, <code>a2ensite</code>, <code>a2enmod</code> nem a estrutura <code>sites-available</code>. Tudo é editado direto em <code>$PREFIX/etc/apache2/httpd.conf</code>.</li>
+          <li>Caminhos vivem em <code>$PREFIX</code> (<code>/data/data/com.termux/files/usr</code>), não em <code>/etc</code> ou <code>/var</code>.</li>
+          <li>O IP do celular muda entre Wi-Fi e dados móveis e em 4G/5G você costuma estar atrás do CG-NAT da operadora.</li>
+          <li>Pra subir como serviço use <code>termux-services</code> (runit) — ou simplesmente o binário <code>httpd</code>.</li>
+        </ul>
+      </AlertBox>
 
       <h2>1. Instalação</h2>
+      <CodeBlock
+        title="Instalar o Apache no Termux"
+        code={`pkg update && pkg upgrade -y
+pkg install -y apache2
 
-      <Terminal title="wallyson@termux: ~">
-        <Command root command="pkg update && pkg install -y apache2"
-          output={`Reading package lists... Done
-Building dependency tree... Done
-The following additional packages will be installed:
-  apache2-bin apache2-data apache2-utils libapr1t64 libaprutil1-dbd-sqlite3
-  libaprutil1-ldap libaprutil1t64 liblua5.3-0 ssl-cert
-Suggested packages:
-  apache2-doc apache2-suexec-pristine | apache2-suexec-custom www-browser
-  openssl-blacklist
-The following NEW packages will be installed:
-  apache2 apache2-bin apache2-data apache2-utils libapr1t64
-  libaprutil1-dbd-sqlite3 libaprutil1-ldap libaprutil1t64 liblua5.3-0 ssl-cert
-0 upgraded, 10 newly installed, 0 to remove and 0 not upgraded.
-Need to get 1.957 kB of archives.
-After this operation, 8.302 kB of additional disk space will be used.
-Get:1 http://packages.termux.dev/apt/termux-main noble/main amd64 libapr1t64 amd64 1.7.2-3.termux.1 [108 kB]
-...
-Setting up apache2 (2.4.58-termux.4) ...
-Enabling module mpm_event.
-Enabling module authz_core.
-Enabling module authz_host.
-Enabling module authn_core.
-Enabling module auth_basic.
-...
-Created symlink /etc/systemd/system/multi-user.target.wants/apache2.service → /lib/systemd/system/apache2.service.
-Created symlink /etc/systemd/system/multi-user.target.wants/apache-htcacheclean.service → /lib/systemd/system/apache-htcacheclean.service.
-Processing triggers for ufw (0.36.2-6) ...
-Processing triggers for man-db (2.12.0-4build2) ...`}
-        />
-        <Command command="apache2 -v"
-          output={`Server version: Apache/2.4.58 (Termux)
-Server built:   2024-04-30T18:28:45`} />
-        <Command command="apache2 -M | head -20"
-          comment="lista módulos atualmente carregados"
-          output={`Loaded Modules:
- core_module (static)
- so_module (static)
- watchdog_module (static)
- http_module (static)
- log_config_module (static)
- logio_module (static)
- version_module (static)
- unixd_module (static)
- access_compat_module (shared)
- alias_module (shared)
- auth_basic_module (shared)
- authn_core_module (shared)
- authn_file_module (shared)
- authz_core_module (shared)
- authz_host_module (shared)
- authz_user_module (shared)
- autoindex_module (shared)
- deflate_module (shared)
- dir_module (shared)
- env_module (shared)
- filter_module (shared)
- mime_module (shared)
- mpm_event_module (shared)
- negotiation_module (shared)
- reqtimeout_module (shared)
- setenvif_module (shared)
- status_module (shared)`} />
-        <Command root command="systemctl status apache2 --no-pager"
-          output={`● apache2.service - The Apache HTTP Server
-     Loaded: loaded (/lib/systemd/system/apache2.service; enabled; preset: enabled)
-     Active: active (running) since Sat 2025-04-12 19:00:11 -03; 8s ago
-       Docs: https://httpd.apache.org/docs/2.4/
-    Process: 5102 ExecStart=/usr/sbin/apachectl start (code=exited, status=0/SUCCESS)
-   Main PID: 5106 (apache2)
-      Tasks: 55 (limit: 9265)
-     Memory: 5.2M (peak: 6.0M)
-        CPU: 95ms
-     CGroup: /system.slice/apache2.service
-             ├─5106 /usr/sbin/apache2 -k start
-             ├─5108 /usr/sbin/apache2 -k start
-             └─5109 /usr/sbin/apache2 -k start
+# Confere a versão (binário se chama "httpd" no Termux)
+httpd -v
+# Server version: Apache/2.4.x (Unix)
 
-abr 12 19:00:11 termux systemd[1]: Starting apache2.service - The Apache HTTP Server...
-abr 12 19:00:11 termux apachectl[5105]: AH00558: apache2: Could not reliably determine the server's fully qualified domain name, using 127.0.1.1.
-abr 12 19:00:11 termux systemd[1]: Started apache2.service - The Apache HTTP Server.`} />
-        <Command command="curl -I http://localhost"
-          output={`HTTP/1.1 200 OK
-Date: Sat, 12 Apr 2025 22:00:21 GMT
-Server: Apache/2.4.58 (Termux)
-Last-Modified: Sat, 12 Apr 2025 22:00:11 GMT
-ETag: "29cd-633c6bd4b5cba"
-Accept-Ranges: bytes
-Content-Length: 10701
-Vary: Accept-Encoding
-Content-Type: text/html; charset=UTF-8`} />
-      </Terminal>
+# Lista módulos compilados
+httpd -l
 
-      <h2>2. Estrutura de diretórios</h2>
+# Lista módulos carregados via httpd.conf
+httpd -M`}
+      />
 
-      <Terminal>
-        <Command command="tree -L 2 /etc/apache2"
-          output={`/etc/apache2
-├── apache2.conf                # arquivo MASTER
-├── conf-available             # snippets globais (charset, security, serve-cgi-bin)
-│   ├── charset.conf
-│   ├── localized-error-pages.conf
-│   ├── other-vhosts-access-log.conf
-│   ├── security.conf
-│   └── serve-cgi-bin.conf
-├── conf-enabled               # symlinks dos snippets ativos
-├── envvars                    # variáveis: APACHE_LOG_DIR, APACHE_RUN_USER...
-├── magic
-├── mods-available             # 100+ módulos disponíveis
-│   ├── alias.conf
-│   ├── alias.load
-│   ├── deflate.conf
-│   ├── deflate.load
-│   ├── ssl.conf
-│   ├── ssl.load
-│   └── ...
-├── mods-enabled               # symlinks dos módulos carregados
-├── ports.conf                 # quais portas escutar (Listen 80 / Listen 443)
-├── sites-available
-│   ├── 000-default.conf
-│   └── default-ssl.conf
-└── sites-enabled
-    └── 000-default.conf -> ../sites-available/000-default.conf
+      <h2>2. Estrutura de diretórios no Termux</h2>
+      <CodeBlock
+        title="Onde mora o que"
+        code={`# Configuração principal
+$PREFIX/etc/apache2/httpd.conf
 
-7 directories, ~150 files`} />
-      </Terminal>
+# Configurações extras (incluídas no httpd.conf)
+$PREFIX/etc/apache2/extra/
 
-      <h2>3. Comandos <code>a2*</code> (Apache helpers do Debian)</h2>
+# DocumentRoot padrão
+$PREFIX/share/apache2/default-site/htdocs/
 
-      <table>
-        <thead>
-          <tr><th>Comando</th><th>O que faz</th><th>Equivalente "manual"</th></tr>
-        </thead>
-        <tbody>
-          <tr><td><code>a2enmod &lt;mod&gt;</code></td><td>Ativa módulo</td><td><code>ln -s ../mods-available/X.load mods-enabled/</code></td></tr>
-          <tr><td><code>a2dismod &lt;mod&gt;</code></td><td>Desativa módulo</td><td><code>rm /etc/apache2/mods-enabled/X.*</code></td></tr>
-          <tr><td><code>a2ensite &lt;site&gt;</code></td><td>Ativa virtual host</td><td><code>ln -s ../sites-available/X.conf sites-enabled/</code></td></tr>
-          <tr><td><code>a2dissite &lt;site&gt;</code></td><td>Desativa vhost</td><td><code>rm sites-enabled/X.conf</code></td></tr>
-          <tr><td><code>a2enconf &lt;c&gt;</code></td><td>Ativa snippet em conf-enabled</td><td>idem</td></tr>
-          <tr><td><code>a2query -m</code></td><td>Lista módulos carregados</td><td><code>apache2 -M</code></td></tr>
-        </tbody>
-      </table>
+# Logs
+$PREFIX/var/log/apache2/access_log
+$PREFIX/var/log/apache2/error_log
 
-      <Terminal>
-        <Command root command="a2enmod rewrite headers ssl deflate expires"
-          output={`Enabling module rewrite.
-Enabling module headers.
-Considering dependency setenvif for ssl:
-Module setenvif already enabled
-Considering dependency mime for ssl:
-Module mime already enabled
-Considering dependency socache_shmcb for ssl:
-Enabling module socache_shmcb.
-Enabling module ssl.
-See /usr/share/doc/apache2/README.Debian.gz on how to configure SSL and create self-signed certificates.
-Module deflate already enabled
-Enabling module expires.
-To activate the new configuration, you need to run:
-  systemctl restart apache2`} />
-        <Command root command="systemctl restart apache2" />
-        <Command command="apache2ctl configtest"
-          output={`Syntax OK`} />
-      </Terminal>
+# Binários
+$PREFIX/bin/httpd
+$PREFIX/bin/apachectl`}
+      />
 
-      <h2>4. Virtual Hosts</h2>
+      <h2>3. Subir o Apache (sem systemd)</h2>
+      <CodeBlock
+        title="Iniciar e parar manualmente"
+        code={`# Sobe o Apache (como daemon, em background)
+httpd
 
-      <p>Vamos criar dois sites: <code>blog.exemplo.com.br</code> e <code>app.exemplo.com.br</code>.</p>
+# Equivalente, com checagens extras
+apachectl start
 
-      <Terminal>
-        <Command root command="mkdir -p /var/www/blog.exemplo.com.br/public_html" />
-        <Command root command="chown -R www-data:www-data /var/www/blog.exemplo.com.br" />
-        <Command root command={`bash -c 'echo "<h1>Blog do Wallyson</h1>" > /var/www/blog.exemplo.com.br/public_html/index.html'`} />
-        <Command root command="nano /etc/apache2/sites-available/blog.exemplo.com.br.conf" />
-      </Terminal>
+# Para
+apachectl stop
 
-      <File path="/etc/apache2/sites-available/blog.exemplo.com.br.conf">
-{`<VirtualHost *:80>
-    ServerName  blog.exemplo.com.br
-    ServerAlias www.blog.exemplo.com.br
-    ServerAdmin webmaster@exemplo.com.br
+# Recarrega a config (graceful — não dropa conexões)
+apachectl graceful
 
-    DocumentRoot /var/www/blog.exemplo.com.br/public_html
+# Testa a config antes de aplicar
+apachectl configtest
+# Saída esperada: Syntax OK
 
-    <Directory /var/www/blog.exemplo.com.br/public_html>
-        Options -Indexes +FollowSymLinks
-        AllowOverride All           # permite .htaccess
-        Require all granted
-    </Directory>
+# Acesso local
+curl http://localhost:8080`}
+      />
 
-    ErrorLog  ` + '${APACHE_LOG_DIR}' + `/blog.error.log
-    CustomLog ` + '${APACHE_LOG_DIR}' + `/blog.access.log combined
-    LogLevel warn
-</VirtualHost>`}
-      </File>
+      <AlertBox type="warning" title="Mude a porta antes de subir">
+        Edite <code>$PREFIX/etc/apache2/httpd.conf</code> e troque
+        <code> Listen 80</code> por <code>Listen 8080</code>. Sem isso o
+        Apache vai falhar com <code>permission denied</code> ao tentar
+        bindar a porta 80.
+      </AlertBox>
 
-      <InfoBox type="note" title="A variável APACHE_LOG_DIR">
-        Essa variável é definida em <code>/etc/apache2/envvars</code> e expandida pelo
-        próprio Apache. Vale também: <code>APACHE_RUN_USER</code> (default: www-data),
-        <code>APACHE_RUN_GROUP</code>, <code>APACHE_PID_FILE</code>, <code>APACHE_LOCK_DIR</code>.
-      </InfoBox>
+      <h2>4. Como serviço com termux-services</h2>
+      <CodeBlock
+        title="apache2 como sv"
+        code={`pkg install -y termux-services
 
-      <Terminal>
-        <Command root command="a2ensite blog.exemplo.com.br.conf"
-          output={`Enabling site blog.exemplo.com.br.
-To activate the new configuration, you need to run:
-  systemctl reload apache2`} />
-        <Command root command="a2dissite 000-default.conf"
-          output={`Site 000-default disabled.
-To activate the new configuration, you need to run:
-  systemctl reload apache2`} />
-        <Command root command="apache2ctl configtest && systemctl reload apache2"
-          output={`Syntax OK`} />
-        <Command command={`curl -H "Host: blog.exemplo.com.br" http://localhost`}
-          output={`<h1>Blog do Wallyson</h1>`} />
-      </Terminal>
+# Reinicie o Termux (saia e entre de novo) pra o sv carregar
+sv-enable apache2
 
-      <h2>5. <code>.htaccess</code> e <code>AllowOverride</code></h2>
+sv up apache2
+sv status apache2
+sv down apache2
+
+# Logs do serviço
+tail -f $PREFIX/var/log/sv/apache2/current`}
+      />
+
+      <h2>5. httpd.conf — anatomia mínima</h2>
       <p>
-        O Apache permite que diretivas sejam declaradas em arquivos <code>.htaccess</code>
-        dentro do próprio DocumentRoot — perfeito para shared hosting, WordPress, etc. O
-        custo é desempenho (Apache lê o .htaccess a CADA request).
+        O Apache do Termux usa o esquema clássico "vanilla" (um único
+        <code> httpd.conf</code>), não o esquema Debian. Você adiciona
+        sites e módulos no próprio arquivo (ou via <code>Include</code>).
       </p>
+      <CodeBlock
+        title="$PREFIX/etc/apache2/httpd.conf (trechos importantes)"
+        language="apache"
+        code={`ServerRoot "/data/data/com.termux/files/usr"
 
-      <File path="/var/www/blog.exemplo.com.br/public_html/.htaccess">
-{`# Permite que .html seja servido sem extensão
-RewriteEngine On
-RewriteCond %{REQUEST_FILENAME}.html -f
-RewriteRule ^([^.]+)$ $1.html [L]
+# Porta — sempre >= 1024 no Termux
+Listen 8080
 
-# Bloqueia listagem de diretório
-Options -Indexes
+# Módulos (descomente conforme precisar)
+LoadModule rewrite_module     libexec/apache2/mod_rewrite.so
+LoadModule headers_module     libexec/apache2/mod_headers.so
+LoadModule deflate_module     libexec/apache2/mod_deflate.so
+LoadModule expires_module     libexec/apache2/mod_expires.so
+LoadModule ssl_module         libexec/apache2/mod_ssl.so
+LoadModule proxy_module       libexec/apache2/mod_proxy.so
+LoadModule proxy_http_module  libexec/apache2/mod_proxy_http.so
 
-# Define headers
-<IfModule mod_headers.c>
-    Header set X-Frame-Options "SAMEORIGIN"
-    Header set X-Content-Type-Options "nosniff"
-</IfModule>
+# Sem User/Group www-data — comente as linhas:
+# User  daemon
+# Group daemon
 
-# Cache de imagens
-<IfModule mod_expires.c>
-    ExpiresActive On
-    ExpiresByType image/jpeg "access plus 1 month"
-    ExpiresByType image/png  "access plus 1 month"
-    ExpiresByType text/css   "access plus 1 week"
-    ExpiresByType application/javascript "access plus 1 week"
-</IfModule>
+ServerName localhost:8080
 
-# Bloqueia acesso a arquivos sensíveis
-<FilesMatch "^\\.(htaccess|env|git)">
-    Require all denied
-</FilesMatch>`}
-      </File>
+DocumentRoot "/data/data/com.termux/files/usr/share/apache2/default-site/htdocs"
 
-      <InfoBox type="warning" title="AllowOverride">
-        Para <code>.htaccess</code> funcionar você PRECISA ter <code>AllowOverride All</code>
-        no <code>&lt;Directory&gt;</code>. Se for <code>None</code> (default), o Apache nem
-        abre o arquivo — economizando I/O. Em produção alta performance, prefira mover as
-        regras para o <code>&lt;VirtualHost&gt;</code> e manter <code>AllowOverride None</code>.
-      </InfoBox>
+<Directory "/data/data/com.termux/files/usr/share/apache2/default-site/htdocs">
+    Options Indexes FollowSymLinks
+    AllowOverride All
+    Require all granted
+</Directory>
 
-      <h2>6. <code>mod_rewrite</code> — URL rewriting</h2>
+# Logs
+ErrorLog  "/data/data/com.termux/files/usr/var/log/apache2/error_log"
+CustomLog "/data/data/com.termux/files/usr/var/log/apache2/access_log" common
 
-      <File path="exemplos típicos de mod_rewrite">
-{`# 1. Forçar HTTPS
-RewriteEngine On
-RewriteCond %{HTTPS} !=on
-RewriteRule ^/?(.*) https://%{SERVER_NAME}/$1 [R=301,L]
+# Vhosts extras
+Include etc/apache2/extra/httpd-vhosts.conf`}
+      />
 
-# 2. Forçar www
-RewriteCond %{HTTP_HOST} ^exemplo\\.com\\.br$ [NC]
-RewriteRule ^(.*)$ https://www.exemplo.com.br/$1 [R=301,L]
+      <h2>6. Servir uma página</h2>
+      <CodeBlock
+        title="Sua primeira página"
+        code={`mkdir -p $PREFIX/share/apache2/default-site/htdocs
+cat > $PREFIX/share/apache2/default-site/htdocs/index.html <<'HTML'
+<!doctype html>
+<html><body>
+  <h1>Apache rodando no Termux!</h1>
+</body></html>
+HTML
 
-# 3. Remover www
-RewriteCond %{HTTP_HOST} ^www\\.(.+)$ [NC]
-RewriteRule ^(.*)$ https://%1/$1 [R=301,L]
+apachectl configtest && apachectl graceful
+curl http://localhost:8080`}
+      />
 
-# 4. Front-controller (Laravel/Symfony/WordPress)
-RewriteEngine On
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^ index.php [QSA,L]
+      <h2>7. Virtual Hosts</h2>
+      <p>
+        Edite <code>$PREFIX/etc/apache2/extra/httpd-vhosts.conf</code> (já
+        incluído pelo <code>httpd.conf</code>):
+      </p>
+      <CodeBlock
+        title="$PREFIX/etc/apache2/extra/httpd-vhosts.conf"
+        language="apache"
+        code={`<VirtualHost *:8080>
+    ServerName  blog.local
+    DocumentRoot "/data/data/com.termux/files/home/sites/blog"
 
-# 5. Manter /api/* mas com versionamento
-RewriteRule ^api/v1/(.*)$ /backend.php?version=1&path=$1 [L,QSA]
-
-# 6. Bloquear bots ruins por User-Agent
-RewriteCond %{HTTP_USER_AGENT} (semrush|ahrefs|mj12bot) [NC]
-RewriteRule .* - [F,L]   # F = 403 Forbidden`}
-      </File>
-
-      <p>Flags mais úteis do <code>RewriteRule</code>:</p>
-      <table>
-        <thead><tr><th>Flag</th><th>Significado</th></tr></thead>
-        <tbody>
-          <tr><td><code>L</code></td><td>Last — para de processar regras</td></tr>
-          <tr><td><code>R=301</code></td><td>Redirect permanente</td></tr>
-          <tr><td><code>R=302</code></td><td>Redirect temporário</td></tr>
-          <tr><td><code>QSA</code></td><td>Query String Append (mantém ?a=1)</td></tr>
-          <tr><td><code>NC</code></td><td>No Case (case-insensitive)</td></tr>
-          <tr><td><code>F</code></td><td>403 Forbidden</td></tr>
-          <tr><td><code>G</code></td><td>410 Gone</td></tr>
-          <tr><td><code>P</code></td><td>Proxy (precisa mod_proxy)</td></tr>
-          <tr><td><code>E=VAR:val</code></td><td>Define variável de ambiente</td></tr>
-        </tbody>
-      </table>
-
-      <h2>7. <code>mod_ssl</code> + Let's Encrypt</h2>
-
-      <Terminal>
-        <Command root command="snap install --classic certbot"
-          output={`certbot 2.10.0 from Certbot Project (certbot-eff✓) installed`} />
-        <Command root command="ln -s /snap/bin/certbot /usr/bin/certbot" />
-        <Command root command="certbot --apache -d blog.exemplo.com.br -d www.blog.exemplo.com.br --redirect --agree-tos -m admin@exemplo.com.br"
-          output={`Saving debug log to /var/log/letsencrypt/letsencrypt.log
-Requesting a certificate for blog.exemplo.com.br and www.blog.exemplo.com.br
-
-Successfully received certificate.
-Certificate is saved at: /etc/letsencrypt/live/blog.exemplo.com.br/fullchain.pem
-Key is saved at:         /etc/letsencrypt/live/blog.exemplo.com.br/privkey.pem
-This certificate expires on 2025-07-11.
-
-Deploying certificate
-Successfully deployed certificate for blog.exemplo.com.br to /etc/apache2/sites-available/blog.exemplo.com.br-le-ssl.conf
-Successfully deployed certificate for www.blog.exemplo.com.br to /etc/apache2/sites-available/blog.exemplo.com.br-le-ssl.conf
-Congratulations! You have successfully enabled HTTPS on https://blog.exemplo.com.br
-
-NEXT STEPS:
-- The certificate will need to be renewed before it expires.`} />
-        <Command command="curl -I https://blog.exemplo.com.br"
-          output={`HTTP/1.1 200 OK
-Date: Sat, 12 Apr 2025 22:30:11 GMT
-Server: Apache/2.4.58 (Termux)
-Strict-Transport-Security: max-age=63072000
-Content-Type: text/html`} />
-      </Terminal>
-
-      <File path="/etc/apache2/sites-available/blog.exemplo.com.br-le-ssl.conf">
-{`<IfModule mod_ssl.c>
-<VirtualHost *:443>
-    ServerName  blog.exemplo.com.br
-    ServerAlias www.blog.exemplo.com.br
-    ServerAdmin webmaster@exemplo.com.br
-
-    DocumentRoot /var/www/blog.exemplo.com.br/public_html
-
-    <Directory /var/www/blog.exemplo.com.br/public_html>
+    <Directory "/data/data/com.termux/files/home/sites/blog">
         Options -Indexes +FollowSymLinks
         AllowOverride All
         Require all granted
     </Directory>
 
-    SSLEngine on
-    SSLCertificateFile      /etc/letsencrypt/live/blog.exemplo.com.br/fullchain.pem
-    SSLCertificateKeyFile   /etc/letsencrypt/live/blog.exemplo.com.br/privkey.pem
-    Include /etc/letsencrypt/options-ssl-apache.conf
+    ErrorLog  "/data/data/com.termux/files/usr/var/log/apache2/blog-error.log"
+    CustomLog "/data/data/com.termux/files/usr/var/log/apache2/blog-access.log" combined
+</VirtualHost>`}
+      />
+      <CodeBlock
+        title="Testar"
+        code={`mkdir -p ~/sites/blog
+echo "<h1>Blog do Termux</h1>" > ~/sites/blog/index.html
 
-    Header always set Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
-    Header always set X-Frame-Options DENY
-    Header always set X-Content-Type-Options nosniff
-    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+apachectl configtest && apachectl graceful
+curl -H "Host: blog.local" http://localhost:8080`}
+      />
 
-    ErrorLog  ` + '${APACHE_LOG_DIR}' + `/blog.error.log
-    CustomLog ` + '${APACHE_LOG_DIR}' + `/blog.access.log combined
-</VirtualHost>
-</IfModule>`}
-      </File>
+      <h2>8. .htaccess e AllowOverride</h2>
+      <p>
+        Pra que o <code>.htaccess</code> funcione você precisa
+        de <code>AllowOverride All</code> no <code>&lt;Directory&gt;</code>.
+      </p>
+      <CodeBlock
+        title="~/sites/blog/.htaccess"
+        language="apache"
+        code={`# Habilita rewrite
+RewriteEngine On
 
-      <h2>8. <code>mod_proxy</code> — Apache como reverse proxy</h2>
+# URLs amigáveis (front-controller estilo Laravel/WordPress)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.php [QSA,L]
 
-      <Terminal>
-        <Command root command="a2enmod proxy proxy_http proxy_wstunnel proxy_balancer lbmethod_byrequests"
-          output={`Considering dependency proxy for proxy_http:
-Enabling module proxy.
-Enabling module proxy_http.
-Enabling module proxy_wstunnel.
-Enabling module proxy_balancer.
-Considering dependency slotmem_shm for lbmethod_byrequests:
-Enabling module slotmem_shm.
-Enabling module lbmethod_byrequests.
-To activate the new configuration, you need to run:
-  systemctl restart apache2`} />
-      </Terminal>
+# Bloqueia listagem de diretório
+Options -Indexes
 
-      <File path="/etc/apache2/sites-available/api.exemplo.com.br.conf">
-{`<VirtualHost *:80>
-    ServerName api.exemplo.com.br
+# Headers de segurança
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"
+</IfModule>
+
+# Cache de assets
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType image/jpeg "access plus 1 month"
+    ExpiresByType text/css   "access plus 1 week"
+    ExpiresByType application/javascript "access plus 1 week"
+</IfModule>
+
+# Bloqueia .git, .env etc
+<FilesMatch "^\\.(htaccess|env|git)">
+    Require all denied
+</FilesMatch>`}
+      />
+
+      <h2>9. mod_rewrite — receitas úteis</h2>
+      <CodeBlock
+        title="Snippets típicos"
+        language="apache"
+        code={`# 1. Forçar HTTPS (se você expor via túnel/ngrok)
+RewriteEngine On
+RewriteCond %{HTTPS} !=on
+RewriteRule ^/?(.*) https://%{SERVER_NAME}/$1 [R=301,L]
+
+# 2. Bloquear bots ruins por User-Agent
+RewriteCond %{HTTP_USER_AGENT} (semrush|ahrefs|mj12bot) [NC]
+RewriteRule .* - [F,L]
+
+# 3. Versionamento de API
+RewriteRule ^api/v1/(.*)$ /backend.php?version=1&path=$1 [L,QSA]`}
+      />
+
+      <h2>10. Apache como reverse proxy</h2>
+      <p>
+        Mesma ideia do Nginx: você roda um Node/Python na porta 3000 e o
+        Apache fica na frente:
+      </p>
+      <CodeBlock
+        title="vhost de proxy"
+        language="apache"
+        code={`<VirtualHost *:8080>
+    ServerName api.local
+
     ProxyPreserveHost On
     ProxyRequests Off
 
@@ -427,214 +278,93 @@ To activate the new configuration, you need to run:
         Require all granted
     </Proxy>
 
-    # Reverse proxy para Node escutando em 3000
     ProxyPass        / http://127.0.0.1:3000/
     ProxyPassReverse / http://127.0.0.1:3000/
 
-    # WebSocket (Socket.io)
-    RewriteEngine On
-    RewriteCond %{HTTP:Upgrade} websocket [NC]
-    RewriteCond %{HTTP:Connection} upgrade [NC]
-    RewriteRule ^/?(.*)$ "ws://127.0.0.1:3000/$1" [P,L]
-
-    ErrorLog  ` + '${APACHE_LOG_DIR}' + `/api.error.log
-    CustomLog ` + '${APACHE_LOG_DIR}' + `/api.access.log combined
+    ErrorLog  "/data/data/com.termux/files/usr/var/log/apache2/api-error.log"
+    CustomLog "/data/data/com.termux/files/usr/var/log/apache2/api-access.log" combined
 </VirtualHost>`}
-      </File>
+      />
+      <CodeBlock
+        title="Habilitar proxy no httpd.conf (descomente)"
+        language="apache"
+        code={`LoadModule proxy_module      libexec/apache2/mod_proxy.so
+LoadModule proxy_http_module libexec/apache2/mod_proxy_http.so`}
+      />
 
-      <p>Para load balancing entre vários backends:</p>
-      <File path="balanceador">
-{`<Proxy balancer://node_cluster>
-    BalancerMember http://127.0.0.1:3000 route=node1
-    BalancerMember http://127.0.0.1:3001 route=node2
-    BalancerMember http://127.0.0.1:3002 route=node3 status=+H   # hot-standby
-    ProxySet lbmethod=byrequests
-</Proxy>
+      <h2>11. HTTPS local (autoassinado)</h2>
+      <CodeBlock
+        title="Certificado de teste"
+        code={`pkg install -y openssl-tool
+mkdir -p $PREFIX/etc/apache2/ssl
+cd $PREFIX/etc/apache2/ssl
 
-ProxyPass        /api/ balancer://node_cluster/
-ProxyPassReverse /api/ balancer://node_cluster/
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 \\
+  -keyout server.key -out server.crt \\
+  -subj "/CN=meu-termux"`}
+      />
+      <CodeBlock
+        title="vhost TLS na porta 8443"
+        language="apache"
+        code={`Listen 8443
 
-# Painel de status do balancer
-<Location "/balancer-manager">
-    SetHandler balancer-manager
-    Require local
-</Location>`}
-      </File>
+<VirtualHost *:8443>
+    ServerName localhost
+    DocumentRoot "/data/data/com.termux/files/usr/share/apache2/default-site/htdocs"
 
-      <h2>9. MPMs: prefork, worker, event</h2>
-      <p>
-        O Apache permite trocar o motor de execução. No Termux 0.118 o padrão é
-        <code>mpm_event</code> (assíncrono, similar ao Nginx).
-      </p>
+    SSLEngine on
+    SSLCertificateFile    "/data/data/com.termux/files/usr/etc/apache2/ssl/server.crt"
+    SSLCertificateKeyFile "/data/data/com.termux/files/usr/etc/apache2/ssl/server.key"
+</VirtualHost>`}
+      />
 
-      <table>
-        <thead><tr><th>MPM</th><th>Modelo</th><th>Quando usar</th></tr></thead>
-        <tbody>
-          <tr><td><code>mpm_prefork</code></td><td>1 processo por conexão, sem threads</td><td>com mod_php (não é thread-safe)</td></tr>
-          <tr><td><code>mpm_worker</code></td><td>processos com threads</td><td>genérico, baixo uso de memória</td></tr>
-          <tr><td><code>mpm_event</code></td><td>worker + I/O assíncrono</td><td>default; melhor para keep-alive</td></tr>
-        </tbody>
-      </table>
+      <h2>12. Logs e troubleshooting</h2>
+      <CodeBlock
+        title="Acompanhar erros"
+        code={`tail -f $PREFIX/var/log/apache2/error_log
+tail -f $PREFIX/var/log/apache2/access_log
 
-      <Terminal>
-        <Command command="apache2ctl -V | grep MPM"
-          output={` Server MPM:     event`} />
-        <Command root command="a2dismod mpm_event && a2enmod mpm_prefork"
-          comment="troca para prefork (necessário com mod_php)"
-          output={`Module mpm_event disabled.
-Considering dependency mpm_prefork for mpm_prefork:
-Enabling module mpm_prefork.
-To activate the new configuration, you need to run:
-  systemctl restart apache2`} />
-      </Terminal>
+# Conferir o que está usando a porta
+netstat -tlnp 2>/dev/null | grep 8080
 
-      <File path="/etc/apache2/mods-available/mpm_event.conf">
-{`<IfModule mpm_event_module>
-    StartServers              2
-    MinSpareThreads          25
-    MaxSpareThreads          75
-    ThreadLimit              64
-    ThreadsPerChild          25
-    MaxRequestWorkers       150
-    MaxConnectionsPerChild    0
-</IfModule>`}
-      </File>
+# Sempre antes de aplicar mudança:
+apachectl configtest`}
+      />
 
-      <h2>10. Logs e análise</h2>
+      <AlertBox type="danger" title="Erros típicos no Termux">
+        <ul>
+          <li><code>(13)Permission denied: AH00072: make_sock: could not bind to address [::]:80</code> → troque <code>Listen 80</code> por <code>Listen 8080</code>.</li>
+          <li><code>getpwnam: User daemon does not exist</code> → comente as diretivas <code>User</code> e <code>Group</code> no <code>httpd.conf</code>.</li>
+          <li><code>.htaccess: directive not allowed here</code> → garanta <code>AllowOverride All</code> no <code>&lt;Directory&gt;</code>.</li>
+        </ul>
+      </AlertBox>
 
-      <Terminal>
-        <Command command="tail -3 /var/log/apache2/blog.access.log"
-          output={`192.168.1.42 - - [12/Apr/2025:22:30:11 -0300] "GET / HTTP/1.1" 200 26 "-" "Mozilla/5.0 (X11; Linux x86_64; rv:124.0) Gecko/20100101 Firefox/124.0"
-192.168.1.42 - - [12/Apr/2025:22:30:11 -0300] "GET /favicon.ico HTTP/1.1" 404 488 "https://blog.exemplo.com.br/" "Mozilla/5.0..."
-192.168.1.50 - - [12/Apr/2025:22:30:18 -0300] "POST /wp-login.php HTTP/1.1" 401 1232 "-" "WordPress/6.4; https://malicioso.com"`} />
-        <Command command="tail -2 /var/log/apache2/blog.error.log"
-          output={`[Sat Apr 12 22:31:01.184321 2025] [authz_core:error] [pid 5108] [client 192.168.1.50:54321] AH01630: client denied by server configuration: /var/www/blog.exemplo.com.br/public_html/.git
-[Sat Apr 12 22:32:14.412987 2025] [php:error] [pid 5109] [client 187.45.99.10:33221] PHP Fatal error: Uncaught Error: Class 'PDO' not found in /var/www/blog/index.php:14`} />
-      </Terminal>
+      <h2>13. Manter o Apache rodando</h2>
+      <CodeBlock
+        title="Wake lock + boot"
+        code={`# Impede o Android de matar o processo em standby
+termux-wake-lock
 
-      <p>Definindo um formato customizado e mostrando IP real atrás de proxy:</p>
-      <File path="/etc/apache2/apache2.conf (trecho)">
-{`LogFormat "%h %l %u %t \\"%r\\" %>s %b \\"%{Referer}i\\" \\"%{User-Agent}i\\"" combined
-LogFormat "%h %l %u %t \\"%r\\" %>s %b" common
-LogFormat "%{X-Forwarded-For}i %l %u %t \\"%r\\" %>s %b \\"%{Referer}i\\" \\"%{User-Agent}i\\"" proxy
+# Liberar
+termux-wake-unlock
 
-# Para usar com Cloudflare/Nginx na frente:
-# CustomLog ` + '${APACHE_LOG_DIR}' + `/access.log proxy`}
-      </File>
+# Subir no boot do celular (precisa do app Termux:Boot)
+mkdir -p ~/.termux/boot
+cat > ~/.termux/boot/start-apache <<'EOF'
+#!/data/data/com.termux/files/usr/bin/sh
+termux-wake-lock
+httpd
+EOF
+chmod +x ~/.termux/boot/start-apache`}
+      />
 
-      <h2>11. Compressão (mod_deflate) e cache (mod_expires)</h2>
-
-      <File path="/etc/apache2/conf-available/compress-cache.conf">
-{`<IfModule mod_deflate.c>
-    AddOutputFilterByType DEFLATE \\
-        text/html text/plain text/xml text/css text/javascript \\
-        application/javascript application/json application/xml \\
-        application/rss+xml application/atom+xml image/svg+xml font/ttf font/otf
-</IfModule>
-
-<IfModule mod_expires.c>
-    ExpiresActive On
-    ExpiresDefault                          "access plus 1 month"
-    ExpiresByType text/html                 "access plus 0 seconds"
-    ExpiresByType text/css                  "access plus 1 year"
-    ExpiresByType application/javascript    "access plus 1 year"
-    ExpiresByType image/jpeg                "access plus 1 year"
-    ExpiresByType image/png                 "access plus 1 year"
-    ExpiresByType image/svg+xml             "access plus 1 year"
-    ExpiresByType font/woff2                "access plus 1 year"
-</IfModule>`}
-      </File>
-
-      <Terminal>
-        <Command root command="a2enconf compress-cache && systemctl reload apache2" />
-        <Command command="curl -H 'Accept-Encoding: gzip' -I https://blog.exemplo.com.br"
-          output={`HTTP/1.1 200 OK
-Content-Encoding: gzip
-Vary: Accept-Encoding
-Content-Type: text/html; charset=UTF-8
-Cache-Control: max-age=0
-Expires: Sat, 12 Apr 2025 22:35:00 GMT`} />
-      </Terminal>
-
-      <h2>12. Hardening básico</h2>
-
-      <File path="/etc/apache2/conf-available/security.conf (ajustes)">
-{`ServerTokens Prod              # esconde versão (Server: Apache)
-ServerSignature Off            # remove rodapé "Apache/2.4.58 ..." em páginas de erro
-
-TraceEnable Off                # desativa método TRACE (XSS via TRACE)
-
-Header set X-Content-Type-Options "nosniff"
-Header set X-Frame-Options "SAMEORIGIN"
-Header set Referrer-Policy "strict-origin-when-cross-origin"
-Header set Permissions-Policy "geolocation=(), camera=(), microphone=()"
-
-# Esconde headers sensíveis
-Header unset X-Powered-By
-Header unset Server`}
-      </File>
-
-      <h2>13. Apache vs Nginx — quando escolher cada um</h2>
-
-      <table>
-        <thead><tr><th>Critério</th><th>Apache</th><th>Nginx</th></tr></thead>
-        <tbody>
-          <tr><td>Modelo</td><td>Processos/threads (MPM)</td><td>Event-driven assíncrono</td></tr>
-          <tr><td>.htaccess</td><td>Sim (per-directory)</td><td>Não suporta</td></tr>
-          <tr><td>mod_php embarcado</td><td>Sim (mpm_prefork)</td><td>Só via PHP-FPM</td></tr>
-          <tr><td>Estáticos sob alta carga</td><td>Bom</td><td>Excelente</td></tr>
-          <tr><td>Reverse proxy</td><td>mod_proxy (ok)</td><td>Nativo, otimizado</td></tr>
-          <tr><td>Configuração</td><td>Verbosa, XML-like</td><td>Minimalista, nginx.conf</td></tr>
-          <tr><td>Curva de aprendizado</td><td>Mais fácil para iniciantes</td><td>Requer entender contextos</td></tr>
-          <tr><td>Memória por conexão</td><td>~1-2 MB (worker)</td><td>~10 KB</td></tr>
-          <tr><td>Dinâmico em runtime</td><td>módulos via a2enmod</td><td>módulos compilados/dinâmicos</td></tr>
-        </tbody>
-      </table>
-
-      <InfoBox type="tip" title="Combo Nginx + Apache">
-        Em hosting compartilhado é comum colocar <strong>Nginx na frente</strong> (TLS,
-        cache, gzip) e <strong>Apache atrás</strong> servindo PHP via mod_php — assim você
-        ganha o desempenho do Nginx e mantém compatibilidade com <code>.htaccess</code> de
-        clientes legados.
-      </InfoBox>
-
-      <h2>14. Troubleshooting</h2>
-
-      <Terminal>
-        <Command root command="apache2ctl configtest"
-          output={`AH00112: Warning: DocumentRoot [/var/www/inexistente/] does not exist
-AH00558: apache2: Could not reliably determine the server's fully qualified domain name, using 127.0.1.1.
-Syntax OK`} />
-        <Command root command="apache2ctl -S"
-          comment="-S lista TODOS os virtual hosts efetivamente carregados"
-          output={`VirtualHost configuration:
-*:80                   blog.exemplo.com.br (/etc/apache2/sites-enabled/blog.exemplo.com.br.conf:1)
-*:443                  blog.exemplo.com.br (/etc/apache2/sites-enabled/blog.exemplo.com.br-le-ssl.conf:2)
-ServerRoot: "/etc/apache2"
-Main DocumentRoot: "/var/www/html"
-Main ErrorLog: "/var/log/apache2/error.log"
-Mutex default: dir="/var/run/apache2/" mechanism=default
-Mutex mpm-accept: using_defaults
-PidFile: "/var/run/apache2/apache2.pid"
-User: name="www-data" id=33
-Group: name="www-data" id=33`} />
-        <Command root command="journalctl -u apache2 -n 30 --no-pager" />
-      </Terminal>
-
-      <p><strong>Erros frequentes:</strong></p>
-      <ul>
-        <li><code>AH00072: make_sock: could not bind to address [::]:80</code> — outra coisa (Nginx?) está usando a porta 80.</li>
-        <li><code>AH01797: client denied by server configuration</code> — falta <code>Require all granted</code> no <code>&lt;Directory&gt;</code>.</li>
-        <li><code>403 Forbidden</code> — permissões do filesystem (<code>chmod 755</code> em diretórios, <code>644</code> em arquivos, dono <code>www-data</code>).</li>
-        <li><code>500 Internal Server Error</code> + <code>.htaccess</code> não funciona — falta <code>a2enmod rewrite</code> ou <code>AllowOverride None</code>.</li>
-      </ul>
-
-      <InfoBox type="success" title="Próximos passos">
-        Aprenda <strong>PHP</strong> (junto com Apache forma a stack LAMP),
-        <strong> MariaDB/MySQL</strong> e <strong>PostgreSQL</strong>. Considere também
-        explorar <strong>Nginx</strong> se ainda não viu — entender as duas filosofias amplia
-        muito sua visão de servidores web.
-      </InfoBox>
+      <AlertBox type="info" title="Nginx ou Apache no Termux?">
+        Os dois rodam bem. O <strong>Nginx</strong> consome menos memória e é
+        mais leve pra estáticos e proxy. O <strong>Apache</strong> brilha
+        quando você precisa de <code>.htaccess</code> e <code>mod_rewrite</code>
+        complexo (ex.: portar um projeto WordPress/Laravel local sem mexer
+        em vhost).
+      </AlertBox>
     </PageContainer>
   );
 }

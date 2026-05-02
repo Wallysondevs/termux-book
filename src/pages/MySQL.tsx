@@ -1,269 +1,264 @@
 import { PageContainer } from "@/components/layout/PageContainer";
-  import { CodeBlock } from "@/components/ui/CodeBlock";
-  import { AlertBox } from "@/components/ui/AlertBox";
+import { CodeBlock } from "@/components/ui/CodeBlock";
+import { AlertBox } from "@/components/ui/AlertBox";
 
-  export default function MySQL() {
-    return (
-      <PageContainer
-        title="MySQL / MariaDB no Termux"
-        subtitle="Instalação, configuração, gerenciamento de bancos e usuários, backup, segurança, replicação e performance do MySQL/MariaDB."
-        difficulty="intermediario"
-        timeToRead="30 min"
-      >
-        <p>
-          O <strong>MySQL</strong> é o banco de dados relacional open source mais popular do mundo,
-          usado por WordPress, Facebook, Twitter e milhões de aplicações web. O <strong>MariaDB</strong>
-          é um fork compatível criado pelo fundador original do MySQL, com melhorias de performance
-          e recursos extras. No Termux, ambos funcionam de forma quase idêntica.
-        </p>
+export default function MySQL() {
+  return (
+    <PageContainer
+      title="MariaDB no Termux"
+      subtitle="Instalação, configuração, gerenciamento de bancos e usuários, backup e performance do MariaDB (substituto do MySQL) no Termux."
+      difficulty="intermediario"
+      timeToRead="30 min"
+    >
+      <AlertBox type="warning" title="Use 'mariadb', não 'mysql'">
+        O Termux <strong>não distribui o pacote <code>mysql</code></strong>. O equivalente
+        oficial é o <strong>MariaDB</strong> (<code>pkg install mariadb</code>), um fork
+        100% compatível criado pelo autor original do MySQL. O cliente <code>mysql</code> e
+        utilitários como <code>mysqldump</code> vêm junto e mantêm os mesmos comandos.
+      </AlertBox>
 
-        <h2>1. Instalação</h2>
-        <CodeBlock
-          title="Instalar MySQL ou MariaDB"
-          code={`# === MySQL ===
-  pkg update
-  pkg install -y mysql-server
+      <p>
+        O <strong>MariaDB</strong> é um banco de dados relacional open source totalmente
+        compatível com o MySQL. No Termux roda nativo (sem proot, sem root) e é ótimo para
+        APIs locais, prototipagem, testes e mesmo pequenos serviços expostos na rede local.
+      </p>
 
-  # === MariaDB (alternativa recomendada) ===
-  pkg install -y mariadb-server
+      <AlertBox type="info" title="Caveats no Android">
+        Não há <code>systemd</code> no Termux — o servidor é iniciado manualmente
+        (<code>mariadbd</code>) ou via runit (<code>sv-enable mariadb</code>). Portas abaixo
+        de 1024 exigem root; o MariaDB usa 3306 (livre). Os arquivos ficam em
+        <code> $PREFIX/var/lib/mysql</code> e configs em <code>$PREFIX/etc/my.cnf.d/</code>.
+      </AlertBox>
 
-  # Verificar status
-  sudo systemctl status mysql    # ou: mariadb
-  sudo systemctl enable mysql
+      <h2>1. Instalação</h2>
+      <CodeBlock
+        title="Instalar o MariaDB no Termux"
+        code={`# Atualizar índices e instalar
+pkg update
+pkg install -y mariadb
 
-  # Verificar versão
-  mysql --version
-  # MySQL: Ver 8.0.37 ou MariaDB: Ver 10.11.7
+# Verificar versão (cliente e servidor compartilham binários)
+mariadb --version
+mariadbd --version
 
-  # Executar script de segurança (ESSENCIAL para produção)
-  sudo mysql_secure_installation
-  # 1. Definir senha do root (ou configurar validação)
-  # 2. Remover usuários anônimos → Y
-  # 3. Desabilitar login root remoto → Y
-  # 4. Remover banco de teste → Y
-  # 5. Recarregar tabelas de privilégios → Y`}
-        />
+# Inicializar o diretório de dados (apenas na primeira vez)
+mariadb-install-db
 
-        <h2>2. Acessar e Gerenciar</h2>
-        <CodeBlock
-          title="Comandos básicos do MySQL"
-          code={`# Acessar como root (no Termux, usa auth_socket por padrão)
-  sudo mysql
-  # Ou com senha:
-  mysql -u root -p
+# Diretórios usados:
+#   Dados:  $PREFIX/var/lib/mysql
+#   Conf:   $PREFIX/etc/my.cnf.d/
+#   Socket: $PREFIX/tmp/mysql.sock`}
+      />
 
-  # Comandos internos:
-  # SHOW DATABASES;       → listar bancos
-  # USE nome_banco;       → selecionar banco
-  # SHOW TABLES;          → listar tabelas
-  # DESCRIBE tabela;      → ver estrutura da tabela
-  # SHOW PROCESSLIST;     → ver conexões ativas
-  # STATUS;               → informações do servidor
-  # EXIT; ou \q           → sair
+      <h2>2. Iniciar e Parar o Servidor</h2>
+      <CodeBlock
+        title="Subir o mariadbd no Termux"
+        code={`# Iniciar em background (uma sessão Termux)
+mariadbd-safe &
 
-  # Criar banco de dados
-  CREATE DATABASE meuapp CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+# Parar
+mysqladmin -u root shutdown
 
-  # Criar usuário
-  CREATE USER 'meuusuario'@'localhost' IDENTIFIED BY 'SenhaForte123!';
+# Como serviço via runit (persistente entre sessões)
+pkg install -y termux-services
+sv-enable mariadb
+sv up mariadb        # iniciar
+sv down mariadb      # parar
+sv status mariadb    # status
 
-  # Dar permissões
-  GRANT ALL PRIVILEGES ON meuapp.* TO 'meuusuario'@'localhost';
-  FLUSH PRIVILEGES;
+# Dica: rode 'termux-wake-lock' para evitar que o Android
+# mate o processo quando a tela apaga.`}
+      />
 
-  # Permissões mais restritivas (produção)
-  GRANT SELECT, INSERT, UPDATE, DELETE ON meuapp.* TO 'app_user'@'localhost';
-  FLUSH PRIVILEGES;
+      <h2>3. Acessar e Gerenciar</h2>
+      <CodeBlock
+        title="Comandos básicos do cliente mysql/mariadb"
+        code={`# Acessar como root (sem senha por padrão no Termux)
+mariadb -u root
+# ou: mysql -u root  (alias do mesmo cliente)
 
-  # Permitir acesso remoto (de qualquer IP)
-  CREATE USER 'admin'@'%' IDENTIFIED BY 'SenhaForte123!';
-  GRANT ALL ON meuapp.* TO 'admin'@'%';
-  FLUSH PRIVILEGES;
+# Comandos internos:
+# SHOW DATABASES;       → listar bancos
+# USE nome_banco;       → selecionar banco
+# SHOW TABLES;          → listar tabelas
+# DESCRIBE tabela;      → ver estrutura
+# SHOW PROCESSLIST;     → conexões ativas
+# STATUS;               → infos do servidor
+# EXIT; ou \\q          → sair
 
-  # Conectar com usuário
-  mysql -u meuusuario -p meuapp
+# Criar banco
+CREATE DATABASE meuapp CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
-  # Executar SQL de um arquivo
-  mysql -u meuusuario -p meuapp < script.sql
+# Criar usuário
+CREATE USER 'meuusuario'@'localhost' IDENTIFIED BY 'SenhaForte123!';
 
-  # Executar SQL diretamente
-  mysql -u meuusuario -p -e "SELECT COUNT(*) FROM meuapp.usuarios;"`}
-        />
+# Permissões
+GRANT ALL PRIVILEGES ON meuapp.* TO 'meuusuario'@'localhost';
+FLUSH PRIVILEGES;
 
-        <h2>3. SQL Essencial</h2>
-        <CodeBlock
-          title="Operações SQL comuns"
-          code={`# Criar tabela
-  CREATE TABLE usuarios (
-      id INT AUTO_INCREMENT PRIMARY KEY,
-      nome VARCHAR(100) NOT NULL,
-      email VARCHAR(255) UNIQUE NOT NULL,
-      senha VARCHAR(255) NOT NULL,
-      ativo BOOLEAN DEFAULT TRUE,
-      criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-      INDEX idx_email (email)
-  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+# Permissões mais restritas
+GRANT SELECT, INSERT, UPDATE, DELETE ON meuapp.* TO 'app_user'@'localhost';
+FLUSH PRIVILEGES;
 
-  # Inserir dados
-  INSERT INTO usuarios (nome, email, senha) VALUES
-      ('João Silva', 'joao@email.com', SHA2('senha123', 256)),
-      ('Maria Santos', 'maria@email.com', SHA2('senha456', 256));
+# Permitir acesso de outros dispositivos da LAN (cuidado!)
+CREATE USER 'admin'@'%' IDENTIFIED BY 'SenhaForte123!';
+GRANT ALL ON meuapp.* TO 'admin'@'%';
+FLUSH PRIVILEGES;
 
-  # Consultar
-  SELECT * FROM usuarios;
-  SELECT nome, email FROM usuarios WHERE ativo = TRUE ORDER BY nome;
-  SELECT COUNT(*) as total FROM usuarios;
+# Conectar com usuário
+mariadb -u meuusuario -p meuapp
 
-  # Atualizar
-  UPDATE usuarios SET nome = 'João da Silva' WHERE id = 1;
+# Executar SQL de arquivo
+mariadb -u meuusuario -p meuapp < script.sql
 
-  # Deletar
-  DELETE FROM usuarios WHERE id = 3;
+# Executar SQL inline
+mariadb -u meuusuario -p -e "SELECT COUNT(*) FROM meuapp.usuarios;"`}
+      />
 
-  # Joins
-  SELECT p.titulo, u.nome AS autor
-  FROM posts p
-  INNER JOIN usuarios u ON p.autor_id = u.id
-  WHERE p.publicado = TRUE;
+      <h2>4. SQL Essencial</h2>
+      <CodeBlock
+        title="Operações SQL comuns"
+        code={`-- Criar tabela
+CREATE TABLE usuarios (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    senha VARCHAR(255) NOT NULL,
+    ativo BOOLEAN DEFAULT TRUE,
+    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_email (email)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-  # Índices (acelerar consultas)
-  CREATE INDEX idx_nome ON usuarios(nome);
-  ALTER TABLE usuarios ADD INDEX idx_criado (criado_em);
+-- Inserir
+INSERT INTO usuarios (nome, email, senha) VALUES
+    ('João Silva', 'joao@email.com', SHA2('senha123', 256)),
+    ('Maria Santos', 'maria@email.com', SHA2('senha456', 256));
 
-  # Ver índices
-  SHOW INDEX FROM usuarios;
+-- Consultar
+SELECT * FROM usuarios;
+SELECT nome, email FROM usuarios WHERE ativo = TRUE ORDER BY nome;
 
-  # Full-text search
-  ALTER TABLE posts ADD FULLTEXT INDEX ft_conteudo (titulo, conteudo);
-  SELECT * FROM posts WHERE MATCH(titulo, conteudo) AGAINST('termux' IN BOOLEAN MODE);`}
-        />
+-- Atualizar / deletar
+UPDATE usuarios SET nome = 'João da Silva' WHERE id = 1;
+DELETE FROM usuarios WHERE id = 3;
 
-        <h2>4. Configuração</h2>
-        <CodeBlock
-          title="Configurar MySQL para performance e segurança"
-          code={`# Arquivo de configuração
-  sudo nano /etc/mysql/mysql.conf.d/mysqld.cnf
-  # Ou MariaDB:
-  sudo nano /etc/mysql/mariadb.conf.d/50-server.cnf
+-- Joins
+SELECT p.titulo, u.nome AS autor
+FROM posts p
+INNER JOIN usuarios u ON p.autor_id = u.id
+WHERE p.publicado = TRUE;
 
-  # Aceitar conexões externas (por padrão só aceita localhost)
-  # bind-address = 0.0.0.0   ← aceita qualquer IP
-  # bind-address = 127.0.0.1 ← apenas local (padrão, mais seguro)
+-- Índices
+CREATE INDEX idx_nome ON usuarios(nome);
+SHOW INDEX FROM usuarios;
 
-  # Performance (para servidor com 8GB RAM):
-  # innodb_buffer_pool_size = 4G    # 50-70% da RAM (cache de dados)
-  # innodb_log_file_size = 256M     # Tamanho do redo log
-  # max_connections = 150           # Máximo de conexões simultâneas
-  # query_cache_type = 0            # Desabilitado no MySQL 8+ (usar ProxySQL)
-  # slow_query_log = 1              # Logar queries lentas
-  # slow_query_log_file = /var/log/mysql/slow.log
-  # long_query_time = 1             # Queries > 1 segundo
+-- Full-text search
+ALTER TABLE posts ADD FULLTEXT INDEX ft_conteudo (titulo, conteudo);
+SELECT * FROM posts WHERE MATCH(titulo, conteudo) AGAINST('termux' IN BOOLEAN MODE);`}
+      />
 
-  # Charset UTF-8 (para suportar emojis e caracteres especiais)
-  # character-set-server = utf8mb4
-  # collation-server = utf8mb4_unicode_ci
+      <h2>5. Configuração</h2>
+      <CodeBlock
+        title="Tunar performance e segurança no Termux"
+        code={`# Arquivo principal
+nano $PREFIX/etc/my.cnf.d/mariadb-server.cnf
 
-  # Reiniciar após mudanças
-  sudo systemctl restart mysql
+# Aceitar conexões da LAN (padrão é só localhost):
+# [mysqld]
+# bind-address = 0.0.0.0
+# port         = 3306
 
-  # Verificar variáveis
-  SHOW VARIABLES LIKE 'innodb_buffer_pool_size';
-  SHOW VARIABLES LIKE 'max_connections';
-  SHOW VARIABLES LIKE 'slow_query_log';`}
-        />
+# Performance (celular típico — vá com calma com a RAM):
+# innodb_buffer_pool_size = 128M    # poucos MB no celular!
+# innodb_log_file_size    = 32M
+# max_connections         = 30
 
-        <h2>5. Backup e Restauração</h2>
-        <CodeBlock
-          title="Backup do MySQL"
-          code={`# Backup de um banco
-  mysqldump -u root -p meuapp > backup-meuapp-$(date +%Y%m%d).sql
+# Charset UTF-8 (emojis e acentos)
+# character-set-server = utf8mb4
+# collation-server     = utf8mb4_unicode_ci
 
-  # Backup de todos os bancos
-  mysqldump -u root -p --all-databases > backup-todos-$(date +%Y%m%d).sql
+# Reiniciar
+mysqladmin -u root shutdown
+mariadbd-safe &
 
-  # Backup comprimido
-  mysqldump -u root -p meuapp | gzip > backup-$(date +%Y%m%d).sql.gz
+# Verificar variáveis
+mariadb -u root -e "SHOW VARIABLES LIKE 'innodb_buffer_pool_size';"
+mariadb -u root -e "SHOW VARIABLES LIKE 'max_connections';"`}
+      />
 
-  # Backup com rotinas e triggers
-  mysqldump -u root -p --routines --triggers meuapp > backup-completo.sql
+      <h2>6. Backup e Restauração</h2>
+      <CodeBlock
+        title="Backup com mysqldump (vem com o pacote mariadb)"
+        code={`# Backup de um banco
+mysqldump -u root meuapp > backup-meuapp-$(date +%Y%m%d).sql
 
-  # Backup apenas estrutura (sem dados)
-  mysqldump -u root -p --no-data meuapp > estrutura.sql
+# Todos os bancos
+mysqldump -u root --all-databases > backup-todos-$(date +%Y%m%d).sql
 
-  # Backup apenas dados
-  mysqldump -u root -p --no-create-info meuapp > dados.sql
+# Comprimido
+mysqldump -u root meuapp | gzip > backup-$(date +%Y%m%d).sql.gz
 
-  # Restaurar
-  mysql -u root -p meuapp < backup.sql
+# Estrutura / dados separados
+mysqldump -u root --no-data meuapp > estrutura.sql
+mysqldump -u root --no-create-info meuapp > dados.sql
 
-  # Restaurar de arquivo comprimido
-  gunzip < backup.sql.gz | mysql -u root -p meuapp
+# Restaurar
+mariadb -u root meuapp < backup.sql
+gunzip < backup.sql.gz | mariadb -u root meuapp
 
-  # Script de backup automático
-  cat > /usr/local/bin/backup-mysql.sh << 'SCRIPT'
-  #!/bin/bash
-  DIR="/backup/mysql"
-  DATE=$(date +%Y%m%d_%H%M)
-  mkdir -p "$DIR"
+# Backup automático (script salvo no storage compartilhado)
+termux-setup-storage   # autoriza acesso a ~/storage
+cat > $PREFIX/bin/backup-mariadb.sh << 'SCRIPT'
+#!/data/data/com.termux/files/usr/bin/bash
+DIR="$HOME/storage/shared/Backups/mariadb"
+DATE=$(date +%Y%m%d_%H%M)
+mkdir -p "$DIR"
+mysqldump -u root --all-databases | gzip > "$DIR/all-$DATE.sql.gz"
+find "$DIR" -name "*.sql.gz" -mtime +7 -delete
+echo "Backup MariaDB: $DATE"
+SCRIPT
+chmod +x $PREFIX/bin/backup-mariadb.sh`}
+      />
 
-  mysqldump -u root --all-databases | gzip > "$DIR/all-$DATE.sql.gz"
+      <h2>Troubleshooting</h2>
+      <CodeBlock
+        title="Problemas comuns no Termux"
+        code={`# "Can't connect to local MySQL server through socket"
+# O servidor não está rodando — suba:
+mariadbd-safe &
 
-  find "$DIR" -name "*.sql.gz" -mtime +7 -delete
+# "Access denied for user 'root'@'localhost'"
+# Sem senha por padrão; basta:
+mariadb -u root
 
-  echo "Backup MySQL: $DATE"
-  SCRIPT
-  chmod +x /usr/local/bin/backup-mysql.sh`}
-        />
+# Definir senha do root
+mariadb -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'NovaSenha!'; FLUSH PRIVILEGES;"
 
-        <h2>Troubleshooting</h2>
-        <CodeBlock
-          title="Problemas comuns com MySQL"
-          code={`# Erro: "Access denied for user 'root'@'localhost'"
-  # No Termux, root usa auth_socket (não precisa de senha via sudo)
-  sudo mysql
-  # Para mudar para autenticação por senha:
-  ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'NovaSenha123!';
-  FLUSH PRIVILEGES;
+# Reset de senha esquecida
+mysqladmin -u root shutdown
+mariadbd-safe --skip-grant-tables &
+mariadb -u root -e "FLUSH PRIVILEGES; ALTER USER 'root'@'localhost' IDENTIFIED BY 'NovaSenha!';"
+mysqladmin -u root -p shutdown
+mariadbd-safe &
 
-  # Erro: "Can't connect to local MySQL server"
-  # Verificar se está rodando:
-  sudo systemctl status mysql
-  sudo systemctl start mysql
+# Processo morrendo quando a tela apaga
+termux-wake-lock
 
-  # Reset de senha do root (esqueceu a senha)
-  sudo systemctl stop mysql
-  sudo mysqld_safe --skip-grant-tables &
-  mysql -u root
-  USE mysql;
-  # MySQL 8:
-  ALTER USER 'root'@'localhost' IDENTIFIED BY 'NovaSenha!';
-  # MariaDB:
-  SET PASSWORD FOR 'root'@'localhost' = PASSWORD('NovaSenha!');
-  FLUSH PRIVILEGES;
-  EXIT;
-  sudo systemctl restart mysql
+# Tamanho dos bancos
+mariadb -u root -e "SELECT table_schema AS banco,
+  ROUND(SUM(data_length + index_length)/1024/1024, 2) AS MB
+  FROM information_schema.TABLES GROUP BY table_schema;"
 
-  # MySQL consumindo muita memória
-  # Reduzir innodb_buffer_pool_size
-  # Reduzir max_connections
+# Logs
+ls $PREFIX/var/lib/mysql/*.err`}
+      />
 
-  # Ver queries lentas
-  sudo cat /var/log/mysql/slow.log
-
-  # Ver tamanho dos bancos
-  SELECT table_schema AS banco,
-    ROUND(SUM(data_length + index_length) / 1024 / 1024, 2) AS 'Tamanho (MB)'
-  FROM information_schema.TABLES
-  GROUP BY table_schema
-  ORDER BY SUM(data_length + index_length) DESC;`}
-        />
-
-        <AlertBox type="info" title="MySQL vs MariaDB">
-          O MariaDB é um fork do MySQL criado pelo fundador original (Monty Widenius) após a 
-          aquisição pela Oracle. São 99% compatíveis. O MariaDB tem: melhor performance em
-          alguns cenários, mais storage engines, e é totalmente GPL. Para novos projetos,
-          ambos são boas escolhas.
-        </AlertBox>
-      </PageContainer>
-    );
-  }
+      <AlertBox type="info" title="MariaDB = MySQL no Termux">
+        Tudo que você aprende sobre MySQL (sintaxe SQL, drivers <code>mysql-connector</code>,
+        WordPress, frameworks etc) funciona com o MariaDB. A diferença prática no Termux é
+        só o nome do pacote (<code>mariadb</code>) e a ausência de <code>systemctl</code> —
+        use <code>mariadbd-safe &amp;</code> ou <code>termux-services</code>.
+      </AlertBox>
+    </PageContainer>
+  );
+}

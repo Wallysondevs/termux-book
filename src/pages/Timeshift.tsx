@@ -1,253 +1,180 @@
 import { PageContainer } from "@/components/layout/PageContainer";
-  import { CodeBlock } from "@/components/ui/CodeBlock";
-  import { AlertBox } from "@/components/ui/AlertBox";
+import { CodeBlock } from "@/components/ui/CodeBlock";
+import { AlertBox } from "@/components/ui/AlertBox";
 
-  export default function Timeshift() {
-    return (
-      <PageContainer
-        title="Timeshift — Snapshots do Sistema"
-        subtitle="Guia completo do Timeshift no Termux: criar, gerenciar e restaurar snapshots do sistema, agendamento automático e recuperação de desastres."
-        difficulty="iniciante"
-        timeToRead="25 min"
-      >
-        <p>
-          O <strong>Timeshift</strong> é a ferramenta de restauração do sistema mais popular no
-          Termux/Linux. Funciona como o "Restauração do Sistema" do Windows ou o Time Machine
-          do macOS — cria snapshots do sistema que podem ser restaurados se algo der errado
-          após uma atualização, instalação de driver ou configuração.
-        </p>
+export default function Timeshift() {
+  return (
+    <PageContainer
+      title="Backup do $PREFIX"
+      subtitle="Estratégia oficial de snapshots no Termux: tar/rsync do $PREFIX, sincronização para nuvem com rclone (Google Drive, Dropbox, S3) e restauração."
+      difficulty="iniciante"
+      timeToRead="25 min"
+    >
+      <AlertBox type="info" title="Timeshift não existe no Termux">
+        Timeshift depende de <code>rsync + cron</code> ou snapshots Btrfs do <strong>sistema raiz Linux</strong> —
+        nada disso existe no Android. O método oficial recomendado pelo wiki do Termux é
+        <strong> empacotar o <code>$PREFIX</code> com <code>tar</code></strong> (e opcionalmente o
+        <code>$HOME</code>) e mover o arquivo para um local seguro.
+      </AlertBox>
 
-        <h2>rsync vs Btrfs — Modos de Operação</h2>
-        <ul>
-          <li><strong>rsync</strong> — Funciona em qualquer sistema de arquivos (ext4, xfs, etc.). Cria hard links para economizar espaço. Mais lento, mas mais compatível.</li>
-          <li><strong>Btrfs</strong> — Usa snapshots nativos do Btrfs. Quase instantâneo, não usa espaço extra até que arquivos sejam modificados (Copy-on-Write). Requer partição Btrfs.</li>
+      <h2>O que fazer backup</h2>
+      <ul>
+        <li><code>$PREFIX</code> = <code>/data/data/com.termux/files/usr</code> — pacotes instalados, configs do sistema do Termux.</li>
+        <li><code>$HOME</code> = <code>/data/data/com.termux/files/home</code> — seus arquivos, dotfiles, projetos.</li>
+        <li>Storage compartilhado (acessível via <code>termux-setup-storage</code>) — onde o <code>.tar</code> é salvo, pois sobrevive à reinstalação do app.</li>
+      </ul>
+
+      <AlertBox type="warning" title="O Termux NÃO pode tar dele mesmo enquanto roda">
+        Empacotar o <code>$PREFIX</code> de dentro do próprio Termux trava (você está modificando
+        arquivos abertos do <code>tar</code>). O backup correto se faz pelo app
+        <strong> Termux-only via ADB</strong> ou usando o script oficial <code>termux-backup</code>
+        do pacote <code>termux-tools</code>. Veja exemplos abaixo.
+      </AlertBox>
+
+      <h2>1. Preparar o storage</h2>
+      <CodeBlock
+        title="Liberar acesso ao storage compartilhado"
+        code={`# Cria os links ~/storage/* para a memória interna do Android
+termux-setup-storage
+
+# Estrutura criada:
+# ~/storage/shared      -> /sdcard (memória interna)
+# ~/storage/downloads   -> /sdcard/Download
+# ~/storage/dcim        -> /sdcard/DCIM
+# ~/storage/movies      -> /sdcard/Movies
+
+mkdir -p ~/storage/shared/TermuxBackup`}
+      />
+
+      <h2>2. Backup com tar (método oficial)</h2>
+      <CodeBlock
+        title="termux-backup do pacote termux-tools"
+        code={`# Garanta o pacote
+pkg install termux-tools
+
+# Cria backup completo (PREFIX + HOME) em um .tar.xz
+termux-backup ~/storage/shared/TermuxBackup/termux-$(date +%F).tar.xz
+
+# O comando para a maioria dos serviços, fecha sessões filhas e gera
+# um arquivo único, restaurável via:
+#   termux-restore /caminho/do/backup.tar.xz`}
+      />
+
+      <h2>3. Backup manual com tar</h2>
+      <p>
+        Útil quando você quer backup só do <code>$HOME</code> (mais comum, e seguro de fazer
+        com o Termux rodando) ou quer customizar exclusões.
+      </p>
+      <CodeBlock
+        title="Empacotar apenas o HOME"
+        code={`cd $HOME
+
+tar --exclude='.cache' \\
+    --exclude='node_modules' \\
+    --exclude='.npm' \\
+    -czvf ~/storage/shared/TermuxBackup/home-$(date +%F).tgz .
+
+# Conferir o conteúdo
+tar -tzf ~/storage/shared/TermuxBackup/home-$(date +%F).tgz | head`}
+      />
+
+      <h2>4. Backup incremental com rsync</h2>
+      <CodeBlock
+        title="rsync para storage local ou cartão SD"
+        code={`pkg install rsync
+
+# Sincroniza o HOME para uma pasta no storage compartilhado
+rsync -avh --delete \\
+  --exclude='.cache/' \\
+  --exclude='node_modules/' \\
+  $HOME/ ~/storage/shared/TermuxBackup/home/`}
+      />
+
+      <h2>5. Sincronizar para a nuvem com rclone</h2>
+      <p>
+        O <strong>rclone</strong> é a forma mais robusta de subir backups para Google Drive,
+        Dropbox, OneDrive, S3, Backblaze B2 etc — direto do Termux.
+      </p>
+      <CodeBlock
+        title="Configurar e enviar"
+        code={`pkg install rclone
+
+# Configurar um remote (interativo). Escolha o tipo (drive, dropbox, s3, ...)
+rclone config
+
+# Listar remotes configurados
+rclone listremotes
+
+# Enviar o tar do dia para o Google Drive
+rclone copy \\
+  ~/storage/shared/TermuxBackup/home-$(date +%F).tgz \\
+  gdrive:TermuxBackup/
+
+# Sincronizar pasta inteira (apaga no destino o que sumiu na origem)
+rclone sync ~/storage/shared/TermuxBackup gdrive:TermuxBackup --progress
+
+# Criptografar antes de subir? Use o backend "crypt" do rclone:
+#   rclone config -> n -> nome -> crypt -> aponta para outro remote`}
+      />
+
+      <CodeBlock
+        title="Exemplo: backup automatizado para S3"
+        code={`# Script ~/bin/backup-cloud.sh
+#!/data/data/com.termux/files/usr/bin/bash
+set -e
+
+DEST=~/storage/shared/TermuxBackup
+mkdir -p "$DEST"
+
+ARQ="$DEST/home-$(date +%F).tgz"
+tar --exclude='.cache' --exclude='node_modules' \\
+    -czf "$ARQ" -C "$HOME" .
+
+rclone copy "$ARQ" s3remote:meu-bucket/termux/
+echo "Backup enviado: $ARQ"`}
+      />
+
+      <h2>6. Restaurar</h2>
+      <CodeBlock
+        title="Restaurar do tar"
+        code={`# Restauração feita pelo helper oficial (PREFIX + HOME):
+termux-restore ~/storage/shared/TermuxBackup/termux-2025-01-15.tar.xz
+
+# Restauração manual de um backup só do HOME:
+cd $HOME
+tar -xzvf ~/storage/shared/TermuxBackup/home-2025-01-15.tgz
+
+# Baixar do rclone primeiro, se for da nuvem:
+rclone copy gdrive:TermuxBackup/home-2025-01-15.tgz ~/storage/shared/TermuxBackup/`}
+      />
+
+      <h2>7. Agendar backups</h2>
+      <p>
+        Como o Termux não tem <code>cron</code> rodando como serviço do sistema, use o
+        <strong> Termux:Boot</strong> + um loop com <code>sleep</code>, ou
+        <strong> Termux:Tasker</strong> com o app Tasker do Android.
+      </p>
+      <CodeBlock
+        title="~/.termux/boot/backup-diario"
+        code={`#!/data/data/com.termux/files/usr/bin/bash
+termux-wake-lock
+while true; do
+  if [ "$(date +%H:%M)" = "03:00" ]; then
+    ~/bin/backup-cloud.sh >> ~/backup.log 2>&1
+    sleep 60
+  fi
+  sleep 30
+done`}
+      />
+
+      <AlertBox type="success" title="Boas práticas">
+        <ul className="mt-1 mb-0 list-disc pl-5">
+          <li>Salve o <code>.tar</code> sempre <strong>fora</strong> do <code>$PREFIX</code> (em <code>~/storage/shared</code> ou nuvem).</li>
+          <li>Reinstalar o Termux apaga o app inteiro — sem backup externo, perde tudo.</li>
+          <li>Liste os pacotes para refacilitar a reinstalação: <code>pkg list-installed &gt; ~/storage/shared/TermuxBackup/pacotes.txt</code></li>
+          <li>Teste a restauração de vez em quando — backup sem teste é ilusão.</li>
         </ul>
-
-        <h2>1. Instalar e Configurar</h2>
-        <CodeBlock
-          title="Instalar o Timeshift"
-          code={`# Instalar o Timeshift
-  pkg update
-  pkg install -y timeshift
-
-  # Abrir a interface gráfica
-  sudo timeshift-gtk
-  # Ou via terminal (para servidores):
-  sudo timeshift --list
-
-  # Na primeira execução:
-  # 1. Escolha o modo: RSYNC (recomendado) ou BTRFS
-  # 2. Escolha o disco de destino (onde os snapshots serão salvos)
-  #    - Idealmente um disco/partição DIFERENTE do sistema
-  #    - Se não tiver outro disco, pode usar o mesmo
-  # 3. Configure a frequência dos snapshots
-  # 4. Escolha os diretórios a incluir
-
-  # Configurar via terminal
-  sudo timeshift --create --comments "Primeiro snapshot"
-  # Saída:
-  # Creating new snapshot...
-  # Saving to device: /dev/sda2
-  # Snapshot saved: 2024-07-15_14-30-00`}
-        />
-
-        <h2>2. Criar Snapshots</h2>
-        <CodeBlock
-          title="Criar e gerenciar snapshots"
-          code={`# Criar um snapshot manual com comentário
-  sudo timeshift --create --comments "Antes de atualizar o kernel"
-
-  # Criar snapshot com tag específica
-  sudo timeshift --create --tags D   # Daily
-  sudo timeshift --create --tags W   # Weekly
-  sudo timeshift --create --tags M   # Monthly
-  sudo timeshift --create --tags O   # On-demand (manual)
-
-  # Listar todos os snapshots
-  sudo timeshift --list
-  # Saída:
-  # Device : /dev/sda2
-  # -----------------------------------------------
-  # Num   Name                    Tags  Description
-  # -----------------------------------------------
-  # 0  >  2024-07-15_14-30-00     O     Antes de atualizar o kernel
-  # 1  >  2024-07-14_02-00-00     D     Snapshot automático diário
-  # 2  >  2024-07-07_02-00-00     W     Snapshot automático semanal
-
-  # Ver detalhes de um snapshot
-  sudo timeshift --list --snapshot-device /dev/sda2
-
-  # Deletar um snapshot específico
-  sudo timeshift --delete --snapshot '2024-07-14_02-00-00'
-
-  # Deletar todos os snapshots
-  sudo timeshift --delete-all
-
-  # Ver espaço usado pelos snapshots
-  du -sh /timeshift/snapshots/*/`}
-        />
-
-        <h2>3. Restaurar o Sistema</h2>
-        <CodeBlock
-          title="Restaurar a partir de um snapshot"
-          code={`# === VIA INTERFACE GRÁFICA (recomendado) ===
-  sudo timeshift-gtk
-  # 1. Selecione o snapshot desejado
-  # 2. Clique em "Restaurar"
-  # 3. Revise o que será restaurado
-  # 4. Confirme
-  # 5. Reinicie o computador
-
-  # === VIA TERMINAL ===
-  # Listar snapshots disponíveis
-  sudo timeshift --list
-
-  # Restaurar um snapshot específico
-  sudo timeshift --restore --snapshot '2024-07-15_14-30-00'
-
-  # Restaurar sem pedir confirmação (para scripts)
-  sudo timeshift --restore --snapshot '2024-07-15_14-30-00' --yes
-
-  # Pular arquivos específicos durante a restauração
-  sudo timeshift --restore --snapshot '2024-07-15_14-30-00' \
-    --skip-grub   # Não restaurar o GRUB
-
-  # === RESTAURAR QUANDO O SISTEMA NÃO INICIA ===
-  # 1. Bootar com Termux Live USB
-  # 2. Instalar o Timeshift no Live:
-  pkg install -y timeshift
-  # 3. Montar a partição com os snapshots:
-  sudo mount /dev/sda2 /mnt
-  # 4. Restaurar:
-  sudo timeshift --restore --snapshot-device /dev/sda2
-  # 5. Selecione o snapshot e restaure
-  # 6. Reinicie sem o USB`}
-        />
-
-        <AlertBox type="warning" title="O que o Timeshift protege e o que não protege">
-          O Timeshift, por padrão, faz snapshot apenas dos <strong>arquivos do sistema</strong>
-          (<code>/</code>), não dos seus arquivos pessoais (<code>/home</code>). Isso é proposital:
-          ele restaura o sistema sem apagar seus documentos. Se quiser incluir o <code>/home</code>,
-          ative nas configurações — mas para backup pessoal, use rsync ou BorgBackup.
-        </AlertBox>
-
-        <h2>4. Agendamento Automático</h2>
-        <CodeBlock
-          title="Configurar snapshots automáticos"
-          code={`# Via interface gráfica:
-  # Timeshift → Configurações → Agendamento
-  # - Mensal: manter últimos 2 snapshots
-  # - Semanal: manter últimos 3 snapshots
-  # - Diário: manter últimos 5 snapshots
-  # - Horário: manter últimos 6 snapshots
-  # - Boot: criar snapshot a cada boot
-
-  # Via linha de comando (editar config):
-  sudo nano /etc/timeshift/timeshift.json
-
-  # Configuração recomendada:
-  # {
-  #   "backup_device_uuid": "UUID_DO_DISCO",
-  #   "schedule_monthly": "true",
-  #   "count_monthly": "2",
-  #   "schedule_weekly": "true",
-  #   "count_weekly": "3",
-  #   "schedule_daily": "true",
-  #   "count_daily": "5",
-  #   "schedule_hourly": "false",
-  #   "count_hourly": "6",
-  #   "schedule_boot": "false",
-  #   "count_boot": "5",
-  #   "exclude": [
-  #     "/home/**",
-  #     "/root/**"
-  #   ],
-  #   "exclude_apps": []
-  # }
-
-  # Verificar se o agendamento está ativo
-  # O Timeshift usa cron para agendamento
-  sudo cat /etc/cron.d/timeshift-*
-
-  # Executar snapshot agendado manualmente
-  sudo timeshift --check
-  # Verifica se um snapshot agendado está pendente e o executa`}
-        />
-
-        <h2>5. Boas Práticas</h2>
-        <CodeBlock
-          title="Dicas para uso eficiente do Timeshift"
-          code={`# 1. Sempre criar snapshot ANTES de:
-  sudo timeshift --create --comments "Antes: pkg upgrade"
-  pkg upgrade -y
-
-  sudo timeshift --create --comments "Antes: instalar driver NVIDIA"
-  pkg install -y nvidia-driver-545
-
-  sudo timeshift --create --comments "Antes: mudanças no fstab"
-  sudo nano /etc/fstab
-
-  # 2. Verificar espaço em disco regularmente
-  df -h /timeshift
-  # Se estiver enchendo, reduzir o número de snapshots mantidos
-
-  # 3. Usar disco separado para snapshots (se possível)
-  # Snapshots no mesmo disco que o sistema não protegem contra falha de disco
-  # Idealmente, use um segundo HD/SSD
-
-  # 4. Testar a restauração periodicamente
-  # Crie uma VM, restaure o snapshot e verifique
-
-  # 5. Combinar com backup do /home
-  # Timeshift para o sistema, rsync/BorgBackup para dados pessoais
-  rsync -avh --exclude='.cache' /home/usuario/ /backup/home/
-
-  # 6. Manter snapshots úteis com bons comentários
-  sudo timeshift --create --comments "Sistema estável após config completa"
-  # Snapshots sem comentário são difíceis de identificar depois`}
-        />
-
-        <h2>Troubleshooting</h2>
-        <CodeBlock
-          title="Problemas comuns com Timeshift"
-          code={`# Timeshift ocupa muito espaço
-  # Solução: Limpar snapshots antigos
-  sudo timeshift --list
-  sudo timeshift --delete --snapshot 'nome-do-snapshot'
-  # Ou reduzir o número de snapshots mantidos na configuração
-
-  # Erro: "No snapshots found on device"
-  # Solução: Verificar se o disco está montado
-  lsblk
-  sudo mount /dev/sda2 /mnt
-  sudo timeshift --list --snapshot-device /dev/sda2
-
-  # Snapshot demora muito para criar (modo rsync)
-  # Causa: Muitos arquivos ou disco lento
-  # Solução: Excluir pastas grandes desnecessárias
-  # Na config, adicione exclusões:
-  # /var/cache/apt/archives
-  # /tmp
-  # /var/tmp
-  # /snap
-
-  # Erro ao restaurar: "GRUB not found"
-  # Solução: Reinstalar o GRUB após restaurar
-  sudo grub-install /dev/sda
-  sudo update-grub
-
-  # Timeshift não inicia (interface gráfica)
-  # Verificar dependências:
-  pkg install --reinstall timeshift
-  # Executar via terminal para ver erros:
-  sudo timeshift-gtk 2>&1`}
-        />
-
-        <AlertBox type="info" title="Timeshift vs Snapper">
-          Se você usa Btrfs, o <strong>Snapper</strong> é uma alternativa ao Timeshift com
-          integração mais profunda ao sistema de snapshots do Btrfs. O openSUSE usa Snapper
-          por padrão. No Termux com ext4, o Timeshift com rsync é a melhor opção.
-        </AlertBox>
-      </PageContainer>
-    );
-  }
+      </AlertBox>
+    </PageContainer>
+  );
+}

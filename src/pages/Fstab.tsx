@@ -1,226 +1,141 @@
 import { PageContainer } from "@/components/layout/PageContainer";
-  import { CodeBlock } from "@/components/ui/CodeBlock";
-  import { AlertBox } from "@/components/ui/AlertBox";
+import { CodeBlock } from "@/components/ui/CodeBlock";
+import { AlertBox } from "@/components/ui/AlertBox";
 
-  export default function Fstab() {
-    return (
-      <PageContainer
-        title="fstab — Montagem de Sistemas de Arquivos"
-        subtitle="Guia completo do /etc/fstab no Termux: montar partições automaticamente, opções de montagem, UUID, swap e dispositivos removíveis."
-        difficulty="intermediario"
-        timeToRead="25 min"
-      >
-        <p>
-          O arquivo <strong>/etc/fstab</strong> (File System Table) define quais sistemas de
-          arquivos são montados automaticamente no boot do sistema. Cada linha descreve uma
-          partição, disco ou recurso de rede e como ele deve ser montado — ponto de montagem,
-          tipo de filesystem, opções e prioridade.
-        </p>
+export default function Fstab() {
+  return (
+    <PageContainer
+      title="Montagem de Storage no Android — não há /etc/fstab editável"
+      subtitle="Como o Android monta /data, /sdcard e cartões SD automaticamente, e como o Termux acessa o storage compartilhado via termux-setup-storage."
+      difficulty="iniciante"
+      timeToRead="10 min"
+    >
+      <AlertBox type="warning" title="Não existe /etc/fstab editável no Android">
+        Em distros Linux desktop, <code>/etc/fstab</code> define o que montar no boot. No
+        Android <strong>quem decide o que montar é o init/vold</strong> (códigos do próprio
+        sistema operacional), a partir de partições fixas definidas no firmware. Não há
+        <code> /etc/fstab</code> que o Termux possa editar para “montar mais um disco”.
+        Tudo o que existe em <code>$PREFIX/etc/</code> serve para o Termux, não para o
+        kernel do Android. Para o Termux <em>enxergar</em> o storage compartilhado existe
+        um único comando: <code>termux-setup-storage</code>.
+      </AlertBox>
 
-        <h2>1. Entender o fstab</h2>
-        <CodeBlock
-          title="Estrutura do /etc/fstab"
-          code={`# Ver o fstab atual
-  cat /etc/fstab
+      <h2>1. termux-setup-storage — a única coisa que você roda</h2>
+      <CodeBlock
+        title="Conceder acesso ao storage compartilhado"
+        code={`# Roda uma vez (mostra o popup do Android pedindo permissão)
+termux-setup-storage
 
-  # Formato de cada linha:
-  # <dispositivo>  <ponto_montagem>  <tipo>  <opções>  <dump>  <pass>
+# Após autorizar, surge a pasta ~/storage/ com symlinks:
+ls -l ~/storage/
+# Saída típica:
+# dcim     -> /storage/emulated/0/DCIM
+# downloads-> /storage/emulated/0/Download
+# movies   -> /storage/emulated/0/Movies
+# music    -> /storage/emulated/0/Music
+# pictures -> /storage/emulated/0/Pictures
+# shared   -> /storage/emulated/0/
+# external-1 -> /storage/XXXX-XXXX/Android/data/com.termux/files (cartão SD, se houver)
 
-  # Exemplo típico:
-  # UUID=a1b2c3d4-e5f6  /           ext4  errors=remount-ro  0  1
-  # UUID=f6e5d4c3-b2a1  /home       ext4  defaults           0  2
-  # UUID=9876-ABCD       /boot/efi   vfat  umask=0077         0  1
-  # /dev/sdb1            /dados      ext4  defaults,nofail    0  2
-  # //servidor/share     /mnt/share  cifs  credentials=...    0  0
+# Usar
+ls ~/storage/downloads
+cp arquivo.txt ~/storage/shared/Documents/`}
+      />
 
-  # Explicação de cada campo:
-  # 1. Dispositivo: UUID=xxx, /dev/sdXN, LABEL=xxx, ou recurso remoto
-  # 2. Ponto de montagem: onde será montado (/mnt/dados, /home, etc.)
-  # 3. Tipo: ext4, xfs, btrfs, ntfs, vfat, cifs, nfs, swap
-  # 4. Opções: defaults, noatime, nofail, ro, rw, etc.
-  # 5. Dump: 0 = não fazer dump (backup), 1 = fazer
-  # 6. Pass: ordem do fsck (0=skip, 1=root, 2=outros)
+      <h2>2. Ver o que está montado (read-only para você)</h2>
+      <CodeBlock
+        title="mount, df e findmnt"
+        code={`# Lista tudo que o kernel Android montou — informativo, NÃO se edita
+mount | head -20
 
-  # Descobrir UUID de um dispositivo
-  sudo blkid
-  # Saída: /dev/sda1: UUID="a1b2c3d4-e5f6" TYPE="ext4" PARTUUID="xxx"
-  sudo blkid /dev/sdb1
+# Saída típica (resumo):
+# rootfs on / type rootfs (ro,seclabel,size=...)
+# tmpfs on /dev type tmpfs (rw,seclabel,nosuid,relatime,mode=755)
+# /dev/block/dm-XX on /data type f2fs (rw,seclabel,nosuid,nodev,noatime,...)
+# /dev/fuse on /storage/emulated type fuse (rw,nosuid,nodev,noexec,noatime,...)
+# tmpfs on /storage type tmpfs (rw,seclabel,nosuid,nodev,noexec,relatime,...)
 
-  # Listar partições montadas
-  lsblk
-  df -h
-  mount | column -t`}
-        />
+# Espaço disponível
+df -h
 
-        <AlertBox type="danger" title="Cuidado ao editar o fstab">
-          Um erro no fstab pode impedir o sistema de iniciar. Sempre faça backup antes de
-          editar: <code>sudo cp /etc/fstab /etc/fstab.bak</code>. Após editar, teste com
-          <code>sudo mount -a</code> antes de reiniciar. Use <code>nofail</code> em discos
-          removíveis para evitar travamento no boot se o disco não estiver conectado.
-        </AlertBox>
+# Onde está montado um caminho específico
+df -h $PREFIX
+df -h ~/storage/shared/`}
+      />
 
-        <h2>2. Opções de Montagem</h2>
-        <CodeBlock
-          title="Opções comuns do fstab"
-          code={`# defaults = rw,suid,dev,exec,auto,nouser,async
-  # É equivalente a usar todas as opções padrão
+      <AlertBox type="warning" title="Por que você NÃO pode editar isso">
+        <ul>
+          <li>
+            <code>mount</code> e <code>umount</code> exigem capability{" "}
+            <code>CAP_SYS_ADMIN</code> — bloqueada no Termux por padrão.
+          </li>
+          <li>
+            O kernel do Android usa SELinux <em>enforcing</em>: mesmo com root convencional,
+            tentar remontar <code>/system</code> ou <code>/data</code> com opções diferentes
+            quase sempre falha.
+          </li>
+          <li>
+            Não existe arquivo de texto que sobreviva ao reboot e altere a tabela de
+            montagem. Tudo é gerado pelo init a partir do firmware.
+          </li>
+        </ul>
+      </AlertBox>
 
-  # Opções comuns:
-  # rw         → leitura e escrita (padrão)
-  # ro         → somente leitura
-  # auto       → montar automaticamente no boot
-  # noauto     → NÃO montar no boot (montar manualmente)
-  # exec       → permitir execução de binários
-  # noexec     → proibir execução (segurança)
-  # suid       → permitir SUID/SGID
-  # nosuid     → desabilitar SUID/SGID (segurança)
-  # noatime    → não atualizar access time (melhora performance)
-  # nodiratime → não atualizar access time de diretórios
-  # nofail     → não parar o boot se o dispositivo falhar
-  # user       → permitir que usuários comuns montem
-  # nouser     → só root pode montar (padrão)
-  # discard    → habilitar TRIM para SSDs
-  # _netdev    → esperar rede antes de montar (para NFS/CIFS)
+      <h2>3. Cartão SD — quando aparece e quando não</h2>
+      <CodeBlock
+        title="Acessar SD a partir do Termux"
+        code={`# Após termux-setup-storage, se houver SD físico:
+ls ~/storage/external-1/
+# Esse caminho é /storage/XXXX-XXXX/Android/data/com.termux/files
+# É a única pasta do SD onde o Termux pode escrever sem root,
+# por causa do Scoped Storage (Android 11+).
 
-  # === EXEMPLOS PRÁTICOS ===
+# Tentar escrever fora dela falha com 'Permission denied':
+echo teste > /storage/XXXX-XXXX/qualquer.txt   # ❌ EACCES
 
-  # Partição de dados ext4 (performance otimizada)
-  UUID=xxx  /dados  ext4  defaults,noatime  0  2
+# Ler outras pastas do SD pode até funcionar para mídia,
+# mas escrever só dá em ~/storage/external-1/.`}
+      />
 
-  # SSD com TRIM
-  UUID=xxx  /  ext4  errors=remount-ro,discard,noatime  0  1
+      <h2>4. Montar um “volume” lógico do seu jeito (workarounds)</h2>
+      <CodeBlock
+        title="Soluções que funcionam sem root"
+        code={`# Criptografar uma pasta privada (parece um volume montado)
+pkg install -y gocryptfs
+mkdir -p ~/secret-cifra ~/secret-claro
+gocryptfs -init ~/secret-cifra
+gocryptfs ~/secret-cifra ~/secret-claro
+# Use ~/secret-claro como pasta normal; desmonta com:
+fusermount -u ~/secret-claro
 
-  # HD externo (pode não estar sempre conectado)
-  UUID=xxx  /mnt/externo  ext4  defaults,nofail,noatime,x-systemd.device-timeout=10  0  2
+# Montar diretório remoto via SSHFS
+pkg install -y sshfs
+mkdir -p ~/servidor
+sshfs usuario@servidor:/home/usuario ~/servidor
+# Desmontar
+fusermount -u ~/servidor
 
-  # Partição NTFS (compatível com Windows)
-  UUID=xxx  /mnt/windows  ntfs-3g  defaults,uid=1000,gid=1000,umask=0022  0  0
+# Para imagens/ISOs use proot-distro (faz "mount" lógico do rootfs).`}
+      />
 
-  # Partição FAT32 (pendrive, EFI)
-  UUID=XXXX-YYYY  /boot/efi  vfat  umask=0077  0  1
+      <h2>5. Resumo: o equivalente “Termux” do fstab</h2>
+      <CodeBlock
+        title="Cheatsheet"
+        code={`Distro Linux                    | Termux / Android
+--------------------------------|----------------------------------------
+editar /etc/fstab               | rodar termux-setup-storage (uma vez)
+mount /dev/sdb1 /mnt/dados      | usar ~/storage/shared (já montado)
+mount -o loop arq.iso /mnt/iso  | proot-distro / archivemount
+mount -t cifs //srv/share ...   | sshfs usuario@srv:/path ~/srv
+swapon /swapfile                | não há swap configurável (kernel decide)
+fsck /dev/sdb1                  | não acessível (block device protegido)`}
+      />
 
-  # Compartilhamento NFS
-  servidor:/dados  /mnt/nfs  nfs  defaults,_netdev  0  0
-
-  # Compartilhamento CIFS/Samba
-  //servidor/share  /mnt/samba  cifs  credentials=/etc/samba/.cred,uid=1000,_netdev  0  0
-
-  # Swap
-  UUID=xxx  none  swap  sw  0  0
-
-  # tmpfs (RAM disk — extremamente rápido)
-  tmpfs  /tmp  tmpfs  defaults,size=2G,noatime,mode=1777  0  0`}
-        />
-
-        <h2>3. Adicionar uma Partição ao fstab</h2>
-        <CodeBlock
-          title="Passo a passo para montar uma partição"
-          code={`# Passo 1: Identificar a partição
-  lsblk
-  sudo blkid
-
-  # Passo 2: Criar o ponto de montagem
-  sudo mkdir -p /mnt/dados
-
-  # Passo 3: Descobrir o UUID
-  sudo blkid /dev/sdb1
-  # Copie o UUID (ex: UUID="a1b2c3d4-e5f6-7890-abcd-ef1234567890")
-
-  # Passo 4: Fazer backup do fstab
-  sudo cp /etc/fstab /etc/fstab.bak
-
-  # Passo 5: Adicionar a linha ao fstab
-  echo 'UUID=a1b2c3d4-e5f6-7890-abcd-ef1234567890  /mnt/dados  ext4  defaults,noatime,nofail  0  2' | sudo tee -a /etc/fstab
-
-  # Passo 6: Testar (sem reiniciar!)
-  sudo mount -a
-  # Se não mostrar erro, está correto!
-
-  # Passo 7: Verificar
-  df -h /mnt/dados
-  ls /mnt/dados
-
-  # Passo 8: Ajustar permissões
-  sudo chown $USER:$USER /mnt/dados
-  # Ou para grupo específico:
-  sudo chown -R :dados-grupo /mnt/dados
-  sudo chmod 775 /mnt/dados`}
-        />
-
-        <h2>4. Swap no fstab</h2>
-        <CodeBlock
-          title="Configurar swap"
-          code={`# Ver swap atual
-  swapon --show
-  free -h
-
-  # === Swap via partição ===
-  # UUID=xxx  none  swap  sw  0  0
-
-  # === Criar swap via arquivo (mais flexível) ===
-  # Criar arquivo de swap (4GB)
-  sudo fallocate -l 4G /swapfile
-  sudo chmod 600 /swapfile
-  sudo mkswap /swapfile
-  sudo swapon /swapfile
-
-  # Adicionar ao fstab para persistir
-  echo '/swapfile  none  swap  sw  0  0' | sudo tee -a /etc/fstab
-
-  # Ajustar swappiness (quão agressivamente usar swap)
-  cat /proc/sys/vm/swappiness    # Padrão: 60
-  # Para desktop (pouco swap): 10
-  # Para servidor: 60
-  echo 'vm.swappiness=10' | sudo tee -a /etc/sysctl.conf
-  sudo sysctl -p
-
-  # Remover swap
-  sudo swapoff /swapfile
-  # Remover a linha do /etc/fstab
-  sudo rm /swapfile`}
-        />
-
-        <h2>Troubleshooting</h2>
-        <CodeBlock
-          title="Problemas comuns com fstab"
-          code={`# Sistema não inicia (erro no fstab)
-  # 1. O sistema pode entrar em modo de emergência
-  # 2. Digite a senha de root
-  # 3. Edite o fstab:
-  nano /etc/fstab
-  # 4. Corrija ou comente (#) a linha problemática
-  # 5. Reinicie: reboot
-
-  # Ou restaurar o backup:
-  cp /etc/fstab.bak /etc/fstab
-
-  # mount -a dá erro
-  # Verificar a linha com problema:
-  sudo mount -a -v    # Verbose — mostra o que está fazendo
-
-  # "wrong fs type, bad option"
-  # Verificar o tipo de filesystem:
-  sudo blkid /dev/sdb1
-  # Instalar suporte ao filesystem:
-  pkg install -y ntfs-3g    # Para NTFS
-  pkg install -y cifs-utils # Para CIFS/Samba
-  pkg install -y nfs-common # Para NFS
-
-  # UUID mudou (após formatar ou trocar disco)
-  # Atualizar o UUID no fstab:
-  sudo blkid    # Pegar novo UUID
-  sudo nano /etc/fstab
-
-  # Disco removível trava o boot
-  # Adicionar nofail e timeout:
-  # UUID=xxx  /mnt/externo  ext4  defaults,nofail,x-systemd.device-timeout=5  0  2`}
-        />
-
-        <AlertBox type="info" title="UUID vs /dev/sdX">
-          Sempre use <code>UUID=</code> no fstab ao invés de <code>/dev/sda1</code>.
-          Os nomes <code>/dev/sdX</code> podem mudar quando você adiciona/remove discos,
-          mas o UUID é único e permanente. Use <code>sudo blkid</code> para descobrir UUIDs.
-        </AlertBox>
-      </PageContainer>
-    );
-  }
+      <AlertBox type="info" title="Em uma frase">
+        No Android, storage é “monte automático e ponto”. O Termux participa via{" "}
+        <code>termux-setup-storage</code> e via FUSE (<code>sshfs</code>,{" "}
+        <code>gocryptfs</code>). Editar fstab não é uma opção — nem é necessário.
+      </AlertBox>
+    </PageContainer>
+  );
+}

@@ -1,317 +1,183 @@
 import { PageContainer } from "@/components/layout/PageContainer";
-  import { CodeBlock } from "@/components/ui/CodeBlock";
-  import { AlertBox } from "@/components/ui/AlertBox";
+import { CodeBlock } from "@/components/ui/CodeBlock";
+import { AlertBox } from "@/components/ui/AlertBox";
 
-  export default function Wine() {
-    return (
-      <PageContainer
-        title="Wine — Executar Aplicativos Windows no Termux"
-        subtitle="Guia completo do Wine, Winetricks, Bottles e Proton para rodar programas e jogos Windows nativamente no Termux sem virtualização."
-        difficulty="intermediario"
-        timeToRead="30 min"
-      >
-        <p>
-          O <strong>Wine</strong> (Wine Is Not an Emulator) é uma camada de compatibilidade que
-          permite executar aplicativos Windows no Linux sem emulação. Diferente de uma máquina
-          virtual, o Wine traduz as chamadas da API do Windows para Linux em tempo real,
-          o que significa performance quase nativa.
-        </p>
+export default function Wine() {
+  return (
+    <PageContainer
+      title="Wine no Termux — Aplicativos Windows no Android"
+      subtitle="Por que Wine não roda nativo no Termux, e como tentar via proot-distro + Box86/Box64. Experimental, lento e limitado."
+      difficulty="avancado"
+      timeToRead="25 min"
+    >
+      <AlertBox type="warning" title="Wine NÃO roda nativo no Termux">
+        Termux é Android (ARM/AArch64) sem root e sem suporte direto a
+        binários x86 do Windows. <strong>Não existe pacote
+        <code>wine</code> no repositório do Termux</strong>. A única forma
+        razoável de rodar programas Windows é via uma distro Linux instalada
+        com <code>proot-distro</code> + <strong>Box86/Box64</strong> para
+        traduzir x86→ARM. Tudo é <strong>experimental, lento</strong> e
+        <strong> não roda jogos AAA, anti-cheat, DRM moderno</strong> nem
+        nada que dependa de drivers GPU dedicados. Para Office/Photoshop/jogos
+        modernos, use o PC.
+      </AlertBox>
 
-        <h2>Wine vs Máquina Virtual — Quando Usar Cada Um</h2>
-        <ul>
-          <li><strong>Wine</strong> — Ideal para aplicativos simples, jogos (via Proton/Lutris), programas de escritório. Performance nativa, sem overhead. Nem todo software funciona.</li>
-          <li><strong>VM (VirtualBox/KVM)</strong> — Ideal quando você precisa de 100% de compatibilidade, como software empresarial complexo ou drivers de hardware Windows. Mais lento, consome mais recursos.</li>
-          <li><strong>Bottles/Lutris</strong> — Frontends gráficos para o Wine com prefixos isolados. Facilitam a configuração e compatibilidade.</li>
-          <li><strong>Proton</strong> — Versão do Wine otimizada pela Valve para jogos no Steam. Funciona automaticamente no Steam para Linux.</li>
-        </ul>
+      <p>
+        O <strong>Wine</strong> (Wine Is Not an Emulator) é uma camada de
+        compatibilidade que traduz chamadas da API Windows para Linux. No
+        Termux puro ele não existe — Termux roda em Android, e Wine precisa
+        de uma userland Linux completa + um tradutor x86 (Box86/Box64) já que
+        a maioria dos .exe é x86.
+      </p>
 
-        <h2>1. Instalar o Wine</h2>
-        <CodeBlock
-          title="Instalação do Wine no Termux"
-          code={`# Habilitar arquitetura 32-bit (necessário para muitos programas Windows)
-  sudo dpkg --add-architecture i386
+      <h2>1. Pré-requisitos</h2>
+      <CodeBlock
+        title="Atualizar Termux e instalar utilitários"
+        code={`pkg update && pkg upgrade -y
+pkg install -y proot-distro x11-repo
+pkg install -y termux-x11-nightly  # pode falhar; instale o app Termux:X11
+pkg install -y pulseaudio          # áudio (limitado)
 
-  # Adicionar a chave GPG do repositório oficial do Wine
-  sudo mkdir -pm755 /etc/apt/keyrings
-  sudo wget -O /etc/apt/keyrings/winehq-archive.key https://dl.winehq.org/wine-builds/winehq.key
+# Dar acesso ao storage compartilhado (pra trocar arquivos)
+termux-setup-storage`}
+      />
 
-  # Adicionar o repositório (Termux 0.118 Noble)
-  sudo wget -NP /etc/apt/sources.list.d/ \
-    https://dl.winehq.org/wine-builds/termux/dists/noble/winehq-noble.sources
+      <h2>2. Instalar uma distro Linux via proot-distro</h2>
+      <CodeBlock
+        title="Debian dentro do Termux"
+        code={`# Listar distros disponíveis
+proot-distro list
 
-  # Atualizar e instalar
-  pkg update
+# Instalar Debian (Ubuntu também serve)
+proot-distro install debian
 
-  # Escolha UMA das versões:
-  pkg install -y --install-recommends winehq-stable    # Estável (recomendado)
-  pkg install -y --install-recommends winehq-staging   # Com patches extras (gaming)
-  pkg install -y --install-recommends winehq-devel     # Desenvolvimento (mais recente)
+# Entrar
+proot-distro login debian
 
-  # Verificar a instalação
-  wine --version
-  # Saída: wine-9.0
+# Dentro do Debian, atualizar
+apt update && apt upgrade -y
+apt install -y wget gnupg2 software-properties-common`}
+      />
 
-  # Configurar o Wine pela primeira vez
-  winecfg
-  # Abre uma janela gráfica para configurar:
-  # - Versão do Windows simulada (Windows 10 recomendado)
-  # - Resolução de tela, áudio, drives virtuais
-  # Isso cria o prefixo padrão em ~/.wine/`}
-        />
+      <h2>3. Instalar Box86 e Box64 (dentro do Debian em proot)</h2>
+      <CodeBlock
+        title="Tradução x86/x86_64 → ARM"
+        code={`# Box86 (32-bit) e Box64 (64-bit) precisam estar instalados
+# DENTRO do proot pra Wine conseguir executar .exe.
 
-        <AlertBox type="info" title="Prefixo do Wine (~/.wine)">
-          O Wine cria uma estrutura de diretórios que simula a instalação do Windows
-          em <code>~/.wine</code>. Dentro dela você encontra <code>drive_c/</code>
-          (equivalente ao C:\\), o registro do Windows e configurações. Cada prefixo
-          é independente — você pode ter vários para diferentes programas.
-        </AlertBox>
+# Adicionar repositório do projeto Box86/Box64 (ARM64):
+wget https://itai-nelken.github.io/weekly-box86-debs/debian/box86.list \
+  -O /etc/apt/sources.list.d/box86.list
+wget -qO- https://itai-nelken.github.io/weekly-box86-debs/debian/KEY.gpg \
+  | apt-key add -
 
-        <h2>2. Executar Programas Windows</h2>
-        <CodeBlock
-          title="Usar o Wine para rodar .exe"
-          code={`# Executar um programa Windows
-  wine programa.exe
+wget https://ryanfortner.github.io/box64-debs/box64.list \
+  -O /etc/apt/sources.list.d/box64.list
+wget -qO- https://ryanfortner.github.io/box64-debs/KEY.gpg | apt-key add -
 
-  # Executar com um prefixo específico (isolado)
-  WINEPREFIX=~/wine-office wine setup.exe
+apt update
+apt install -y box86 box64
 
-  # Executar em modo 32-bit (necessário para alguns programas antigos)
-  WINEARCH=win32 WINEPREFIX=~/wine32 wine programa.exe
+# Testar
+box86 -v
+box64 -v`}
+      />
 
-  # Executar o Bloco de Notas do Windows (incluso no Wine)
-  wine notepad
+      <h2>4. Instalar Wine (dentro do Debian em proot)</h2>
+      <CodeBlock
+        title="Wine x86 rodando via Box86"
+        code={`# Wine para arquitetura i386 — rodará via Box86
+dpkg --add-architecture i386
+apt update
+apt install -y wine winetricks
 
-  # Executar o explorador de arquivos
-  wine explorer
+# Verificar
+wine --version
 
-  # Executar o prompt de comando do Windows
-  wine cmd
+# Inicializar prefixo (cria ~/.wine)
+wineboot --init
 
-  # Executar o regedit (editor de registro do Windows)
-  wine regedit
+# Configurar (precisa do Termux:X11 aberto e DISPLAY exportado)
+export DISPLAY=:0
+winecfg`}
+      />
 
-  # Abrir o painel de controle
-  wine control
+      <h2>5. Subir a interface gráfica (Termux:X11)</h2>
+      <CodeBlock
+        title="Iniciar X11 e rodar um .exe"
+        code={`# 1. No Termux (FORA do proot), instale o app Termux:X11 (F-Droid)
+# 2. Inicie o servidor X:
+termux-x11 :0 &
 
-  # Desinstalar programas (abre o desinstalador do Windows)
-  wine uninstaller
+# 3. Abra o app Termux:X11 no Android — janela em branco aparece
+# 4. Volte ao Termux, entre no Debian:
+proot-distro login debian
+export DISPLAY=:0
+export PULSE_SERVER=127.0.0.1   # se quiser áudio via PulseAudio do Termux
 
-  # Executar com debug para identificar problemas
-  WINEDEBUG=+all wine programa.exe 2> debug.log`}
-        />
+# 5. Rode o .exe:
+wine /root/programa.exe
 
-        <h2>3. Winetricks — Instalar Componentes Windows</h2>
-        <p>
-          O <strong>Winetricks</strong> facilita a instalação de bibliotecas e componentes
-          que muitos programas Windows precisam para funcionar (DirectX, .NET, Visual C++, fontes, etc.).
-        </p>
-        <CodeBlock
-          title="Instalar e usar o Winetricks"
-          code={`# Instalar o Winetricks
-  pkg install -y winetricks
+# Para programas 64-bit, Wine precisa estar em modo win64:
+WINEARCH=win64 WINEPREFIX=~/.wine64 wineboot --init
+WINEPREFIX=~/.wine64 wine programa64.exe`}
+      />
 
-  # Abrir a interface gráfica do Winetricks
-  winetricks
+      <AlertBox type="warning" title="Espere lentidão e bugs">
+        A pilha aqui é: <em>Android → Termux → proot Debian → Box86/64 →
+        Wine → seu programa</em>. Cada camada cobra performance. Programas
+        leves (Notepad++, MSPaint clones, leitores) talvez rodem. Jogos
+        modernos, Photoshop, Office completo: <strong>não conta com isso</strong>.
+      </AlertBox>
 
-  # Instalar componentes via terminal:
+      <h2>6. Winetricks — instalar componentes Windows</h2>
+      <CodeBlock
+        title="Bibliotecas comuns que apps esperam"
+        code={`# Dentro do proot, com Wine já configurado:
+winetricks corefonts          # Arial, Times New Roman
+winetricks vcrun2019          # Visual C++ 2019 redistributable
+winetricks dotnet48           # .NET Framework 4.8 (lento de instalar)
+winetricks d3dx9              # DirectX 9 (utilidade limitada sem GPU dedicada)
 
-  # Runtime do .NET Framework
-  winetricks dotnet48          # .NET Framework 4.8
-  winetricks dotnet40          # .NET Framework 4.0
+# Listar tudo que dá pra instalar
+winetricks list-all`}
+      />
 
-  # Visual C++ Redistributables (necessário para muitos programas)
-  winetricks vcrun2019         # Visual C++ 2019
-  winetricks vcrun2015         # Visual C++ 2015
-  winetricks vcrun2010         # Visual C++ 2010
+      <h2>7. Troubleshooting</h2>
+      <CodeBlock
+        title="Problemas comuns"
+        code={`# "wine: command not found"
+# Você está no Termux em vez de no Debian via proot.
+proot-distro login debian
 
-  # DirectX (necessário para jogos)
-  winetricks d3dx9             # DirectX 9 (jogos antigos)
-  winetricks dxvk              # Vulkan-based DirectX 9/10/11 (performance melhor)
+# "Could not open display"
+# Faltou subir o Termux:X11 e/ou exportar DISPLAY=:0
+termux-x11 :0 &
+export DISPLAY=:0
 
-  # Fontes Windows (melhora a aparência dos programas)
-  winetricks corefonts         # Arial, Times New Roman, Courier, etc.
-  winetricks allfonts          # Todas as fontes disponíveis
+# Programa fecha imediatamente
+# Rode no terminal e leia o erro:
+wine programa.exe
+# Geralmente faltam libs — instale com winetricks.
 
-  # Bibliotecas comuns
-  winetricks mfc42             # Microsoft Foundation Classes
-  winetricks msxml6            # XML parser da Microsoft
-  winetricks riched20          # Rich text editor component
+# Performance ruim
+# É esperado. Box86/64 + Wine no celular nunca vai ser rápido.
+# Tente programas mais leves ou versões antigas.
 
-  # Configurações do Windows
-  winetricks win10             # Simular Windows 10
-  winetricks win7              # Simular Windows 7
+# Sem áudio
+# Inicie PulseAudio NO TERMUX (fora do proot) antes de logar:
+pulseaudio --start --exit-idle-time=-1 --load="module-native-protocol-tcp \
+  auth-ip-acl=127.0.0.1 auth-anonymous=1"
+# Dentro do proot:
+export PULSE_SERVER=127.0.0.1`}
+      />
 
-  # Instalar em um prefixo específico
-  WINEPREFIX=~/wine-office winetricks dotnet48 corefonts`}
-        />
-
-        <h2>4. Bottles — Wine Simplificado</h2>
-        <CodeBlock
-          title="Instalar e usar o Bottles"
-          code={`# Instalar o Bottles via Flatpak (forma recomendada)
-  pkg install -y flatpak
-  flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
-  flatpak install flathub com.usebottles.bottles
-
-  # Executar o Bottles
-  flatpak run com.usebottles.bottles
-
-  # O Bottles oferece:
-  # - Prefixos isolados (cada programa em seu "bottle")
-  # - Instalação automática de dependências
-  # - Diferentes runners (Wine, Proton, Wine-GE)
-  # - Snapshots para backup antes de mudanças
-  # - Templates pré-configurados para software e gaming
-
-  # Criar um Bottle via GUI:
-  # 1. Abra o Bottles
-  # 2. Clique em "Create new bottle"
-  # 3. Escolha o tipo: Gaming, Application, ou Custom
-  # 4. Escolha o runner (Wine 9.x, Proton, etc.)
-  # 5. Instale seu programa .exe dentro do bottle`}
-        />
-
-        <h2>5. Lutris — Plataforma de Gaming</h2>
-        <CodeBlock
-          title="Instalar e usar o Lutris"
-          code={`# Adicionar o repositório do Lutris
-  sudo add-apt-repository ppa:lutris-team/lutris
-  pkg update
-  pkg install -y lutris
-
-  # O Lutris é uma plataforma de gaming que integra:
-  # - Wine/Proton (jogos Windows)
-  # - Steam
-  # - GOG
-  # - Epic Games Store
-  # - Emuladores (RetroArch, Dolphin, PCSX2, etc.)
-
-  # Principais vantagens:
-  # - Scripts de instalação da comunidade (lutris.net)
-  # - Cada jogo em um prefixo Wine isolado
-  # - Configuração automática de DXVK, VKD3D, etc.
-  # - Gerenciamento de diferentes versões do Wine
-
-  # Fluxo para instalar um jogo:
-  # 1. Acesse lutris.net e busque o jogo
-  # 2. Clique em "Install" — abre o Lutris automaticamente
-  # 3. O script configura tudo (Wine, dependências, patches)
-  # 4. Jogue!`}
-        />
-
-        <h2>6. Proton e Steam Play</h2>
-        <CodeBlock
-          title="Configurar Proton no Steam"
-          code={`# Instalar o Steam
-  pkg install -y steam
-
-  # Habilitar o Steam Play (Proton) para todos os jogos:
-  # 1. Abra o Steam
-  # 2. Vá em Steam → Settings → Compatibility
-  # 3. Marque "Enable Steam Play for all other titles"
-  # 4. Escolha a versão do Proton (Proton Experimental é recomendado)
-
-  # Instalar o ProtonGE (versão melhorada pela comunidade)
-  # 1. Instale o ProtonUp-Qt
-  flatpak install flathub net.davidotek.pupgui2
-
-  # 2. Abra o ProtonUp-Qt e instale a versão desejada do GE-Proton
-
-  # Verificar compatibilidade de jogos:
-  # Acesse https://www.protondb.com/ para ver relatórios da comunidade
-  # Classificações: Platinum (perfeito), Gold (funciona bem), Silver, Bronze, Borked
-
-  # Forçar uma versão do Proton para um jogo específico:
-  # 1. Clique com botão direito no jogo → Properties
-  # 2. Aba "Compatibility"
-  # 3. Marque "Force the use of a specific Steam Play compatibility tool"
-  # 4. Escolha a versão do Proton
-
-  # Variáveis de ambiente úteis para jogos via Proton:
-  # PROTON_USE_WINED3D=1     ← usar OpenGL ao invés de DXVK
-  # DXVK_HUD=fps             ← mostrar FPS na tela
-  # PROTON_LOG=1              ← habilitar logs para debug
-  # PROTON_NO_ESYNC=1         ← desabilitar esync (resolve alguns travamentos)`}
-        />
-
-        <h2>7. DXVK e VKD3D — DirectX via Vulkan</h2>
-        <CodeBlock
-          title="Configurar DXVK e VKD3D"
-          code={`# DXVK traduz DirectX 9/10/11 para Vulkan (muito mais rápido que o wined3d)
-  # VKD3D traduz DirectX 12 para Vulkan
-
-  # Instalar drivers Vulkan (ESSENCIAL para performance)
-  # Para GPUs NVIDIA:
-  pkg install -y nvidia-driver-545 libvulkan1
-  # Para GPUs AMD:
-  pkg install -y mesa-vulkan-drivers libvulkan1
-  # Para GPUs Intel:
-  pkg install -y mesa-vulkan-drivers intel-media-va-driver libvulkan1
-
-  # Verificar se o Vulkan está funcionando
-  vulkaninfo | head -20
-  # Deve mostrar informações da GPU
-
-  # Instalar o DXVK manualmente (geralmente o Lutris/Proton já inclui)
-  winetricks dxvk
-
-  # Verificar que o DXVK está ativo em um jogo
-  # Adicione a variável: DXVK_HUD=fps
-  # Você verá um overlay com FPS no canto da tela
-
-  # Monitorar performance com MangoHud
-  pkg install -y mangohud
-  # Executar um jogo com MangoHud:
-  mangohud wine jogo.exe
-  # Ou via Steam: adicione "mangohud %command%" nos launch options`}
-        />
-
-        <h2>Troubleshooting</h2>
-        <CodeBlock
-          title="Problemas comuns com Wine"
-          code={`# Erro: "wine: could not load kernel32.dll"
-  # Solução: Recriar o prefixo
-  rm -rf ~/.wine
-  winecfg   # Recria o prefixo
-
-  # Programa não abre ou fecha imediatamente
-  # 1. Testar no terminal para ver os erros:
-  wine programa.exe
-  # 2. Instalar dependências faltantes:
-  winetricks vcrun2019 dotnet48
-
-  # Fontes aparecem como quadrados
-  winetricks corefonts allfonts
-
-  # Áudio não funciona
-  # Instalar bibliotecas de áudio
-  pkg install -y wine32:i386 libasound2-plugins:i386
-  winetricks sound=alsa    # ou sound=pulse
-
-  # Performance ruim em jogos
-  # 1. Verificar se DXVK está ativo (não wined3d)
-  # 2. Verificar drivers Vulkan: vulkaninfo
-  # 3. Usar gamemode: pkg install -y gamemode
-  # 4. Executar com: gamemoderun wine jogo.exe
-
-  # Programa precisa de versão específica do Windows
-  # Mudar a versão no prefixo:
-  winecfg   # Aba Applications → Windows Version → Windows 10
-
-  # Limpar um prefixo e começar do zero
-  WINEPREFIX=~/wine-app wineboot --init
-
-  # Verificar o log de debug
-  WINEDEBUG=warn+all wine programa.exe 2>&1 | tee wine-debug.log
-  # Procure linhas com "err:" para identificar o problema`}
-        />
-
-        <AlertBox type="info" title="Compatibilidade">
-          Nem todo software Windows funciona no Wine. Antes de tentar, consulte o banco de
-          dados de compatibilidade em <strong>appdb.winehq.org</strong> para ver se o programa
-          foi testado e qual a classificação (Platinum, Gold, Silver, Bronze, Garbage).
-          Para jogos, use <strong>protondb.com</strong>.
-        </AlertBox>
-      </PageContainer>
-    );
-  }
+      <AlertBox type="info" title="Alternativas">
+        Se a meta é só rodar 1 programinha Windows, considere: usar um PC
+        remoto via <strong>RDP</strong>/<strong>VNC</strong> direto do app
+        Android, ou rodar a mesma tarefa com um app Android nativo. Wine no
+        Termux é mais um exercício técnico do que uma solução prática.
+      </AlertBox>
+    </PageContainer>
+  );
+}

@@ -1,288 +1,173 @@
 import { PageContainer } from "@/components/layout/PageContainer";
-  import { CodeBlock } from "@/components/ui/CodeBlock";
-  import { AlertBox } from "@/components/ui/AlertBox";
+import { CodeBlock } from "@/components/ui/CodeBlock";
+import { AlertBox } from "@/components/ui/AlertBox";
 
-  export default function Samba() {
-    return (
-      <PageContainer
-        title="Samba — Compartilhamento de Arquivos"
-        subtitle="Guia completo do Samba no Termux: compartilhar pastas com Windows, macOS e Linux na rede local, permissões, autenticação e segurança."
-        difficulty="intermediario"
-        timeToRead="30 min"
-      >
-        <p>
-          O <strong>Samba</strong> implementa o protocolo SMB/CIFS, permitindo que máquinas
-          Linux compartilhem arquivos e impressoras com Windows, macOS e outros sistemas na
-          rede local. É a forma mais fácil de criar um servidor de arquivos acessível por
-          qualquer computador ou dispositivo na rede.
-        </p>
+export default function Samba() {
+  return (
+    <PageContainer
+      title="Samba (smbclient) no Termux"
+      subtitle="Como acessar compartilhamentos SMB/CIFS de Windows, NAS e Linux a partir do Termux usando o cliente smbclient."
+      difficulty="intermediario"
+      timeToRead="20 min"
+    >
+      <AlertBox type="warning" title="Servidor Samba NÃO funciona bem no Android">
+        Rodar um <strong>servidor Samba (smbd)</strong> no Termux é praticamente inviável:
+        <br />• A porta <strong>445/TCP</strong> é reservada pelo Android e não pode ser
+        ligada por apps sem root.
+        <br />• Sem root não há broadcast SMB, então o aparelho não aparece em
+        "Vizinhança de Rede" do Windows.
+        <br />• Não existe <code>systemd</code> e não existem usuários Unix completos para o
+        backend de autenticação.
+        <br />Por isso este capítulo cobre apenas o <strong>cliente</strong>{" "}
+        (<code>smbclient</code>), que funciona muito bem para acessar Windows, NAS, roteadores
+        e servidores Linux/macOS a partir do seu celular.
+      </AlertBox>
 
-        <h2>1. Instalação e Configuração Básica</h2>
-        <CodeBlock
-          title="Instalar e configurar o Samba"
-          code={`# Instalar o Samba
-  pkg update
-  pkg install -y samba samba-common-bin
+      <p>
+        O protocolo <strong>SMB/CIFS</strong> é o padrão usado por Windows e NAS para
+        compartilhar pastas e impressoras. No Termux você pode <em>consumir</em> esses
+        compartilhamentos com o utilitário <code>smbclient</code>, listar pastas, baixar
+        arquivos e até montar (com root) um share remoto.
+      </p>
 
-  # Verificar o status
-  sudo systemctl status smbd
-  sudo systemctl enable smbd
+      <h2>1. Instalação</h2>
+      <CodeBlock
+        title="Instalar o cliente Samba no Termux"
+        code={`pkg update
+pkg install -y samba
 
-  # Verificar a versão
-  smbd --version
+# Esse pacote traz:
+#   smbclient   → cliente interativo (estilo FTP)
+#   nmblookup   → resolver nomes NetBIOS
+#   rpcclient   → consultas RPC ao servidor
 
-  # O arquivo de configuração principal
-  sudo nano /etc/samba/smb.conf
+# Verificar versão
+smbclient --version`}
+      />
 
-  # Verificar se a configuração está correta
-  testparm
-  # Mostra a configuração efetiva e aponta erros
+      <h2>2. Descobrir Servidores na Rede</h2>
+      <CodeBlock
+        title="Listar máquinas SMB visíveis"
+        code={`# Resolver nome NetBIOS para IP (se a rede permitir broadcast)
+nmblookup MEU-PC
 
-  # Estrutura do smb.conf:
-  # [global]     → configurações gerais
-  # [compartilhamento]  → cada pasta compartilhada`}
-        />
+# Listar compartilhamentos de um servidor
+smbclient -L //192.168.0.10 -N
+# -L  lista shares
+# -N  conexão sem senha (guest)
 
-        <h2>2. Compartilhamento Público (sem senha)</h2>
-        <CodeBlock
-          title="Criar compartilhamento acessível sem autenticação"
-          code={`# Criar diretório para compartilhamento
-  sudo mkdir -p /srv/samba/publico
-  sudo chmod 777 /srv/samba/publico
+# Com usuário/senha
+smbclient -L //192.168.0.10 -U usuario
+# (digita a senha quando pedido)
 
-  # Adicionar ao smb.conf
-  sudo tee -a /etc/samba/smb.conf > /dev/null << 'EOF'
+# Especificar workgroup
+smbclient -L //192.168.0.10 -U usuario -W WORKGROUP`}
+      />
 
-  [Publico]
-     path = /srv/samba/publico
-     browseable = yes
-     read only = no
-     guest ok = yes
-     create mask = 0664
-     directory mask = 0775
-     force user = nobody
-     force group = nogroup
-  EOF
+      <h2>3. Acessar um Compartilhamento</h2>
+      <CodeBlock
+        title="Sessão interativa estilo FTP"
+        code={`# Conectar a um share
+smbclient //192.168.0.10/Documentos -U usuario
 
-  # Reiniciar o Samba
-  sudo systemctl restart smbd
+# Comandos dentro da shell smb:
+#   ls               → listar
+#   cd pasta         → entrar em pasta
+#   get arquivo      → baixar
+#   put arquivo      → enviar
+#   mget *.pdf       → baixar vários
+#   mput *.jpg       → enviar vários
+#   recurse ON; prompt OFF; mget *  → baixar tudo recursivo
+#   mkdir pasta      → criar pasta
+#   rm arquivo       → apagar
+#   exit             → sair
 
-  # Testar acesso local
-  smbclient //localhost/Publico -N
-  # -N = sem senha (guest)
+# Acesso anônimo (guest)
+smbclient //192.168.0.10/Publico -N
 
-  # Acessar de outro Linux:
-  # smbclient //192.168.1.100/Publico -N
-  # Ou montar:
-  # sudo mount -t cifs //192.168.1.100/Publico /mnt/publico -o guest
+# Conexão usando arquivo de credenciais (não expõe senha em ps)
+cat > ~/.smbcred <<'EOF'
+username=usuario
+password=minha_senha
+domain=WORKGROUP
+EOF
+chmod 600 ~/.smbcred
+smbclient //192.168.0.10/Documentos -A ~/.smbcred`}
+      />
 
-  # Acessar do Windows:
-  # Explorador de Arquivos → \\192.168.1.100\Publico
+      <h2>4. Baixar e Enviar Arquivos em Lote</h2>
+      <CodeBlock
+        title="Cópias não interativas via smbclient"
+        code={`# Baixar um único arquivo direto
+smbclient //192.168.0.10/Documentos -U usuario \\
+  -c "get relatorio.pdf $HOME/storage/downloads/relatorio.pdf"
 
-  # Acessar do macOS:
-  # Finder → Ir → Conectar ao Servidor → smb://192.168.1.100/Publico`}
-        />
+# Enviar arquivo
+smbclient //192.168.0.10/Documentos -U usuario \\
+  -c "put $HOME/storage/dcim/foto.jpg foto.jpg"
 
-        <h2>3. Compartilhamento com Autenticação</h2>
-        <CodeBlock
-          title="Criar compartilhamento protegido por senha"
-          code={`# O Samba tem seu próprio banco de usuários (separado do Linux)
-  # O usuário precisa existir no Linux E no Samba
+# Sincronizar uma pasta inteira
+smbclient //192.168.0.10/Documentos -U usuario -c "
+  recurse ON
+  prompt OFF
+  cd Projetos
+  lcd $HOME/storage/shared/Backup
+  mget *
+"
 
-  # Criar usuário no Linux (se não existir)
-  sudo useradd -M -s /usr/sbin/nologin smbuser
-  # -M = sem home, -s nologin = não pode fazer login no sistema
+# Antes disso, dê acesso ao storage compartilhado:
+termux-setup-storage`}
+      />
 
-  # Adicionar usuário ao Samba (definir senha SMB)
-  sudo smbpasswd -a smbuser
-  # Digite a senha do Samba (pode ser diferente da senha do Linux)
+      <h2>5. Montar um Share (apenas com ROOT)</h2>
+      <CodeBlock
+        title="Montar via cifs-utils — só funciona em aparelho com root"
+        code={`# IMPORTANTE: 'mount -t cifs' só funciona se o kernel tiver suporte
+# a CIFS habilitado E você tiver root no aparelho.
+# A maioria dos celulares NÃO atende a esses dois requisitos.
 
-  # Habilitar o usuário
-  sudo smbpasswd -e smbuser
+# Se atender:
+pkg install -y cifs-utils
+mkdir -p $HOME/mnt/samba
+su -c "mount -t cifs //192.168.0.10/Documentos $HOME/mnt/samba \\
+  -o username=usuario,password=senha,uid=$(id -u),gid=$(id -g)"
 
-  # Criar diretório compartilhado
-  sudo mkdir -p /srv/samba/documentos
-  sudo chown smbuser:smbuser /srv/samba/documentos
-  sudo chmod 770 /srv/samba/documentos
+# Para usuários sem root: prefira sempre 'smbclient' ou um app
+# Android nativo (ex.: "X-plore", "Solid Explorer", "CX File Explorer")
+# que implementam SMB em userspace.`}
+      />
 
-  # Adicionar ao smb.conf
-  sudo tee -a /etc/samba/smb.conf > /dev/null << 'EOF'
+      <h2>Troubleshooting</h2>
+      <CodeBlock
+        title="Problemas comuns no Termux"
+        code={`# "NT_STATUS_HOST_UNREACHABLE"
+# Confira o IP e se o aparelho está na mesma rede:
+ping 192.168.0.10
 
-  [Documentos]
-     path = /srv/samba/documentos
-     browseable = yes
-     read only = no
-     valid users = smbuser, @smbgrupo
-     create mask = 0660
-     directory mask = 0770
-     force group = smbuser
-  EOF
+# "NT_STATUS_LOGON_FAILURE"
+# Usuário, senha ou domínio errado. Algumas redes pedem o domínio:
+smbclient //192.168.0.10/Share -U "DOMINIO\\\\usuario"
 
-  # Para compartilhamento com grupo
-  sudo groupadd smbgrupo
-  sudo usermod -aG smbgrupo usuario1
-  sudo usermod -aG smbgrupo usuario2
+# "protocol negotiation failed: NT_STATUS_CONNECTION_RESET"
+# O servidor exige SMB1 (legado) ou SMB3 mínimo. Forçar versão:
+smbclient -m SMB3 //192.168.0.10/Share -U usuario
+smbclient -m NT1  //192.168.0.10/Share -U usuario   # legacy
 
-  # Reiniciar
-  sudo systemctl restart smbd
+# Servidor não aparece via nmblookup
+# Roteadores modernos bloqueiam broadcast. Use o IP direto.
 
-  # Testar
-  smbclient //localhost/Documentos -U smbuser
+# Acentos errados nos nomes dos arquivos
+smbclient //srv/Share -U user --option='unix charset=UTF-8'`}
+      />
 
-  # Gerenciar usuários Samba
-  sudo pdbedit -L                  # Listar usuários
-  sudo smbpasswd -x smbuser        # Remover usuário
-  sudo smbpasswd smbuser            # Mudar senha`}
-        />
-
-        <h2>4. Montar Compartilhamento Samba no Linux</h2>
-        <CodeBlock
-          title="Acessar pastas Samba de outro computador"
-          code={`# Instalar cliente SMB
-  pkg install -y cifs-utils
-
-  # Montar manualmente
-  sudo mkdir -p /mnt/samba
-  sudo mount -t cifs //192.168.1.100/Documentos /mnt/samba \
-    -o username=smbuser,password=senha,uid=$(id -u),gid=$(id -g)
-
-  # Montar sem expor senha na linha de comando
-  # Criar arquivo de credenciais:
-  sudo tee /etc/samba/.credentials > /dev/null << 'EOF'
-  username=smbuser
-  password=senha_secreta
-  domain=WORKGROUP
-  EOF
-  sudo chmod 600 /etc/samba/.credentials
-
-  # Montar usando o arquivo:
-  sudo mount -t cifs //192.168.1.100/Documentos /mnt/samba \
-    -o credentials=/etc/samba/.credentials,uid=$(id -u),gid=$(id -g)
-
-  # Montagem automática no boot (fstab)
-  echo '//192.168.1.100/Documentos /mnt/samba cifs credentials=/etc/samba/.credentials,uid=1000,gid=1000,iocharset=utf8 0 0' | sudo tee -a /etc/fstab
-  sudo mount -a
-
-  # Desmontar
-  sudo umount /mnt/samba`}
-        />
-
-        <h2>5. Configuração Avançada</h2>
-        <CodeBlock
-          title="Configurações avançadas do smb.conf"
-          code={`# Editar a seção [global] do smb.conf
-  sudo nano /etc/samba/smb.conf
-
-  [global]
-     workgroup = WORKGROUP
-     server string = Servidor de Arquivos Termux
-     server role = standalone server
-     
-     # Segurança
-     security = user
-     map to guest = never
-     
-     # Performance
-     socket options = TCP_NODELAY IPTOS_LOWDELAY
-     use sendfile = yes
-     aio read size = 16384
-     aio write size = 16384
-     
-     # Logging
-     log file = /var/log/samba/log.%m
-     max log size = 1000
-     logging = file
-     
-     # Restringir acesso por IP
-     hosts allow = 192.168.1.0/24 127.0.0.1
-     hosts deny = 0.0.0.0/0
-     
-     # Desabilitar protocolos antigos (segurança)
-     min protocol = SMB2
-     
-     # Charset (para acentos em nomes de arquivos)
-     unix charset = UTF-8
-     dos charset = CP850
-
-  # Compartilhamento somente leitura
-  [ISO]
-     path = /srv/isos
-     browseable = yes
-     read only = yes
-     guest ok = yes
-
-  # Home directories (cada usuário acessa seu /home)
-  [homes]
-     comment = Home Directories
-     browseable = no
-     read only = no
-     valid users = %S
-     create mask = 0700
-     directory mask = 0700`}
-        />
-
-        <h2>6. Firewall</h2>
-        <CodeBlock
-          title="Configurar firewall para Samba"
-          code={`# Abrir portas do Samba no UFW
-  sudo ufw allow samba
-  # Ou especificamente:
-  sudo ufw allow 139/tcp
-  sudo ufw allow 445/tcp
-  sudo ufw allow 137/udp
-  sudo ufw allow 138/udp
-
-  # Restringir acesso apenas à rede local
-  sudo ufw allow from 192.168.1.0/24 to any app Samba
-
-  # Verificar
-  sudo ufw status`}
-        />
-
-        <h2>Troubleshooting</h2>
-        <CodeBlock
-          title="Problemas comuns com Samba"
-          code={`# Não consigo acessar o compartilhamento
-  # 1. Verificar se o Samba está rodando:
-  sudo systemctl status smbd
-  # 2. Verificar configuração:
-  testparm
-  # 3. Verificar firewall:
-  sudo ufw status
-  # 4. Verificar se a porta está escutando:
-  sudo ss -tlnp | grep 445
-
-  # "Access denied" ao acessar
-  # Verificar se o usuário existe no Samba:
-  sudo pdbedit -L | grep smbuser
-  # Se não existir, adicionar:
-  sudo smbpasswd -a smbuser
-
-  # Problemas com permissões (pode ler mas não escrever)
-  # Verificar permissões do diretório:
-  ls -la /srv/samba/
-  # Corrigir:
-  sudo chown -R smbuser:smbgrupo /srv/samba/documentos
-  sudo chmod -R 770 /srv/samba/documentos
-
-  # Windows não encontra o servidor
-  # Verificar se estão no mesmo WORKGROUP
-  # No Windows: Propriedades do Computador → Grupo de Trabalho
-  # No smb.conf: workgroup = WORKGROUP (mesmo nome)
-
-  # Acentos em nomes de arquivos aparecem errados
-  # No [global] do smb.conf:
-  # unix charset = UTF-8
-
-  # Ver logs de erro
-  sudo tail -f /var/log/samba/log.smbd`}
-        />
-
-        <AlertBox type="info" title="Samba vs NFS">
-          Use <strong>Samba</strong> quando precisar compartilhar com Windows/macOS ou em
-          redes mistas. Use <strong>NFS</strong> para compartilhamento entre máquinas Linux
-          (mais rápido e nativo). Para ambos os cenários, o Samba é a escolha mais versátil.
-        </AlertBox>
-      </PageContainer>
-    );
-  }
+      <AlertBox type="info" title="Para servir arquivos do celular">
+        Se o seu objetivo é deixar arquivos do celular acessíveis a outros dispositivos da
+        rede, prefira protocolos que funcionam bem sem root: <strong>SSH/SFTP</strong>{" "}
+        (<code>pkg install openssh</code> + <code>sshd</code>),{" "}
+        <strong>HTTP estático</strong> (<code>python -m http.server 8080</code>) ou um
+        <strong> servidor WebDAV</strong>. Para SMB de verdade, use um app Android como
+        "Servers Ultimate" ou um NAS dedicado.
+      </AlertBox>
+    </PageContainer>
+  );
+}

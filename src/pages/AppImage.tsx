@@ -1,232 +1,142 @@
 import { PageContainer } from "@/components/layout/PageContainer";
-  import { CodeBlock } from "@/components/ui/CodeBlock";
-  import { AlertBox } from "@/components/ui/AlertBox";
+import { CodeBlock } from "@/components/ui/CodeBlock";
+import { AlertBox } from "@/components/ui/AlertBox";
 
-  export default function AppImage() {
-    return (
-      <PageContainer
-        title="AppImage — Aplicativos Portáteis no Linux"
-        subtitle="Como usar, criar, gerenciar e integrar AppImages no Termux. Aplicativos em um único arquivo, sem instalação e sem dependências."
-        difficulty="iniciante"
-        timeToRead="25 min"
-      >
-        <p>
-          O <strong>AppImage</strong> é um formato de distribuição de software para Linux onde
-          o aplicativo inteiro — binário, bibliotecas e recursos — vem em um <em>único arquivo</em>.
-          Não precisa instalar, não precisa de root, não precisa de gerenciador de pacotes.
-          Basta baixar, dar permissão de execução e rodar.
-        </p>
+export default function AppImage() {
+  return (
+    <PageContainer
+      title="Termux:Boot — Auto-iniciar scripts"
+      subtitle="Como rodar scripts automaticamente quando o Android termina de bootar: sshd, túneis SSH, cron substituto, sincronizações."
+      difficulty="iniciante"
+      timeToRead="20 min"
+    >
+      <AlertBox type="info" title="AppImage não roda no Termux">
+        AppImages são binários ELF para Linux desktop x86_64 e <strong>não funcionam no Android/Termux</strong>
+        (arquitetura ARM, sem FUSE de userspace, sem glibc). O equivalente prático para
+        "executar algo automaticamente" no Termux é o app <strong>Termux:Boot</strong> com a pasta
+        <code>~/.termux/boot/</code>, que executa scripts no boot do celular.
+      </AlertBox>
 
-        <h2>AppImage vs Snap vs Flatpak</h2>
-        <ul>
-          <li><strong>AppImage</strong> — Um arquivo, sem instalação, sem sandbox. Portátil (roda de um pendrive). Sem atualizações automáticas por padrão. Ideal para: testar versões, apps portáteis, distribuição simples.</li>
-          <li><strong>Snap</strong> — Repositório centralizado (Snap Store), sandbox, atualizações automáticas. Pode ser mais lento na primeira abertura. Ideal para: apps do dia a dia, servidores.</li>
-          <li><strong>Flatpak</strong> — Repositório descentralizado (Flathub), sandbox, bom isolamento. Ideal para: apps desktop, gaming (Steam).</li>
+      <h2>1. Instalar Termux:Boot</h2>
+      <p>
+        O Termux:Boot é um app Android complementar instalado pelo F-Droid. Ele recebe o
+        broadcast <code>BOOT_COMPLETED</code> do Android e roda os scripts colocados em
+        <code> ~/.termux/boot/</code>.
+      </p>
+      <CodeBlock
+        title="Setup inicial"
+        code={`# 1. Instale "Termux:Boot" pelo F-Droid
+#    https://f-droid.org/packages/com.termux.boot/
+
+# 2. Abra o app Termux:Boot UMA VEZ (essencial!).
+#    Sem isso, o Android nunca dá a permissão de iniciar no boot.
+
+# 3. No Termux, crie a pasta de scripts:
+mkdir -p ~/.termux/boot
+
+# 4. Coloque scripts executáveis dentro dela.
+#    Eles rodam em ordem alfabética, em background, ao ligar o celular.`}
+      />
+
+      <AlertBox type="warning" title="Wake-lock é importante">
+        O Android adormece a CPU agressivamente. Se quiser que serviços (sshd, túneis) continuem
+        rodando, ative o wake-lock: <code>termux-wake-lock</code> no início do script
+        e <code>termux-wake-unlock</code> quando terminar (ou nunca, se for daemon contínuo).
+      </AlertBox>
+
+      <h2>2. Exemplo: iniciar sshd no boot</h2>
+      <CodeBlock
+        title="~/.termux/boot/01-sshd"
+        code={`#!/data/data/com.termux/files/usr/bin/sh
+# Garante que o pacote esteja instalado: pkg install openssh
+termux-wake-lock
+sshd`}
+      />
+      <CodeBlock
+        title="Tornar executável"
+        code={`chmod +x ~/.termux/boot/01-sshd
+
+# Verificar:
+ls -l ~/.termux/boot/
+
+# Testar manualmente sem reiniciar:
+sh ~/.termux/boot/01-sshd
+logcat -s 'Termux-Boot' &   # ver os logs (precisa permissão)`}
+      />
+
+      <h2>3. Exemplo: túnel SSH reverso para acessar de fora</h2>
+      <p>
+        Se você tem um servidor (VPS) na nuvem, dá para abrir um túnel reverso e acessar
+        o celular de qualquer lugar — mesmo atrás de NAT/4G.
+      </p>
+      <CodeBlock
+        title="~/.termux/boot/02-tunnel"
+        code={`#!/data/data/com.termux/files/usr/bin/sh
+termux-wake-lock
+
+# Reabre o túnel automaticamente se cair (autossh é o ideal: pkg install autossh)
+while true; do
+  ssh -N -R 2222:localhost:8022 \\
+      -o ServerAliveInterval=30 \\
+      -o ExitOnForwardFailure=yes \\
+      usuario@meu-vps.exemplo.com
+  sleep 10
+done`}
+      />
+      <p>
+        No VPS, basta rodar <code>ssh -p 2222 usuario_termux@localhost</code> para entrar no
+        celular.
+      </p>
+
+      <h2>4. Exemplo: substituto de cron</h2>
+      <p>
+        Termux não tem <code>cron</code> nativo (sem <code>systemd</code> e sem permissão para
+        <code>cron</code> rodar como daemon do sistema). A combinação Termux:Boot + loop com
+        <code> sleep</code> resolve a maioria dos casos.
+      </p>
+      <CodeBlock
+        title="~/.termux/boot/03-cron"
+        code={`#!/data/data/com.termux/files/usr/bin/sh
+termux-wake-lock
+
+while true; do
+  # Roda backup todo dia às 03:00
+  hora=$(date +%H:%M)
+  if [ "$hora" = "03:00" ]; then
+    tar czf ~/storage/shared/backup-$(date +%F).tgz "$PREFIX"
+  fi
+  sleep 60
+done`}
+      />
+      <p>
+        Para rotinas mais sofisticadas, instale <code>cronie</code> da fonte ou use o app
+        <strong> Tasker</strong> + <strong>Termux:Tasker</strong>.
+      </p>
+
+      <h2>5. Exemplo: sincronizar com a nuvem ao ligar</h2>
+      <CodeBlock
+        title="~/.termux/boot/04-rclone-sync"
+        code={`#!/data/data/com.termux/files/usr/bin/sh
+# Requer: pkg install rclone  (e rclone config feito antes)
+termux-wake-lock
+sleep 30   # aguarda a rede estabilizar
+
+rclone sync ~/storage/shared/Documents gdrive:Backup/Documents \\
+  --log-file ~/rclone.log
+
+termux-wake-unlock`}
+      />
+
+      <h2>Boas práticas</h2>
+      <AlertBox type="warning" title="Cuidado">
+        <ul className="mt-1 mb-0 list-disc pl-5">
+          <li>Sempre dê <code>chmod +x</code>. Sem permissão, o script é silenciosamente ignorado.</li>
+          <li>Use shebang absoluto: <code>#!/data/data/com.termux/files/usr/bin/sh</code> (ou <code>bash</code>).</li>
+          <li>Prefixe com números (<code>01-</code>, <code>02-</code>) para controlar ordem.</li>
+          <li>Não rode comandos que pedem interação (ex: <code>pkg install</code> sem <code>-y</code>).</li>
+          <li>Logue para arquivo: <code>... &gt;&gt; ~/boot.log 2&gt;&amp;1</code> ajuda a debugar.</li>
         </ul>
-
-        <h2>1. Usar um AppImage</h2>
-        <CodeBlock
-          title="Baixar e executar um AppImage"
-          code={`# Passo 1: Baixar o AppImage (exemplo: Krita, editor de imagens)
-  wget https://download.kde.org/stable/krita/5.2.2/krita-5.2.2-x86_64.appimage
-
-  # Passo 2: Dar permissão de execução
-  chmod +x krita-5.2.2-x86_64.appimage
-
-  # Passo 3: Executar
-  ./krita-5.2.2-x86_64.appimage
-
-  # Pronto! O aplicativo abre sem instalar nada.
-
-  # Executar com argumentos
-  ./app.AppImage --help
-  ./app.AppImage arquivo.txt
-
-  # Verificar o conteúdo do AppImage (listar arquivos internos)
-  ./app.AppImage --appimage-extract
-  # Extrai todo o conteúdo para a pasta squashfs-root/
-
-  # Montar o AppImage como diretório (sem extrair)
-  ./app.AppImage --appimage-mount
-  # Mostra o caminho de montagem temporária
-
-  # Mover para uma pasta organizada
-  mkdir -p ~/Applications
-  mv krita-5.2.2-x86_64.appimage ~/Applications/
-  # A convenção é usar ~/Applications/ para AppImages`}
-        />
-
-        <AlertBox type="info" title="FUSE necessário">
-          AppImages usam FUSE (Filesystem in Userspace) para montar o conteúdo.
-          No Termux 0.118+, pode ser necessário instalar: <code>pkg install -y libfuse2</code>.
-          Sem isso, o AppImage pode dar erro ao executar.
-        </AlertBox>
-
-        <h2>2. Integrar ao Sistema</h2>
-        <CodeBlock
-          title="Criar atalho no menu de aplicativos"
-          code={`# Instalar a dependência FUSE (necessário no Termux 0.118+)
-  pkg install -y libfuse2
-
-  # Método 1: Criar um arquivo .desktop manualmente
-  cat > ~/.local/share/applications/krita.desktop << 'EOF'
-  [Desktop Entry]
-  Name=Krita
-  Exec=/home/seu_usuario/Applications/krita-5.2.2-x86_64.appimage
-  Icon=krita
-  Type=Application
-  Categories=Graphics;2DGraphics;RasterGraphics;
-  Comment=Editor de imagens profissional
-  Terminal=false
-  EOF
-
-  # Método 2: Usar o AppImageLauncher (integração automática)
-  sudo add-apt-repository ppa:appimagelauncher-team/stable
-  pkg update
-  pkg install -y appimagelauncher
-
-  # Com o AppImageLauncher instalado:
-  # - Ao abrir um AppImage pela primeira vez, ele pergunta se quer integrar
-  # - Cria atalho no menu automaticamente
-  # - Move o arquivo para ~/Applications/
-  # - Permite desintegrar depois
-
-  # Método 3: Usar o appimaged (daemon em background)
-  # Monitora ~/Applications/ e cria atalhos automaticamente
-  wget https://github.com/AppImage/appimaged/releases/download/continuous/appimaged-x86_64.AppImage
-  chmod +x appimaged-x86_64.AppImage
-  ./appimaged-x86_64.AppImage --install
-  # Agora qualquer AppImage em ~/Applications/ terá atalho no menu`}
-        />
-
-        <h2>3. Atualizar AppImages</h2>
-        <CodeBlock
-          title="Manter AppImages atualizados"
-          code={`# Instalar o AppImageUpdate (atualização delta — só baixa o que mudou)
-  wget https://github.com/AppImageCommunity/AppImageUpdate/releases/latest/download/AppImageUpdate-x86_64.AppImage
-  chmod +x AppImageUpdate-x86_64.AppImage
-
-  # Atualizar um AppImage
-  ./AppImageUpdate-x86_64.AppImage krita-5.2.2-x86_64.appimage
-  # Baixa apenas as diferenças (delta update), muito mais rápido
-
-  # Verificar se há atualização disponível
-  ./AppImageUpdate-x86_64.AppImage --check krita-5.2.2-x86_64.appimage
-
-  # Usar o Gear Lever (gerenciador gráfico de AppImages)
-  flatpak install flathub it.mijorus.gearlever
-  # Interface gráfica para:
-  # - Organizar AppImages
-  # - Criar atalhos
-  # - Verificar atualizações
-  # - Gerenciar permissões`}
-        />
-
-        <h2>4. Onde Encontrar AppImages</h2>
-        <CodeBlock
-          title="Repositórios de AppImages"
-          code={`# AppImageHub — Catálogo centralizado
-  # https://www.appimagehub.com/
-  # Categorias: Audio, Video, Gráficos, Desenvolvimento, Jogos, etc.
-
-  # Alguns AppImages populares:
-  # - Krita (editor de imagens): krita.org
-  # - LibreOffice: libreoffice.org
-  # - Kdenlive (editor de vídeo): kdenlive.org
-  # - Audacity (editor de áudio): audacityteam.org
-  # - MuseScore (edição de partituras): musescore.org
-  # - Subsurface (mergulho): subsurface-divelog.org
-  # - Calibre (e-books): calibre-ebook.com
-  # - FreeCAD: freecad.org
-  # - Blender: blender.org
-
-  # Verificar se um AppImage é confiável:
-  # 1. Baixe sempre do site oficial do projeto
-  # 2. Verifique a assinatura GPG se disponível
-  # 3. Verifique o hash SHA256:
-  sha256sum app.AppImage
-  # Compare com o hash publicado no site oficial`}
-        />
-
-        <h2>5. Criar seu Próprio AppImage</h2>
-        <CodeBlock
-          title="Empacotar uma aplicação como AppImage"
-          code={`# Instalar ferramentas necessárias
-  pkg install -y desktop-file-utils
-
-  # Baixar o linuxdeploy (ferramenta de empacotamento)
-  wget https://github.com/linuxdeploy/linuxdeploy/releases/latest/download/linuxdeploy-x86_64.AppImage
-  chmod +x linuxdeploy-x86_64.AppImage
-
-  # Estrutura básica necessária:
-  # AppDir/
-  # ├── usr/
-  # │   ├── bin/meu-app          ← binário
-  # │   ├── lib/                 ← bibliotecas
-  # │   └── share/
-  # │       ├── applications/
-  # │       │   └── meu-app.desktop  ← arquivo desktop
-  # │       └── icons/
-  # │           └── hicolor/256x256/apps/
-  # │               └── meu-app.png  ← ícone
-  # └── AppRun                    ← script de entrada
-
-  # Criar o AppImage com linuxdeploy
-  ./linuxdeploy-x86_64.AppImage \
-    --appdir AppDir \
-    --executable /usr/bin/meu-app \
-    --desktop-file AppDir/usr/share/applications/meu-app.desktop \
-    --icon-file AppDir/usr/share/icons/hicolor/256x256/apps/meu-app.png \
-    --output appimage
-
-  # Para aplicações Python:
-  # Use python-appimage ou pyinstaller + linuxdeploy
-  pip install python-appimage
-  python-appimage build app -p 3.12 meu-script.py`}
-        />
-
-        <h2>Troubleshooting</h2>
-        <CodeBlock
-          title="Problemas comuns com AppImages"
-          code={`# Erro: "dlopen(): error loading libfuse.so.2"
-  # Solução: Instalar FUSE 2
-  pkg install -y libfuse2
-
-  # Erro: "Permission denied"
-  # Solução: Dar permissão de execução
-  chmod +x aplicativo.AppImage
-
-  # Erro: "FATAL: kernel too old"
-  # Causa: AppImage compilado para kernel mais novo
-  # Solução: Atualizar o kernel ou baixar versão compatível
-
-  # AppImage não abre, sem mensagem de erro
-  # Rodar no terminal para ver os erros:
-  ./aplicativo.AppImage
-  # Se der erro de biblioteca:
-  ldd --version  # Verificar versão do glibc
-
-  # Ícone não aparece no menu
-  # Solução: Recriar o cache de ícones
-  gtk-update-icon-cache ~/.local/share/icons/hicolor/ 2>/dev/null
-  update-desktop-database ~/.local/share/applications/
-
-  # Sandbox: AppImage precisa de acesso a algo que está bloqueado
-  # AppImages NÃO são sandboxed por padrão
-  # Se quiser sandbox, use com firejail:
-  pkg install -y firejail
-  firejail ./aplicativo.AppImage
-
-  # Extrair e rodar sem FUSE (alternativa)
-  ./aplicativo.AppImage --appimage-extract
-  ./squashfs-root/AppRun`}
-        />
-
-        <AlertBox type="warning" title="Segurança">
-          Diferente de Snaps e Flatpaks, AppImages <strong>não</strong> são isolados (sandbox)
-          por padrão. Um AppImage malicioso tem acesso total ao seu sistema. Baixe apenas
-          de fontes confiáveis e verifique checksums quando possível.
-        </AlertBox>
-      </PageContainer>
-    );
-  }
+      </AlertBox>
+    </PageContainer>
+  );
+}

@@ -1,254 +1,157 @@
 import { PageContainer } from "@/components/layout/PageContainer";
-  import { CodeBlock } from "@/components/ui/CodeBlock";
-  import { AlertBox } from "@/components/ui/AlertBox";
+import { CodeBlock } from "@/components/ui/CodeBlock";
+import { AlertBox } from "@/components/ui/AlertBox";
 
-  export default function Gaming() {
-    return (
-      <PageContainer
-        title="Gaming no Termux"
-        subtitle="Guia completo para jogar no Termux: Steam, Proton, Lutris, Wine, drivers de GPU, Vulkan, otimizações e emuladores."
-        difficulty="iniciante"
-        timeToRead="30 min"
-      >
-        <p>
-          Jogar no Linux nunca foi tão fácil. Com o <strong>Steam + Proton</strong>, milhares
-          de jogos Windows rodam nativamente no Termux. O <strong>Lutris</strong> gerencia
-          jogos de várias plataformas, e os drivers de GPU (NVIDIA e AMD) estão maduros.
-          O Steam Deck popularizou o gaming no Linux e acelerou a compatibilidade.
-        </p>
+export default function Gaming() {
+  return (
+    <PageContainer
+      title="Gaming no Termux"
+      subtitle="O que dá (e o que NÃO dá) pra jogar via Termux: emuladores leves no terminal, Box86/Box64 pra binários x86 e por que Steam/Proton não rodam no Android."
+      difficulty="iniciante"
+      timeToRead="20 min"
+    >
+      <AlertBox type="danger" title="Termux NÃO é uma plataforma de gaming">
+        Termux roda em Android, sem root, sem GPU exposta como num PC e sem
+        drivers proprietários NVIDIA/AMD/Intel. <strong>Steam, Proton, Lutris,
+        Wine nativo, RPCS3, PCSX2 desktop, Yuzu, Ryujinx</strong> e outros
+        emuladores/lojas pesadas <strong>não funcionam dentro do Termux</strong>.
+        Para emulação séria de consoles modernos (PS2, GameCube, Switch, 3DS, PSP),
+        instale apps Android nativos: <strong>RetroArch, AetherSX2, Dolphin,
+        Citra, PPSSPP, DuckStation</strong> direto da Play Store ou F-Droid.
+      </AlertBox>
 
-        <h2>1. Drivers de GPU</h2>
-        <CodeBlock
-          title="Instalar drivers NVIDIA e AMD"
-          code={`# === NVIDIA ===
-  # Verificar sua GPU
-  lspci | grep -i nvidia
+      <p>
+        O que o Termux <em>realmente</em> oferece em termos de jogo é nicho:
+        emuladores de máquinas antigas que rodam em texto ou janela leve via
+        Termux:X11, alguns jogos clássicos de DOS/SCUMM e a possibilidade
+        experimental de rodar binários x86 Linux com <strong>Box86/Box64</strong>.
+      </p>
 
-  # Instalar drivers via Termux (recomendado)
-  sudo Termux-drivers autoinstall
-  # Ou instalar uma versão específica:
-  termux-drivers devices    # Listar drivers disponíveis
-  pkg install -y nvidia-driver-545
+      <h2>1. DOSBox — Jogos clássicos de PC (DOS)</h2>
+      <CodeBlock
+        title="Instalar e rodar DOSBox no Termux"
+        code={`# DOSBox roda jogos antigos de MS-DOS via terminal
+pkg install -y dosbox
 
-  # Reiniciar
-  sudo reboot
+# Iniciar
+dosbox
 
-  # Verificar se o driver está funcionando
-  nvidia-smi
-  # Mostra: GPU, driver, temperatura, uso de VRAM, etc.
+# Dentro do DOSBox, montar uma pasta como drive C:
+mount c ~/storage/shared/dos-games
+c:
+cd prince
+prince.exe
 
-  # === AMD / Intel (drivers open source) ===
-  # AMD e Intel usam drivers Mesa (já incluídos no kernel)
-  # Geralmente não precisa instalar nada extra
+# Sair
+exit`}
+      />
 
-  # Atualizar Mesa para a versão mais recente
-  sudo add-apt-repository ppa:kisak/kisak-mesa
-  pkg update
-  pkg upgrade
+      <h2>2. ScummVM — Adventure games clássicos</h2>
+      <CodeBlock
+        title="Rodar Monkey Island, Day of the Tentacle, etc."
+        code={`# ScummVM toca jogos LucasArts/Sierra antigos
+pkg install -y scummvm
 
-  # Verificar GPU
-  glxinfo | grep "OpenGL renderer"
+# Iniciar a interface
+scummvm
 
-  # === Vulkan (API gráfica moderna — essencial para Proton) ===
-  # NVIDIA:
-  pkg install -y nvidia-driver-545   # Já inclui Vulkan
+# Adicione o diretório do jogo (no storage compartilhado):
+# termux-setup-storage
+# depois aponte ScummVM para ~/storage/shared/scumm-games/`}
+      />
 
-  # AMD:
-  pkg install -y mesa-vulkan-drivers
+      <h2>3. RetroArch headless (avançado)</h2>
+      <CodeBlock
+        title="RetroArch via terminal — limitado"
+        code={`# Existe pacote retroarch no Termux, mas a versão Android
+# nativa (Play Store / F-Droid) é MUITO melhor pra jogar:
+# - Tem interface touch
+# - Acessa controles Bluetooth direto pelo Android
+# - Performance melhor (usa GPU do Android)
 
-  # Intel:
-  pkg install -y mesa-vulkan-drivers intel-media-va-driver
+# Se ainda assim quiser tentar via Termux + Termux:X11:
+pkg install x11-repo
+pkg install -y retroarch
 
-  # Verificar suporte a Vulkan
-  vulkaninfo | head -20
-  # Ou:
-  pkg install -y vulkan-tools
-  vkcube   # Deve mostrar um cubo girando`}
-        />
+# Rodar (precisa do app Termux:X11 aberto):
+export DISPLAY=:0
+retroarch
 
-        <h2>2. Steam e Proton</h2>
-        <CodeBlock
-          title="Instalar Steam e habilitar Proton"
-          code={`# Instalar o Steam
-  pkg install -y steam
-  # Ou via .deb do site oficial
-  # Ou via Flatpak:
-  flatpak install flathub com.valvesoftware.Steam
+# Cores (núcleos) precisam ser baixados manualmente ou via UI.
+# Recomendação séria: use o app RetroArch Android, não esta versão.`}
+      />
 
-  # Após instalar e logar na conta Steam:
-  # 1. Steam → Configurações → Compatibilidade
-  # 2. Marque: "Habilitar Steam Play para todos os títulos"
-  # 3. Escolha a versão do Proton (Proton Experimental é recomendado)
+      <h2>4. Box86 / Box64 — Rodar binários x86/x86_64 Linux</h2>
+      <p>
+        <strong>Box86</strong> (32-bit) e <strong>Box64</strong> (64-bit) são
+        tradutores que executam binários Linux compilados para x86 em CPUs ARM
+        (que é a arquitetura do Android). Eles servem pra rodar alguns
+        emuladores e jogos Linux antigos. Não esperar milagres: jogos modernos,
+        DRMs e qualquer coisa que precise de GPU dedicada não vão.
+      </p>
+      <CodeBlock
+        title="Instalar Box86 e Box64 no Termux"
+        code={`# Os pacotes oficiais ficam no repositório x11-repo
+pkg install x11-repo
+pkg install -y box86 box64
 
-  # O Proton permite rodar jogos Windows no Linux
-  # Baseado no Wine, com patches extras da Valve
+# Verificar
+box86 -v
+box64 -v
 
-  # Verificar compatibilidade de jogos:
-  # Acesse: protondb.com
-  # Classificações: Platinum (perfeito), Gold (pequenos ajustes),
-  # Silver (funciona com tweaks), Bronze (problemas), Borked (não funciona)
+# Rodar um binário x86 Linux:
+box86 ./meu-jogo-32bit
+box64 ./meu-jogo-64bit
 
-  # Instalar Proton-GE (versão da comunidade, mais compatível)
-  # 1. Instalar ProtonUp-Qt
-  flatpak install flathub net.davidotek.pupgui2
-  # 2. Abrir ProtonUp-Qt
-  # 3. Adicionar versão do Proton-GE
-  # 4. No Steam, escolher Proton-GE para o jogo
+# Combinar com Termux:X11 para jogos com janela:
+export DISPLAY=:0
+box64 ./jogo-linux-x86_64`}
+      />
 
-  # Forçar uma versão de Proton para um jogo específico:
-  # Steam → Biblioteca → Jogo → Propriedades → Compatibilidade
-  # Marque "Forçar" e escolha a versão`}
-        />
+      <AlertBox type="warning" title="Box86/Box64 é experimental">
+        A tradução x86→ARM é lenta e nem todo binário roda. Jogos com
+        anti-cheat, DRM moderno (Steam, EGS) ou que dependem de drivers
+        gráficos específicos <strong>não vão funcionar</strong>. Use só pra
+        binários Linux antigos, simples, sem proteção.
+      </AlertBox>
 
-        <h2>3. Lutris — Gerenciador de Jogos</h2>
-        <CodeBlock
-          title="Instalar e usar o Lutris"
-          code={`# O Lutris gerencia jogos de várias fontes:
-  # Steam, GOG, Epic Games, Battle.net, EA, Ubisoft, emuladores
+      <h2>5. Wine via proot-distro (muito experimental)</h2>
+      <CodeBlock
+        title="Wine dentro de um Ubuntu/Debian em proot"
+        code={`# Wine NÃO roda nativo no Termux. A única alternativa é
+# instalar uma distro Linux via proot-distro e usar Wine + Box64 lá.
+# Veja a página dedicada "Wine" para o passo a passo.
 
-  # Instalar o Lutris
-  pkg install -y lutris
+pkg install -y proot-distro
+proot-distro install debian
+proot-distro login debian
+# (dentro do Debian) apt install wine box64
+# Performance é baixa. Bom só pra programinhas Windows simples, NÃO jogos AAA.`}
+      />
 
-  # Ou via Flatpak
-  flatpak install flathub net.lutris.Lutris
+      <h2>6. Recomendação: apps Android para emulação séria</h2>
+      <CodeBlock
+        title="Apps nativos Android (instale via Play Store ou F-Droid)"
+        code={`# Esses NÃO rodam dentro do Termux — são apps Android comuns:
 
-  # Instalar dependências de Wine
-  sudo dpkg --add-architecture i386
-  pkg update
-  pkg install -y wine64 wine32 winetricks
+# RetroArch         — multi-emulador (NES, SNES, N64, PS1, GBA, etc.)
+# AetherSX2         — PlayStation 2
+# DuckStation       — PlayStation 1
+# PPSSPP            — PSP
+# Dolphin           — GameCube e Wii
+# Citra (forks)     — Nintendo 3DS
+# Skyline / Egg NS  — Nintendo Switch (status varia)
+# Magic DOSBox      — front-end DOSBox para Android
+# ScummVM (Android) — adventure games
 
-  # No Lutris:
-  # 1. Pesquise o jogo em lutris.net
-  # 2. Clique em "Instalar" — o script faz tudo automaticamente
-  # 3. O Lutris configura Wine, DXVK, dependências, etc.
+# Pra controle, qualquer joypad Bluetooth/USB OTG funciona com esses apps.`}
+      />
 
-  # Jogos Epic Games via Lutris:
-  # 1. Pesquise "Epic Games Store" no Lutris
-  # 2. Instale (vai instalar o launcher da Epic via Wine)
-  # 3. Faça login e baixe jogos normalmente
-
-  # Jogos GOG via Lutris:
-  # 1. Conecte sua conta GOG
-  # 2. Jogos aparecem automaticamente
-  # 3. Instale com um clique`}
-        />
-
-        <h2>4. Otimizações de Performance</h2>
-        <CodeBlock
-          title="Melhorar performance em jogos"
-          code={`# === GameMode (otimizador da Feral Interactive) ===
-  pkg install -y gamemode
-  # O GameMode ajusta CPU, GPU e I/O durante jogos
-  # No Steam: Opções de Inicialização do jogo:
-  # gamemoderun %command%
-
-  # === MangoHud (overlay de FPS/CPU/GPU) ===
-  pkg install -y mangohud
-  # No Steam: Opções de Inicialização:
-  # mangohud %command%
-  # Ou: MANGOHUD=1 %command%
-
-  # === Variáveis de ambiente úteis ===
-  # No Steam → Propriedades do jogo → Opções de Inicialização:
-
-  # Forçar Vulkan (DXVK) — traduz DirectX para Vulkan
-  DXVK_HUD=1 %command%
-
-  # Desabilitar composição (pode melhorar FPS no GNOME)
-  # Configurações → Sobre → Tipo de janela → X11
-  # X11 é geralmente melhor para jogos que Wayland
-
-  # === Kernel otimizado para jogos ===
-  # XanMod ou Liquorix (kernels com patches de baixa latência)
-  # XanMod:
-  echo 'deb http://deb.xanmod.org releases main' | sudo tee /etc/apt/sources.list.d/xanmod-kernel.list
-  wget -qO - https://dl.xanmod.org/gpg.key | pkg add -
-  pkg update
-  pkg install -y linux-xanmod-x64v3
-
-  # === Limitar FPS (reduz consumo de energia e temperatura) ===
-  # MangoHud config (~/.config/MangoHud/MangoHud.conf):
-  # fps_limit=60
-
-  # === Verificar performance ===
-  # Abrir terminal durante o jogo (Alt+Tab):
-  nvidia-smi              # GPU NVIDIA
-  radeontop               # GPU AMD
-  htop                    # CPU e RAM`}
-        />
-
-        <h2>5. Emuladores</h2>
-        <CodeBlock
-          title="Instalar emuladores de consoles"
-          code={`# RetroArch — emulador universal (vários consoles em um)
-  pkg install -y retroarch
-  # Ou via Flatpak:
-  flatpak install flathub org.libretro.RetroArch
-  # Suporta: NES, SNES, N64, PS1, PS2, GameBoy, etc.
-
-  # PCSX2 — PlayStation 2
-  flatpak install flathub net.pcsx2.PCSX2
-
-  # Dolphin — GameCube e Wii
-  pkg install -y dolphin-emu
-  # Ou Flatpak:
-  flatpak install flathub org.DolphinEmu.dolphin-emu
-
-  # RPCS3 — PlayStation 3
-  flatpak install flathub net.rpcs3.RPCS3
-
-  # Yuzu/Ryujinx — Nintendo Switch
-  # (verifique disponibilidade atual)
-
-  # PPSSPP — PSP
-  pkg install -y ppsspp
-
-  # DOSBox — DOS (jogos antigos de PC)
-  pkg install -y dosbox`}
-        />
-
-        <h2>Troubleshooting</h2>
-        <CodeBlock
-          title="Problemas comuns com jogos no Termux"
-          code={`# Jogo não inicia pelo Steam (Proton)
-  # 1. Verificar logs:
-  # ~/.local/share/Steam/steamapps/compatdata/APPID/pfx/
-  # 2. Tentar outra versão do Proton
-  # 3. Verificar no ProtonDB se há dicas
-
-  # Tela preta ao iniciar jogo
-  # Solução: Forçar modo janela nas opções de lançamento:
-  # gamescope -w 1920 -h 1080 -f -- %command%
-
-  # FPS muito baixo
-  # 1. Verificar se o driver da GPU está instalado:
-  nvidia-smi    # NVIDIA
-  glxinfo | grep "OpenGL renderer"   # AMD/Intel
-  # 2. Verificar se Vulkan está funcionando:
-  vulkaninfo | head -5
-  # 3. Habilitar GameMode
-
-  # Controle/gamepad não funciona
-  # Verificar se é detectado:
-  ls /dev/input/js*
-  # Instalar suporte:
-  pkg install -y joystick jstest-gtk
-  jstest /dev/input/js0
-
-  # Anti-cheat não funciona (EAC, BattlEye)
-  # Alguns jogos com anti-cheat não funcionam no Linux
-  # Verificar: areweanticheatyet.com
-
-  # Som não funciona no jogo
-  # Instalar PulseAudio 32-bit:
-  pkg install -y libpulse0:i386`}
-        />
-
-        <AlertBox type="info" title="O futuro do gaming no Linux">
-          O Steam Deck (que roda Linux) fez a Valve investir pesado no Proton. A cada
-          atualização, mais jogos Windows funcionam no Linux. O site
-          <strong> protondb.com</strong> é a melhor referência para verificar compatibilidade.
-        </AlertBox>
-      </PageContainer>
-    );
-  }
+      <AlertBox type="info" title="Resumindo">
+        Termux é ótimo pra jogar coisinhas em texto (DOSBox, ScummVM, jogos em
+        Python/Lua que você mesmo compila) e pra brincar com Box86/Box64. Pra
+        emulação moderna, controles e performance, use apps Android dedicados.
+      </AlertBox>
+    </PageContainer>
+  );
+}

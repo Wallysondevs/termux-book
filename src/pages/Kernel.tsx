@@ -1,192 +1,156 @@
 import { PageContainer } from "@/components/layout/PageContainer";
-  import { CodeBlock } from "@/components/ui/CodeBlock";
-  import { AlertBox } from "@/components/ui/AlertBox";
+import { CodeBlock } from "@/components/ui/CodeBlock";
+import { AlertBox } from "@/components/ui/AlertBox";
 
-  export default function Kernel() {
-    return (
-      <PageContainer
-        title="Kernel Linux no Termux"
-        subtitle="Guia completo do kernel: verificar versão, atualizar, instalar kernels alternativos, módulos, parâmetros e compilar kernel customizado."
-        difficulty="avancado"
-        timeToRead="25 min"
-      >
-        <p>
-          O <strong>kernel</strong> é o coração do sistema operacional. Ele gerencia todo o
-          hardware (CPU, memória, discos, rede), processos, sistemas de arquivos e segurança.
-          O Termux usa o kernel Linux, mantido por Linus Torvalds e milhares de contribuidores.
-        </p>
+export default function Kernel() {
+  return (
+    <PageContainer
+      title="Kernel Android (Linux) visto pelo Termux"
+      subtitle="O kernel do Android é Linux, mas é fechado e lockado pelo fabricante. Veja o que dá pra inspecionar e o que NÃO dá pra fazer no Termux."
+      difficulty="intermediario"
+      timeToRead="12 min"
+    >
+      <AlertBox type="warning" title="Você NÃO troca o kernel do Android pelo Termux">
+        O kernel é compilado e assinado pelo fabricante e gravado em uma
+        partição read-only (<code>boot</code>). Trocar exige{" "}
+        <strong>desbloqueio do bootloader</strong>,{" "}
+        <strong>root</strong> e geralmente uma <strong>custom ROM</strong>{" "}
+        (LineageOS, etc.). Nada disso é feito de dentro do Termux. Aqui você só
+        consegue <em>inspecionar</em> o kernel, não modificá-lo.
+      </AlertBox>
 
-        <h2>1. Informações do Kernel</h2>
-        <CodeBlock
-          title="Verificar versão e informações"
-          code={`# Ver versão do kernel
-  uname -r
-  # Saída: 6.8.0-40-generic
+      <p>
+        O Android usa um <strong>fork do kernel Linux</strong> mantido pelo
+        Google + patches do fabricante do SoC (Qualcomm, MediaTek, Exynos,
+        Tensor). Cada aparelho tem seu próprio kernel; não existe "atualizar o
+        kernel via pkg" como em distros desktop.
+      </p>
 
-  # Informações completas
-  uname -a
-  # Saída: Linux hostname 6.8.0-40-generic #40-Termux SMP x86_64 GNU/Linux
+      <h2>1. Informações do Kernel</h2>
+      <CodeBlock
+        title="Inspecionar o kernel atual"
+        code={`# Versão do kernel
+uname -r
+# Saída exemplo: 4.19.157-android11-perf+
+# 4.19   = versão Linux upstream usada como base
+# 157    = patch level
+# android11 = branch do Android Common Kernel
+# -perf  = build "performance" do fabricante
 
-  # Significado da versão: 6.8.0-40-generic
-  # 6       = versão principal
-  # 8       = versão secundária
-  # 0       = patch
-  # 40      = build do Termux
-  # generic = tipo (generic=desktop/server, lowlatency=áudio/tempo real)
+# Informações completas
+uname -a
+# Linux localhost 4.19.157-android11-perf+ #1 SMP PREEMPT ... aarch64
 
-  # Kernels instalados
-  dpkg -l | grep linux-image
+# Arquitetura (quase sempre aarch64 hoje em dia)
+uname -m
 
-  # Kernel atual em detalhes
-  cat /proc/version
+# Versão completa via /proc
+cat /proc/version
 
-  # Parâmetros do kernel atual
-  cat /proc/cmdline
+# Linha de comando passada ao kernel no boot
+cat /proc/cmdline 2>/dev/null
+# Em vários Androids isso é restrito sem root.
 
-  # Informações do hardware via kernel
-  cat /proc/cpuinfo | head -20
-  cat /proc/meminfo | head -10
-  cat /proc/partitions`}
-        />
+# Build do Android (não é o kernel, mas é útil)
+getprop ro.build.version.release   # ex: 14
+getprop ro.build.version.sdk       # ex: 34
+getprop ro.build.fingerprint`}
+      />
 
-        <h2>2. Atualizar o Kernel</h2>
-        <CodeBlock
-          title="Manter o kernel atualizado"
-          code={`# Atualizar kernel via apt (recomendado)
-  pkg update
-  pkg upgrade
-  # Inclui atualizações de kernel automaticamente
+      <h2>2. Mensagens do Kernel (dmesg)</h2>
+      <CodeBlock
+        title="Ler dmesg — geralmente bloqueado sem root"
+        code={`# Tentar ler dmesg
+dmesg 2>&1 | tail -30
+# Em Android >= 4.1, dmesg é restrito por kptr_restrict /
+# dmesg_restrict. Sem root você normalmente vê:
+#   "dmesg: read kernel buffer failed: Operation not permitted"
 
-  # Instalar kernel específico
-  apt search linux-image | grep generic
-  pkg install linux-image-6.8.0-41-generic linux-headers-6.8.0-41-generic
+# Verificar a restrição
+cat /proc/sys/kernel/dmesg_restrict 2>/dev/null
+cat /proc/sys/kernel/kptr_restrict 2>/dev/null
 
-  # Kernel HWE (Hardware Enablement)
-  # Kernel mais recente com suporte a hardware novo
-  pkg install linux-generic-hwe-24.04
+# Você ainda pode ler alguns counters em /proc:
+cat /proc/loadavg                  # carga (1m, 5m, 15m)
+cat /proc/uptime                   # tempo ligado
+cat /proc/meminfo | head -5
+cat /proc/cpuinfo | head -20
+cat /proc/stat | head -5
+ls /proc/sys/kernel/                # parâmetros visíveis (read-only sem root)`}
+      />
 
-  # Kernel lowlatency (para áudio, tempo real)
-  pkg install linux-lowlatency
+      <h2>3. Módulos do Kernel (informativo)</h2>
+      <CodeBlock
+        title="Android quase sempre tem kernel monolítico ou módulos imutáveis"
+        code={`# Ver módulos carregados (geralmente vazio em Android,
+# pois muitos kernels são compilados monolíticos):
+cat /proc/modules 2>/dev/null
+lsmod 2>/dev/null
 
-  # Reiniciar para usar o novo kernel
-  sudo reboot
+# Em aparelhos com GKI (Generic Kernel Image, Android 11+),
+# existem 'vendor modules' — mas são carregados pelo init do
+# Android, não pelo usuário. Você NÃO usa modprobe/insmod sem root.
 
-  # Remover kernels antigos (liberar espaço em /boot)
-  pkg autoclean --purge
-  # Ou manualmente:
-  dpkg -l linux-image-* | grep ^ii
-  pkg uninstall linux-image-6.8.0-39-generic`}
-        />
+# Para um app de espaço de usuário (Termux), módulos do kernel
+# são opacos. Não tente compilar/inserir módulos: você não tem
+# os headers do kernel exato do seu aparelho disponíveis.`}
+      />
 
-        <h2>3. Módulos do Kernel</h2>
-        <CodeBlock
-          title="Gerenciar módulos (drivers)"
-          code={`# Listar módulos carregados
-  lsmod
-  lsmod | grep nvidia     # Filtrar por nome
+      <h2>4. Parâmetros do Kernel</h2>
+      <CodeBlock
+        title="sysctl — leitura sim, escrita não (sem root)"
+        code={`# Listar parâmetros visíveis
+ls /proc/sys/
 
-  # Informações sobre um módulo
-  modinfo nvidia
-  modinfo ext4
-  modinfo wireguard
+# Ler um parâmetro
+cat /proc/sys/kernel/hostname
+cat /proc/sys/net/ipv4/ip_forward
+cat /proc/sys/vm/swappiness
 
-  # Carregar módulo
-  sudo modprobe wireguard
-  sudo modprobe vhost_net
+# Tentar escrever (sem root → Permission denied)
+echo 1 > /proc/sys/net/ipv4/ip_forward
+# Resultado: bash: /proc/sys/net/ipv4/ip_forward: Permission denied
 
-  # Descarregar módulo
-  sudo modprobe -r nome_modulo
-  sudo rmmod nome_modulo
+# O comando 'sysctl' nem vem por padrão no Termux; mesmo
+# instalando, escrita exige root. Aceite que esses ajustes
+# pertencem ao SO Android, não ao Termux.`}
+      />
 
-  # Carregar módulo permanentemente (no boot)
-  echo "wireguard" | sudo tee /etc/modules-load.d/wireguard.conf
+      <h2>Troubleshooting</h2>
+      <CodeBlock
+        title="Dúvidas comuns"
+        code={`# "Como atualizo o kernel do meu celular?"
+# Resposta: você não atualiza pelo Termux. O kernel só muda via
+# atualização OTA do Android (System Update) OU instalando uma
+# custom ROM (LineageOS, Pixel Experience, etc.) com bootloader
+# desbloqueado — operação fora do escopo do Termux e arriscada.
 
-  # Bloquear módulo (impedir de carregar)
-  echo "blacklist nouveau" | sudo tee /etc/modprobe.d/blacklist-nouveau.conf
-  sudo update-initramfs -u
+# "Como compilo um módulo .ko?"
+# Resposta: precisa dos headers exatos do kernel do seu aparelho
+# (raramente disponíveis), toolchain ARM64, e root para inserir.
+# Não é um caso de uso prático no Termux.
 
-  # Parâmetros de módulos
-  # Ver parâmetros disponíveis:
-  modinfo -p i915
-  # Definir parâmetro:
-  echo "options i915 enable_fbc=1" | sudo tee /etc/modprobe.d/i915.conf`}
-        />
+# "Posso ver logs do sistema Android?"
+# Sim, com a Termux:API (app companion):
+pkg install termux-api
+# (e instale o app Termux:API)
+# logcat NÃO funciona no Termux sem root. A Termux:API expõe
+# acesso a Battery, Sensors, Wi-Fi, etc — não ao log do kernel.
 
-        <h2>4. Parâmetros do Kernel (sysctl)</h2>
-        <CodeBlock
-          title="Ajustar parâmetros em tempo real"
-          code={`# Ver todos os parâmetros
-  sysctl -a
+# Confirmar arquitetura para baixar binários certos
+uname -m
+# aarch64  → ARM 64-bit (quase todos os celulares modernos)
+# armv7l   → ARM 32-bit (aparelhos antigos)
+# x86_64   → emuladores / ChromeOS`}
+      />
 
-  # Ver parâmetro específico
-  sysctl net.ipv4.ip_forward
-  sysctl vm.swappiness
-
-  # Alterar temporariamente
-  sudo sysctl -w net.ipv4.ip_forward=1
-  sudo sysctl -w vm.swappiness=10
-
-  # Alterar permanentemente
-  sudo tee /etc/sysctl.d/99-custom.conf > /dev/null << 'EOF'
-  # Encaminhamento de pacotes (para roteador/VPN)
-  net.ipv4.ip_forward = 1
-
-  # Reduzir uso de swap (melhor performance com SSD)
-  vm.swappiness = 10
-
-  # Segurança de rede
-  net.ipv4.conf.all.rp_filter = 1
-  net.ipv4.icmp_echo_ignore_broadcasts = 1
-  net.ipv4.conf.all.accept_redirects = 0
-
-  # Performance de rede
-  net.core.rmem_max = 16777216
-  net.core.wmem_max = 16777216
-  EOF
-
-  # Aplicar
-  sudo sysctl --system`}
-        />
-
-        <h2>Troubleshooting</h2>
-        <CodeBlock
-          title="Problemas comuns com kernel"
-          code={`# Kernel novo não funciona (tela preta, crash)
-  # Bootar com kernel anterior via GRUB:
-  # GRUB → Advanced options → Escolher kernel antigo
-  # Depois remover o kernel problemático:
-  pkg uninstall linux-image-VERSAO-PROBLEMATICA
-
-  # /boot cheio (não consegue atualizar)
-  df -h /boot
-  # Remover kernels antigos:
-  pkg autoclean --purge
-
-  # Módulo não encontrado
-  sudo depmod -a    # Reconstruir banco de módulos
-  sudo update-initramfs -u
-
-  # Kernel panic
-  # Geralmente causado por: RAM defeituosa, disco corrompido,
-  # ou módulo do kernel incompatível
-  # Verificar:
-  journalctl -b -1 | grep -i panic
-
-  # Verificar integridade do kernel
-  sha256sum /boot/vmlinuz-$(uname -r)
-
-  # Driver de hardware não funciona
-  dmesg | grep -i error
-  dmesg | grep -i firmware
-  # Instalar firmware:
-  pkg install linux-firmware`}
-        />
-
-        <AlertBox type="warning" title="Cuidado com o kernel">
-          O kernel é crítico — um kernel defeituoso pode impedir o sistema de iniciar.
-          Sempre mantenha pelo menos <strong>dois kernels instalados</strong> para poder
-          bootar com o anterior via GRUB em caso de problemas.
-        </AlertBox>
-      </PageContainer>
-    );
-  }
+      <AlertBox type="info" title="Resumo prático">
+        Do Termux você <strong>lê</strong> informações do kernel (
+        <code>uname</code>, <code>/proc/*</code>, <code>getprop</code>) mas{" "}
+        <strong>não modifica</strong> nada. Para mudar o kernel do Android é
+        preciso desbloqueio de bootloader + root + custom ROM — assunto fora do
+        escopo deste livro.
+      </AlertBox>
+    </PageContainer>
+  );
+}

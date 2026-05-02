@@ -1,200 +1,185 @@
 import { PageContainer } from "@/components/layout/PageContainer";
-  import { CodeBlock } from "@/components/ui/CodeBlock";
-  import { AlertBox } from "@/components/ui/AlertBox";
+import { CodeBlock } from "@/components/ui/CodeBlock";
+import { AlertBox } from "@/components/ui/AlertBox";
 
-  export default function Boot() {
-    return (
-      <PageContainer
-        title="Processo de Boot do Termux"
-        subtitle="Guia completo do boot no Termux: UEFI vs BIOS, GRUB, systemd, targets, serviços de inicialização e recuperação."
-        difficulty="avancado"
-        timeToRead="25 min"
-      >
-        <p>
-          Entender o processo de boot é essencial para diagnosticar problemas de
-          inicialização, configurar dual boot, otimizar o tempo de boot e recuperar
-          sistemas que não iniciam. O Termux usa GRUB como bootloader e systemd para
-          gerenciar serviços.
-        </p>
+export default function Boot() {
+  return (
+    <PageContainer
+      title="Processo de Boot do Android e Auto-início do Termux"
+      subtitle="Como o Android inicializa (bootloader → kernel → init → zygote) e como fazer o Termux executar scripts no boot via Termux:Boot."
+      difficulty="intermediario"
+      timeToRead="15 min"
+    >
+      <AlertBox type="info" title="Não há GRUB, UEFI ou systemd no Android">
+        O Android usa um <strong>bootloader proprietário</strong> (Little Kernel,
+        ABL, fastboot) gravado no aparelho de fábrica — nada de GRUB, UEFI ou
+        BIOS. O Termux roda como app de usuário, então não controla o boot do
+        sistema. O que você pode fazer é usar o app companion <strong>Termux:Boot</strong>{" "}
+        para executar scripts logo após o Android terminar de iniciar.
+      </AlertBox>
 
-        <h2>1. Sequência de Boot</h2>
-        <CodeBlock
-          title="Etapas do boot do Termux"
-          code={`# Sequência completa de boot:
-  # 1. UEFI/BIOS → firmware do computador
-  # 2. GRUB → bootloader (escolhe qual kernel carregar)
-  # 3. Kernel Linux → carrega drivers, monta root filesystem
-  # 4. initramfs → sistema de arquivos temporário na RAM
-  # 5. systemd (PID 1) → inicia serviços na ordem correta
-  # 6. Login (GDM/TTY) → tela de login
+      <p>
+        Entender o boot do Android ajuda a diagnosticar problemas e configurar o
+        Termux para iniciar serviços (sshd, cron, túneis, etc.) automaticamente
+        quando o aparelho liga. Diferente do PC, você não troca o bootloader sem
+        desbloquear o aparelho (e perder a garantia).
+      </p>
 
-  # Ver tempo de boot
-  systemd-analyze
-  # Saída: Startup finished in 3.2s (firmware) + 2.1s (loader) +
-  #        4.5s (kernel) + 8.3s (userspace) = 18.1s
+      <h2>1. Sequência de Boot do Android</h2>
+      <CodeBlock
+        title="Etapas do boot do Android"
+        code={`# Sequência completa de boot do Android:
+# 1. Boot ROM (chip)        → código gravado no SoC, carrega o bootloader
+# 2. Bootloader (aboot/LK)  → Little Kernel ou Android Bootloader
+#                             (proprietário do fabricante; fastboot mode aqui)
+# 3. Kernel Linux           → kernel Android (fork do Linux upstream)
+# 4. init (PID 1)           → lê /init.rc, monta partições, inicia daemons
+# 5. zygote                 → processo Java pai de todos os apps
+# 6. system_server          → serviços Android (ActivityManager, etc.)
+# 7. Launcher (Home)        → tela inicial do Android
 
-  # Ver serviços mais lentos
-  systemd-analyze blame
-  # Lista serviços por tempo de inicialização
+# Você só consegue ver o final dessa cadeia, do Termux:
+cat /proc/version           # versão do kernel Android
+getprop ro.bootloader       # nome/versão do bootloader (proprietário)
+getprop ro.build.version.release   # versão do Android (ex: 14)
+getprop ro.boot.bootreason  # motivo do último boot (cold, reboot, etc.)
 
-  # Grafo visual do boot
-  systemd-analyze plot > boot.svg
-  # Abre no navegador para ver visualmente
+# Ver tempo desde o boot
+uptime
+cat /proc/uptime            # segundos desde o boot
 
-  # Ver árvore de dependências
-  systemd-analyze critical-chain
+# Mensagens do kernel (read-only, sem root pode aparecer vazio)
+dmesg 2>/dev/null | tail -20
+# Em quase todo Android moderno dmesg é restrito sem root.`}
+      />
 
-  # Mensagens de boot
-  dmesg                      # Mensagens do kernel
-  journalctl -b              # Logs do boot atual
-  journalctl -b -1           # Logs do boot anterior`}
-        />
+      <h2>2. Termux:Boot — Auto-iniciar scripts</h2>
+      <CodeBlock
+        title="Instalar e configurar Termux:Boot"
+        code={`# Termux:Boot é um app companion (instale pelo F-Droid ou GitHub
+# do Termux). Depois de instalado:
+# 1. Abra o app Termux:Boot pelo menos UMA vez (sem isso o Android
+#    não autoriza o RECEIVE_BOOT_COMPLETED).
+# 2. Coloque seus scripts em ~/.termux/boot/
+# 3. Reinicie o aparelho — os scripts rodam após o boot.
 
-        <h2>2. GRUB (Bootloader)</h2>
-        <CodeBlock
-          title="Configurar o GRUB"
-          code={`# Arquivo de configuração
-  sudo nano /etc/default/grub
+# Criar o diretório
+mkdir -p ~/.termux/boot
 
-  # Opções importantes:
-  # GRUB_TIMEOUT=5              → Tempo de espera (segundos)
-  # GRUB_DEFAULT=0              → Entrada padrão (0 = primeira)
-  # GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"  → Parâmetros do kernel
-  # GRUB_DISABLE_OS_PROBER=false → Detectar outros SOs (dual boot)
+# Exemplo: iniciar sshd e crond no boot
+cat > ~/.termux/boot/start-services <<'EOF'
+#!/data/data/com.termux/files/usr/bin/sh
+# Mantém o CPU acordado durante a execução
+termux-wake-lock
 
-  # Após alterar, atualizar:
-  sudo update-grub
+# Inicia o servidor SSH (porta 8022 por padrão)
+sshd
 
-  # Mostrar menu GRUB (útil para dual boot)
-  # Editar /etc/default/grub:
-  # GRUB_TIMEOUT_STYLE=menu
-  # GRUB_TIMEOUT=10
-  sudo update-grub
+# Inicia cron (se você tiver instalado: pkg install cronie)
+crond
+EOF
 
-  # Acessar menu GRUB no boot:
-  # Pressione ESC ou Shift durante o boot
+chmod +x ~/.termux/boot/start-services
 
-  # Modo recovery (via GRUB):
-  # No menu GRUB → Advanced options → Recovery mode
+# Você pode ter vários scripts em ~/.termux/boot/ — todos rodam.
+# Ordem alfabética; prefixe com 00-, 10-, 20- para ordenar.
 
-  # Reinstalar GRUB (se não inicia)
-  # Bootar de USB live, depois:
-  sudo mount /dev/sda2 /mnt
-  sudo mount /dev/sda1 /mnt/boot/efi    # Se UEFI
-  sudo grub-install --root-directory=/mnt /dev/sda
-  sudo chroot /mnt update-grub`}
-        />
+ls -la ~/.termux/boot/`}
+      />
 
-        <h2>3. Systemd Targets</h2>
-        <CodeBlock
-          title="Targets (equivalente a runlevels)"
-          code={`# Targets substituem os antigos runlevels:
-  # poweroff.target    → Desligar (runlevel 0)
-  # rescue.target      → Modo single-user (runlevel 1)
-  # multi-user.target  → Multiusuário sem GUI (runlevel 3)
-  # graphical.target   → Com interface gráfica (runlevel 5)
-  # reboot.target      → Reiniciar (runlevel 6)
+      <h2>3. Serviços no Termux (sem systemd)</h2>
+      <CodeBlock
+        title="Termux usa runit (sv), não systemd"
+        code={`# Termux NÃO tem systemd, systemctl, journalctl ou targets.
+# Para gerenciar serviços de longa duração, use o pacote termux-services
+# (baseado no runit).
 
-  # Ver target atual
-  systemctl get-default
-  # Saída: graphical.target (desktop) ou multi-user.target (servidor)
+pkg install termux-services
 
-  # Mudar target padrão
-  sudo systemctl set-default multi-user.target    # Sem GUI
-  sudo systemctl set-default graphical.target     # Com GUI
+# Saia e entre no Termux para o ambiente recarregar.
+# Habilitar um serviço (ex: sshd):
+sv-enable sshd
+sv up sshd
 
-  # Mudar target agora (sem reiniciar)
-  sudo systemctl isolate multi-user.target    # Desligar GUI
-  sudo systemctl isolate graphical.target     # Ligar GUI
+# Ver status
+sv status sshd
 
-  # Modo emergência (mínimo, root filesystem read-only)
-  sudo systemctl isolate emergency.target`}
-        />
+# Parar / iniciar / reiniciar
+sv down sshd
+sv up sshd
+sv restart sshd
 
-        <h2>4. Gerenciar Serviços de Boot</h2>
-        <CodeBlock
-          title="Controlar o que inicia no boot"
-          code={`# Listar serviços habilitados
-  systemctl list-unit-files --state=enabled
+# Desabilitar do boot do Termux
+sv-disable sshd
 
-  # Desabilitar serviço do boot
-  sudo systemctl disable nome-do-servico
-  # O serviço NÃO será deletado, apenas não inicia no boot
+# Logs ficam em $PREFIX/var/log/sv/<servico>/
 
-  # Habilitar serviço no boot
-  sudo systemctl enable nome-do-servico
+# Para um serviço sobreviver ao fechamento da UI do Termux,
+# combine com:
+termux-wake-lock      # impede o Android matar o processo
+termux-wake-unlock    # libera`}
+      />
 
-  # Mascarar serviço (impedir completamente de iniciar)
-  sudo systemctl mask nome-do-servico
-  sudo systemctl unmask nome-do-servico
+      <h2>4. Recovery, Fastboot e Modo de Manutenção (informativo)</h2>
+      <CodeBlock
+        title="Modos de boot do Android (NÃO acessíveis pelo Termux)"
+        code={`# Esses modos existem no Android mas NÃO são controlados pelo Termux.
+# São acessados desligando o aparelho e segurando combinações de
+# botões durante o boot (varia por fabricante):
+#
+# - Recovery        → restauração de fábrica, atualizações OTA, sideload
+#                     (TWRP ou recovery do fabricante)
+# - Fastboot/Bootloader → flashar imagens (boot.img, system.img)
+#                     requer 'fastboot' do PC e geralmente bootloader
+#                     desbloqueado
+# - Safe Mode       → boot só com apps do sistema (sem apps de usuário)
+# - Download Mode   → modo Samsung (Odin) / Xiaomi (EDL)
+#
+# Ver propriedades atuais
+getprop ro.boot.mode             # ex: normal, recovery, charger
+getprop ro.product.model         # modelo do aparelho
+getprop ro.build.fingerprint     # fingerprint da ROM`}
+      />
 
-  # Ver dependências de um serviço
-  systemctl list-dependencies nginx.service
+      <h2>Troubleshooting</h2>
+      <CodeBlock
+        title="Problemas comuns com Termux:Boot"
+        code={`# Scripts em ~/.termux/boot/ não rodam após reiniciar:
+# 1. Confirme que o app Termux:Boot está instalado E foi aberto
+#    pelo menos uma vez.
+# 2. Cheque permissão de execução:
+chmod +x ~/.termux/boot/*
 
-  # Criar serviço customizado
-  sudo tee /etc/systemd/system/meuapp.service > /dev/null << 'EOF'
-  [Unit]
-  Description=Minha Aplicação
-  After=network.target
+# 3. Em alguns fabricantes (Xiaomi, Huawei, Oppo, Samsung), o
+#    "otimizador de bateria" mata apps em background. Vá em:
+#    Configurações → Apps → Termux:Boot/Termux → Bateria →
+#    "Sem restrições" / "Permitir auto-inicialização".
 
-  [Service]
-  Type=simple
-  User=www-data
-  WorkingDirectory=/opt/meuapp
-  ExecStart=/usr/bin/python3 app.py
-  Restart=on-failure
-  RestartSec=5
+# 4. Use logger para debugar:
+cat > ~/.termux/boot/debug <<'EOF'
+#!/data/data/com.termux/files/usr/bin/sh
+date >> ~/boot.log
+echo "boot script rodou" >> ~/boot.log
+EOF
+chmod +x ~/.termux/boot/debug
+# Reinicie e cheque ~/boot.log
 
-  [Install]
-  WantedBy=multi-user.target
-  EOF
+# Termux fechou sozinho durante boot:
+# Use termux-wake-lock no início do script para evitar que o
+# Android suspenda/mate o processo.
 
-  sudo systemctl daemon-reload
-  sudo systemctl enable --now meuapp`}
-        />
+# Aparelho reiniciou sozinho? Veja o motivo:
+getprop sys.boot.reason
+getprop ro.boot.bootreason`}
+      />
 
-        <h2>Troubleshooting</h2>
-        <CodeBlock
-          title="Problemas comuns de boot"
-          code={`# Termux não inicia (tela preta)
-  # 1. No GRUB, editar entrada (pressione 'e')
-  # 2. Na linha "linux", trocar "quiet splash" por "nomodeset"
-  # 3. Pressione Ctrl+X para iniciar
-  # 4. Se funcionar, editar /etc/default/grub permanentemente
-
-  # Boot muito lento
-  systemd-analyze blame    # Ver o que está demorando
-  # Desabilitar serviços desnecessários:
-  sudo systemctl disable snap.lxd.daemon.service
-  sudo systemctl disable ModemManager.service
-
-  # "A start job is running for..." (demora 90s)
-  # Geralmente é rede. Verificar:
-  systemctl status systemd-networkd-wait-online.service
-
-  # GRUB não aparece (dual boot)
-  sudo os-prober               # Detectar outros SOs
-  sudo update-grub
-
-  # Modo recovery via GRUB:
-  # GRUB → Advanced options → Recovery mode → root shell
-  # Remontar filesystem como escrita:
-  mount -o remount,rw /
-  # Fazer os reparos necessários
-
-  # Kernel panic
-  # Geralmente hardware com defeito ou módulo do kernel quebrado
-  # Bootar com kernel anterior via GRUB
-
-  # Verificar logs do boot anterior (se o boot anterior falhou):
-  journalctl -b -1 --no-pager | grep -i error`}
-        />
-
-        <AlertBox type="info" title="Otimizar tempo de boot">
-          Desabilite serviços desnecessários com <code>systemctl disable</code>,
-          use SSD (faz a maior diferença), e considere usar
-          <code>systemd-analyze blame</code> para encontrar gargalos.
-        </AlertBox>
-      </PageContainer>
-    );
-  }
+      <AlertBox type="warning" title="Otimizadores de bateria são o inimigo">
+        Em fabricantes chineses (MIUI, ColorOS, EMUI, OneUI), o sistema mata
+        agressivamente processos em background. Para que <code>Termux:Boot</code>{" "}
+        e <code>termux-wake-lock</code> funcionem, você precisa marcar o Termux
+        como <strong>"sem restrições de bateria"</strong> e/ou{" "}
+        <strong>permitir auto-início</strong> nas configurações do Android.
+      </AlertBox>
+    </PageContainer>
+  );
+}

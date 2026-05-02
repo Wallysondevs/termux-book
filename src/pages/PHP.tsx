@@ -1,387 +1,292 @@
 import { PageContainer } from "@/components/layout/PageContainer";
-  import { CodeBlock } from "@/components/ui/CodeBlock";
-  import { AlertBox } from "@/components/ui/AlertBox";
+import { CodeBlock } from "@/components/ui/CodeBlock";
+import { AlertBox } from "@/components/ui/AlertBox";
 
-  export default function PHP() {
-    return (
-      <PageContainer
-        title="PHP no Termux — LAMP & LEMP Stack"
-        subtitle="Instalação completa do PHP, configuração com Apache (LAMP) e Nginx (LEMP), extensões, PHP-FPM, Composer e deploy de aplicações PHP."
-        difficulty="intermediario"
-        timeToRead="35 min"
-      >
-        <p>
-          O <strong>PHP</strong> é uma das linguagens mais utilizadas para desenvolvimento web,
-          alimentando mais de 75% dos sites do mundo, incluindo WordPress, Laravel, Drupal e
-          Magento. No Termux, o PHP pode ser configurado com Apache (stack LAMP) ou Nginx
-          (stack LEMP), cada um com vantagens diferentes.
-        </p>
+export default function PHP() {
+  return (
+    <PageContainer
+      title="PHP no Termux"
+      subtitle="PHP-CLI no Android: instalar, rodar scripts, servidor de desenvolvimento embutido (php -S), Composer e integração com Nginx via PHP-FPM."
+      difficulty="intermediario"
+      timeToRead="25 min"
+    >
+      <p>
+        O <strong>PHP</strong> roda nativo no Termux — útil pra estudar a
+        linguagem, escrever automações no celular, testar uma API rápida ou
+        servir um WordPress/Laravel local. Tanto o <code>php</code> (CLI)
+        quanto o <code>php-fpm</code> têm pacote oficial.
+      </p>
 
-        <h2>LAMP vs LEMP — Qual Escolher?</h2>
+      <AlertBox type="info" title="Caveats do PHP no Termux">
         <ul>
-          <li><strong>LAMP</strong> (Linux + Apache + MySQL + PHP) — Mais tradicional, configuração mais simples via <code>.htaccess</code>, ideal para hospedagem compartilhada e WordPress.</li>
-          <li><strong>LEMP</strong> (Linux + Nginx + MySQL + PHP) — Mais performático, usa menos memória, melhor para sites de alto tráfego. O "E" vem da pronúncia de Nginx ("Engine-X").</li>
+          <li>Não existe <code>sudo</code>, <code>systemctl</code> nem <code>phpenmod</code>/<code>phpdismod</code>. Você habilita extensões editando o <code>php.ini</code> direto.</li>
+          <li>Tudo vive em <code>$PREFIX</code> (<code>/data/data/com.termux/files/usr</code>): binário em <code>$PREFIX/bin/php</code>, config em <code>$PREFIX/etc/php.ini</code>.</li>
+          <li>O servidor embutido (<code>php -S</code>) é perfeito pra dev local. Em rede móvel você raramente recebe conexão de fora (CG-NAT).</li>
+          <li>Portas &lt; 1024 não bindam sem root — use <code>8000</code>, <code>8080</code>.</li>
+          <li>Esqueça LAMP enterprise no celular. Pra produção real, use um VPS.</li>
         </ul>
-
-        <AlertBox type="info" title="Qual usar?">
-          Para a maioria dos projetos modernos, o LEMP (Nginx + PHP-FPM) é a melhor escolha.
-          Se você vai rodar WordPress ou precisa de compatibilidade com <code>.htaccess</code>,
-          o LAMP (Apache) pode ser mais conveniente.
-        </AlertBox>
-
-        <h2>1. Instalar o PHP</h2>
-        <CodeBlock
-          title="Instalação básica do PHP"
-          code={`# Atualizar repositórios
-  pkg update
-
-  # Instalar o PHP com extensões comuns
-  pkg install -y php php-cli php-common php-fpm
-
-  # Verificar a versão instalada
-  php -v
-  # Saída esperada:
-  # PHP 8.3.6 (cli) (built: Apr 15 2024 19:21:47) (NTS)
-  # Copyright (c) The PHP Group
-  # Zend Engine v4.3.6, Copyright (c) Zend Technologies
-  #     with Zend OPcache v8.3.6
-
-  # Ver os módulos PHP instalados
-  php -m
-  # Lista todos os módulos/extensões carregados
-
-  # Ver a configuração completa do PHP
-  php -i
-  # Equivalente a phpinfo() — mostra TODAS as configurações
-
-  # Localizar o arquivo php.ini ativo
-  php --ini
-  # Saída:
-  # Configuration File (php.ini) Path: /etc/php/8.3/cli
-  # Loaded Configuration File: /etc/php/8.3/cli/php.ini`}
-        />
-
-        <h2>2. Instalar Extensões PHP</h2>
-        <CodeBlock
-          title="Extensões essenciais do PHP"
-          code={`# Extensões para desenvolvimento web geral
-  pkg install -y php-mysql php-pgsql php-sqlite3  # Bancos de dados
-  pkg install -y php-xml php-mbstring php-json     # Processamento de dados
-  pkg install -y php-curl php-gd php-zip           # HTTP, imagens, compressão
-  pkg install -y php-intl php-bcmath               # Internacionalização, matemática
-  pkg install -y php-readline php-tokenizer        # CLI e parsing
-
-  # Extensões para Laravel
-  pkg install -y php-xml php-mbstring php-curl php-zip php-bcmath \
-    php-mysql php-pgsql php-redis php-gd php-intl
-
-  # Extensões para WordPress
-  pkg install -y php-mysql php-xml php-mbstring php-curl \
-    php-gd php-zip php-imagick php-intl
-
-  # Extensões de cache e performance
-  pkg install -y php-redis php-memcached php-apcu php-opcache
-
-  # Pesquisar extensões disponíveis
-  apt search php- | grep "^php8.3-"
-
-  # Verificar se uma extensão está instalada
-  php -m | grep -i mysql
-  # Saída: mysqli, mysqlnd, pdo_mysql
-
-  # Habilitar/desabilitar extensões
-  sudo phpenmod redis        # Habilitar a extensão redis
-  sudo phpdismod xdebug      # Desabilitar a extensão xdebug
-  sudo systemctl restart php8.3-fpm  # Reiniciar o PHP-FPM após mudanças`}
-        />
-
-        <h2>3. LAMP Stack — PHP com Apache</h2>
-        <CodeBlock
-          title="Configurar LAMP (Apache + PHP)"
-          code={`# Instalar Apache + PHP módulo Apache + MySQL
-  pkg install -y apache2 libapache2-mod-php php-mysql mysql-server
-
-  # Verificar que o módulo PHP está habilitado no Apache
-  sudo a2enmod php8.3
-
-  # Reiniciar o Apache
-  sudo systemctl restart apache2
-
-  # Testar: criar um arquivo phpinfo
-  sudo tee /var/www/html/info.php > /dev/null << 'EOF'
-  <?php
-  phpinfo();
-  ?>
-  EOF
-
-  # Acessar no navegador: http://seu-ip/info.php
-  # Deve mostrar a página de informações do PHP
-
-  # IMPORTANTE: Remover o info.php em produção (expõe dados sensíveis)
-  sudo rm /var/www/html/info.php
-
-  # Configurar Virtual Host para um projeto
-  sudo tee /etc/apache2/sites-available/meu-projeto.conf > /dev/null << 'EOF'
-  <VirtualHost *:80>
-      ServerName meu-projeto.local
-      DocumentRoot /var/www/meu-projeto/public
-
-      <Directory /var/www/meu-projeto/public>
-          AllowOverride All
-          Require all granted
-      </Directory>
-
-      ErrorLog \${APACHE_LOG_DIR}/meu-projeto-error.log
-      CustomLog \${APACHE_LOG_DIR}/meu-projeto-access.log combined
-  </VirtualHost>
-  EOF
-
-  # Habilitar o site e o mod_rewrite (necessário para Laravel, WordPress, etc.)
-  sudo a2ensite meu-projeto.conf
-  sudo a2enmod rewrite
-  sudo systemctl reload apache2`}
-        />
-
-        <h2>4. LEMP Stack — PHP com Nginx</h2>
-        <CodeBlock
-          title="Configurar LEMP (Nginx + PHP-FPM)"
-          code={`# Instalar Nginx + PHP-FPM + MySQL
-  pkg install -y nginx php-fpm php-mysql mysql-server
-
-  # Verificar que o PHP-FPM está rodando
-  sudo systemctl status php8.3-fpm
-  # Deve mostrar "active (running)"
-
-  # O PHP-FPM usa um socket Unix para comunicação:
-  ls /run/php/php8.3-fpm.sock
-
-  # Configurar Virtual Host no Nginx com PHP
-  sudo tee /etc/nginx/sites-available/meu-projeto > /dev/null << 'EOF'
-  server {
-      listen 80;
-      server_name meu-projeto.local;
-      root /var/www/meu-projeto/public;
-      index index.php index.html;
-
-      # Regra para URLs amigáveis (necessário para Laravel, WordPress, etc.)
-      location / {
-          try_files $uri $uri/ /index.php?$query_string;
-      }
-
-      # Passar requisições .php para o PHP-FPM
-      location ~ \.php$ {
-          include snippets/fastcgi-php.conf;
-          fastcgi_pass unix:/run/php/php8.3-fpm.sock;
-          fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-          include fastcgi_params;
-      }
-
-      # Bloquear acesso a arquivos ocultos (.env, .git, etc.)
-      location ~ /\. {
-          deny all;
-      }
-  }
-  EOF
-
-  # Habilitar o site
-  sudo ln -s /etc/nginx/sites-available/meu-projeto /etc/nginx/sites-enabled/
-
-  # Testar a configuração do Nginx
-  sudo nginx -t
-  # Saída: nginx: configuration file /etc/nginx/nginx.conf test is successful
-
-  # Reiniciar o Nginx
-  sudo systemctl reload nginx`}
-        />
-
-        <AlertBox type="danger" title="Nunca exponha o .env">
-          Frameworks como Laravel usam um arquivo <code>.env</code> com senhas e chaves de API.
-          Certifique-se de que o <code>root</code> do Nginx/Apache aponta para a pasta
-          <code>public/</code>, nunca para a raiz do projeto. A regra de bloqueio de arquivos
-          ocultos também é essencial.
-        </AlertBox>
-
-        <h2>5. Configurar o PHP-FPM</h2>
-        <CodeBlock
-          title="Otimizar o PHP-FPM"
-          code={`# Editar a configuração do pool padrão
-  sudo nano /etc/php/8.3/fpm/pool.d/www.conf
-
-  # Configurações importantes:
-  # user = www-data                 ← usuário que executa os processos PHP
-  # group = www-data                ← grupo
-  # listen = /run/php/php8.3-fpm.sock  ← socket Unix (mais rápido que TCP)
-  # pm = dynamic                    ← gerenciamento de processos
-  # pm.max_children = 50            ← máximo de processos simultâneos
-  # pm.start_servers = 5            ← processos iniciais
-  # pm.min_spare_servers = 5        ← mínimo de processos ociosos
-  # pm.max_spare_servers = 35       ← máximo de processos ociosos
-  # pm.max_requests = 500           ← reiniciar processo após N requisições (previne memory leaks)
-
-  # Editar o php.ini do FPM (diferente do CLI!)
-  sudo nano /etc/php/8.3/fpm/php.ini
-
-  # Configurações recomendadas para produção:
-  # upload_max_filesize = 64M       ← tamanho máximo de upload
-  # post_max_size = 64M             ← tamanho máximo de POST
-  # memory_limit = 256M             ← memória máxima por processo
-  # max_execution_time = 30         ← timeout em segundos
-  # max_input_vars = 5000           ← variáveis de input (importante para WooCommerce)
-  # date.timezone = America/Sao_Paulo  ← fuso horário
-
-  # Habilitar OPcache (cache de bytecode — ESSENCIAL para performance)
-  # No php.ini:
-  # opcache.enable=1
-  # opcache.memory_consumption=128
-  # opcache.interned_strings_buffer=8
-  # opcache.max_accelerated_files=10000
-  # opcache.validate_timestamps=0   ← 0 em produção (não verifica mudanças)
-
-  # Reiniciar o PHP-FPM após mudanças
-  sudo systemctl restart php8.3-fpm
-
-  # Ver o status dos processos PHP-FPM
-  sudo systemctl status php8.3-fpm
-  ps aux | grep php-fpm`}
-        />
-
-        <h2>6. Composer — Gerenciador de Dependências</h2>
-        <CodeBlock
-          title="Instalar e usar o Composer"
-          code={`# Instalar o Composer globalmente
-  curl -sS https://getcomposer.org/installer | php
-  sudo mv composer.phar /usr/local/bin/composer
-
-  # Verificar a instalação
-  composer --version
-  # Saída: Composer version 2.7.6 2024-05-04
-
-  # Criar um novo projeto Laravel
-  composer create-project laravel/laravel meu-projeto
-
-  # Instalar dependências de um projeto existente
-  cd meu-projeto
-  composer install              # Instala exatamente as versões do composer.lock
-  composer install --no-dev     # Sem dependências de desenvolvimento (produção)
-
-  # Adicionar dependências
-  composer require guzzlehttp/guzzle           # Adicionar pacote
-  composer require --dev phpunit/phpunit       # Dependência de desenvolvimento
-
-  # Atualizar dependências
-  composer update               # Atualiza todas as dependências
-  composer update laravel/framework  # Atualiza um pacote específico
-
-  # Autoload: gerar o arquivo de autoload otimizado (produção)
-  composer dump-autoload --optimize
-
-  # Limpar cache do Composer
-  composer clear-cache`}
-        />
-
-        <h2>7. Instalar Versões Múltiplas do PHP</h2>
-        <CodeBlock
-          title="Múltiplas versões do PHP via PPA"
-          code={`# Adicionar o repositório Ondrej (mantém todas as versões do PHP)
-  sudo add-apt-repository ppa:ondrej/php
-  pkg update
-
-  # Instalar PHP 8.1 ao lado do 8.3
-  pkg install -y php8.1 php8.1-fpm php8.1-cli php8.1-mysql php8.1-xml php8.1-mbstring
-
-  # Alternar a versão padrão do CLI
-  sudo update-alternatives --config php
-  # Escolha a versão desejada
-
-  # Usar uma versão específica do PHP-FPM no Nginx
-  # No arquivo de configuração do site, mude o socket:
-  # fastcgi_pass unix:/run/php/php8.1-fpm.sock;  ← para PHP 8.1
-  # fastcgi_pass unix:/run/php/php8.3-fpm.sock;  ← para PHP 8.3
-
-  # Verificar quais versões estão instaladas
-  dpkg -l | grep php | grep -E "^ii" | awk '{print $2}' | sort
-
-  # Desabilitar uma versão no Apache
-  sudo a2dismod php8.1
-  sudo a2enmod php8.3
-  sudo systemctl restart apache2`}
-        />
-
-        <h2>8. Xdebug — Depuração de PHP</h2>
-        <CodeBlock
-          title="Instalar e configurar o Xdebug"
-          code={`# Instalar o Xdebug
-  pkg install -y php-xdebug
-
-  # Configurar o Xdebug para debug remoto
-  sudo tee /etc/php/8.3/mods-available/xdebug.ini > /dev/null << 'EOF'
-  zend_extension=xdebug.so
-  xdebug.mode=debug
-  xdebug.start_with_request=yes
-  xdebug.client_host=127.0.0.1
-  xdebug.client_port=9003
-  xdebug.log=/var/log/xdebug.log
-  EOF
-
-  # Habilitar o Xdebug
-  sudo phpenmod xdebug
-  sudo systemctl restart php8.3-fpm
-
-  # Verificar que o Xdebug está ativo
-  php -v
-  # Deve mostrar: "with Xdebug v3.3.2"
-
-  # No VS Code, instale a extensão "PHP Debug" e use este launch.json:
-  # {
-  #   "name": "Listen for Xdebug",
-  #   "type": "php",
-  #   "request": "launch",
-  #   "port": 9003
-  # }
-
-  # IMPORTANTE: Desabilite o Xdebug em produção (impacta a performance)
-  sudo phpdismod xdebug
-  sudo systemctl restart php8.3-fpm`}
-        />
-
-        <h2>Troubleshooting</h2>
-        <CodeBlock
-          title="Problemas comuns com PHP no Termux"
-          code={`# Erro: "PHP Fatal error: Allowed memory size exhausted"
-  # Solução: Aumentar memory_limit no php.ini
-  sudo sed -i 's/memory_limit = .*/memory_limit = 512M/' /etc/php/8.3/fpm/php.ini
-  sudo systemctl restart php8.3-fpm
-
-  # Erro 502 Bad Gateway com Nginx
-  # Causa: PHP-FPM não está rodando ou socket incorreto
-  sudo systemctl status php8.3-fpm      # Verificar status
-  ls -la /run/php/php8.3-fpm.sock       # Verificar se o socket existe
-  sudo systemctl restart php8.3-fpm     # Reiniciar
-
-  # Erro: "File not found" (Nginx + PHP)
-  # Causa: root do Nginx não aponta para o diretório correto
-  # Verificar no config do Nginx: root /var/www/meu-projeto/public;
-
-  # Erro: Extensão PHP não encontrada
-  # Solução: Instalar e habilitar
-  pkg install -y php8.3-nome_extensao
-  sudo phpenmod nome_extensao
-  sudo systemctl restart php8.3-fpm
-
-  # Verificar erros no log do PHP-FPM
-  sudo tail -f /var/log/php8.3-fpm.log
-
-  # Verificar permissões (PHP precisa ler os arquivos)
-  sudo chown -R www-data:www-data /var/www/meu-projeto
-  sudo find /var/www/meu-projeto -type d -exec chmod 755 {} \;
-  sudo find /var/www/meu-projeto -type f -exec chmod 644 {} \;`}
-        />
-
-        <AlertBox type="info" title="PHP em 2024+">
-          O PHP moderno (8.x) tem tipagem forte opcional, fibers (async), JIT compiler e
-          performance comparável a muitas linguagens compiladas. Se você parou de usar PHP
-          na versão 5.x, vale a pena revisitar — a linguagem evoluiu significativamente.
-        </AlertBox>
-      </PageContainer>
-    );
-  }
+      </AlertBox>
+
+      <h2>1. Instalação</h2>
+      <CodeBlock
+        title="Instalar PHP CLI"
+        code={`pkg update && pkg upgrade -y
+pkg install -y php
+
+# Confere a versão (geralmente PHP 8.x)
+php -v
+
+# Lista todas as extensões carregadas
+php -m
+
+# Mostra a config completa (equivalente a phpinfo() no terminal)
+php -i | less
+
+# Caminho do php.ini ativo
+php --ini`}
+      />
+
+      <h2>2. PHP-FPM (FastCGI Process Manager)</h2>
+      <p>
+        Use o <code>php-fpm</code> quando quiser plugar o PHP num servidor
+        web (Nginx) via socket Unix. Pra rodar scripts CLI puros, o
+        <code> php</code> sozinho basta.
+      </p>
+      <CodeBlock
+        title="Instalar e iniciar o PHP-FPM"
+        code={`pkg install -y php-fpm
+
+# Config principal
+ls $PREFIX/etc/php-fpm.d/
+
+# Iniciar manualmente em foreground (pra debug)
+php-fpm -F
+
+# Em background como serviço:
+pkg install -y termux-services
+sv-enable php-fpm
+sv up php-fpm
+sv status php-fpm
+
+# Logs
+tail -f $PREFIX/var/log/sv/php-fpm/current`}
+      />
+
+      <h2>3. Servidor embutido — <code>php -S</code></h2>
+      <p>
+        O modo mais simples de servir PHP no celular. Sobe um web server
+        single-thread perfeito pra desenvolvimento e testes.
+      </p>
+      <CodeBlock
+        title="Subir um projeto PHP em segundos"
+        code={`mkdir -p ~/php-app && cd ~/php-app
+
+cat > index.php <<'PHP'
+<?php
+echo "<h1>Olá do Termux!</h1>";
+echo "<p>PHP " . PHP_VERSION . " rodando no Android.</p>";
+echo "<pre>" . print_r($_SERVER, true) . "</pre>";
+PHP
+
+# Sobe na porta 8000 (qualquer porta >= 1024 funciona)
+php -S 0.0.0.0:8000
+
+# Acesse no navegador do celular: http://localhost:8000
+# De outro dispositivo na mesma Wi-Fi: http://<ip-do-celular>:8000`}
+      />
+
+      <CodeBlock
+        title="Roteador (front-controller)"
+        code={`# Pra que TODAS as requisições caiam num index.php (estilo Laravel/Slim):
+php -S 0.0.0.0:8000 index.php
+
+# Ou um router personalizado:
+cat > router.php <<'PHP'
+<?php
+// Serve arquivos reais; se não existir, cai no index
+if (preg_match('/\\.(?:png|jpg|css|js|ico)$/', $_SERVER['REQUEST_URI'])) {
+    return false;
+}
+require __DIR__ . '/index.php';
+PHP
+php -S 0.0.0.0:8000 router.php`}
+      />
+
+      <AlertBox type="warning" title="php -S é single-thread">
+        O servidor embutido processa <strong>uma requisição por vez</strong>.
+        É ótimo pra dev, péssimo pra produção. Pra produção use Nginx +
+        PHP-FPM (próxima seção).
+      </AlertBox>
+
+      <h2>4. Extensões PHP no Termux</h2>
+      <p>
+        Cada extensão é um pacote separado. Veja as mais usadas:
+      </p>
+      <CodeBlock
+        title="Extensões disponíveis"
+        code={`# Listar pacotes PHP no repositório do Termux
+pkg search php-
+
+# Mais comuns
+pkg install -y php-apache    # módulo pro Apache (alternativa ao FPM)
+pkg install -y php-pgsql     # PostgreSQL
+# (PDO MySQL, mbstring, openssl, curl etc. já vêm builtin no pacote 'php')
+
+# Confirma que carregou
+php -m | grep -i pdo
+php -m | grep -i curl`}
+      />
+      <AlertBox type="info" title="Habilitar extensão manualmente">
+        Algumas extensões precisam ser ativadas no <code>$PREFIX/etc/php.ini</code>
+        com uma linha tipo <code>extension=pdo_pgsql.so</code>. Edite com
+        <code> nano $PREFIX/etc/php.ini</code>, salve e reinicie o PHP-FPM
+        (<code>sv restart php-fpm</code>).
+      </AlertBox>
+
+      <h2>5. Integração Nginx + PHP-FPM</h2>
+      <p>
+        Combinação clássica pra servir aplicações PHP de verdade. Lembre-se
+        de usar porta &gt;= 1024 no Nginx (veja a página do Nginx).
+      </p>
+      <CodeBlock
+        title="Descobrir o socket do PHP-FPM"
+        code={`# O Termux normalmente expõe o FPM via TCP (127.0.0.1:9000)
+# Confirme em:
+grep -E '^listen' $PREFIX/etc/php-fpm.d/www.conf
+# Saída típica: listen = 127.0.0.1:9000`}
+      />
+      <CodeBlock
+        title="$PREFIX/etc/nginx/conf.d/php-app.conf"
+        language="nginx"
+        code={`server {
+    listen 8080;
+    server_name _;
+
+    root  /data/data/com.termux/files/home/php-app;
+    index index.php index.html;
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location ~ \\.php$ {
+        fastcgi_pass   127.0.0.1:9000;
+        fastcgi_index  index.php;
+        fastcgi_param  SCRIPT_FILENAME  $document_root$fastcgi_script_name;
+        include        fastcgi_params;
+    }
+
+    # Bloqueia .env, .git etc.
+    location ~ /\\. {
+        deny all;
+    }
+}`}
+      />
+      <CodeBlock
+        title="Subir tudo"
+        code={`# 1) PHP-FPM
+sv up php-fpm
+
+# 2) Nginx
+nginx -t && nginx -s reload   # ou: nginx (se ainda não estiver rodando)
+
+# 3) Testar
+curl http://localhost:8080`}
+      />
+
+      <h2>6. Composer</h2>
+      <CodeBlock
+        title="Instalar o Composer"
+        code={`# Forma 1: pacote do Termux (mais simples)
+pkg install -y composer
+composer --version
+
+# Forma 2: instalador oficial
+php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+php composer-setup.php --install-dir=$PREFIX/bin --filename=composer
+rm composer-setup.php
+
+# Uso típico
+mkdir ~/projeto && cd ~/projeto
+composer init
+composer require guzzlehttp/guzzle
+composer install --no-dev`}
+      />
+
+      <h2>7. php.ini — ajustes úteis</h2>
+      <CodeBlock
+        title="Editar configurações comuns"
+        code={`nano $PREFIX/etc/php.ini
+
+# Sugestões pra desenvolvimento:
+# memory_limit = 256M
+# upload_max_filesize = 64M
+# post_max_size = 64M
+# date.timezone = America/Sao_Paulo
+# display_errors = On            ; só em DEV
+# error_reporting = E_ALL
+
+# Após salvar, se estiver usando php-fpm:
+sv restart php-fpm`}
+      />
+
+      <h2>8. Scripts CLI no celular</h2>
+      <p>
+        O lado realmente legal do PHP no Termux: usar como linguagem de
+        script no Android.
+      </p>
+      <CodeBlock
+        title="Exemplo: baixar e processar JSON"
+        code={`cat > ~/clima.php <<'PHP'
+<?php
+$resp = file_get_contents("https://wttr.in/Recife?format=j1");
+$j = json_decode($resp, true);
+$temp = $j['current_condition'][0]['temp_C'];
+$desc = $j['current_condition'][0]['weatherDesc'][0]['value'];
+echo "Recife agora: {$temp}°C, {$desc}\\n";
+PHP
+
+php ~/clima.php`}
+      />
+      <CodeBlock
+        title="Atalho executável"
+        code={`# Adicione shebang e torne executável
+sed -i '1i #!/data/data/com.termux/files/usr/bin/php' ~/clima.php
+chmod +x ~/clima.php
+~/clima.php`}
+      />
+
+      <h2>9. Troubleshooting</h2>
+      <CodeBlock
+        title="Erros comuns"
+        code={`# "Class 'PDO' not found"
+# -> a extensão não está carregada. Confira:
+php -m | grep -i pdo
+# Edite $PREFIX/etc/php.ini e habilite extension=pdo_xxx.so
+
+# "502 Bad Gateway" no Nginx
+# -> php-fpm não está rodando ou está em socket diferente
+sv status php-fpm
+grep -E '^listen' $PREFIX/etc/php-fpm.d/www.conf
+
+# "Allowed memory size exhausted"
+# -> aumente memory_limit no php.ini
+sed -i 's/^memory_limit = .*/memory_limit = 512M/' $PREFIX/etc/php.ini
+sv restart php-fpm
+
+# "File not found." no Nginx ao abrir .php
+# -> root do server block tem que apontar pro diretório real do projeto
+#    e SCRIPT_FILENAME tem que estar correto
+tail -f $PREFIX/var/log/nginx/error.log`}
+      />
+
+      <AlertBox type="info" title="PHP moderno">
+        O PHP 8.x trouxe tipagem forte, JIT, fibers, enums, readonly properties
+        e ganhos enormes de performance. Mesmo no Termux você consegue
+        prototipar APIs e estudar Laravel/Symfony tranquilamente — só lembre
+        que pra colocar no ar de verdade, um VPS é mais saudável que deixar
+        o celular ligado 24/7.
+      </AlertBox>
+    </PageContainer>
+  );
+}

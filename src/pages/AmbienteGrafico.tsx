@@ -5,248 +5,173 @@ import { AlertBox } from "@/components/ui/AlertBox";
 export default function AmbienteGrafico() {
   return (
     <PageContainer
-      title="Layout do Teclado & Gestos no Termux"
-      subtitle="Configurando, personalizando e dominando o GNOME — o ambiente gráfico padrão do Termux."
-      difficulty="iniciante"
+      title="Ambiente Gráfico no Termux (Termux:X11 + XFCE4)"
+      subtitle="Como rodar uma interface gráfica leve no Android usando Termux:X11, xorg-server e XFCE4 — e atalhos de teclado nativos do Termux."
+      difficulty="intermediario"
       timeToRead="20 min"
     >
-      <p>
-        O Termux usa o <strong>GNOME</strong> como ambiente gráfico padrão desde o Termux 17.10.
-        O GNOME (GNU Network Object Model Environment) é um dos ambientes de desktop mais modernos
-        e polidos do Linux, com design limpo e foco em simplicidade. O Termux customiza levemente
-        o GNOME vanilla com sua própria estética laranja/roxa.
-      </p>
-
-      <h2>GNOME: Conceitos Básicos</h2>
-
-      <h3>Activities Overview</h3>
-      <p>
-        Pressione a tecla <strong>Super</strong> (tecla Windows) ou clique em "Activities" no
-        canto superior esquerdo para abrir o Overview. Aqui você pode:
-      </p>
-      <ul>
-        <li>Ver todas as janelas abertas</li>
-        <li>Pesquisar aplicativos digitando diretamente</li>
-        <li>Navegar entre workspaces (áreas de trabalho)</li>
-        <li>Pesquisar arquivos, configurações e até fazer cálculos</li>
-      </ul>
-
-      <h3>Atalhos de Teclado Essenciais</h3>
-      <CodeBlock
-        title="Atalhos do GNOME mais usados"
-        code={`Super                  # Abrir Activities Overview
-Super + A              # Ver todos os aplicativos (App Grid)
-Super + H              # Minimizar janela atual
-Super + D              # Mostrar área de trabalho
-Super + F              # Colocar janela em tela cheia
-Super + ←/→            # Encaixar janela à esquerda/direita (tile)
-Super + ↑/↓            # Maximizar / Restaurar janela
-Super + Shift + ←/→    # Mover janela para workspace anterior/próximo
-Super + número         # Mudar para workspace específico
-Alt + F4               # Fechar janela
-Alt + Tab              # Alternar entre aplicativos abertos
-Alt + \`               # Alternar entre janelas do mesmo app
-Ctrl + Alt + T         # Abrir Terminal (no Termux)
-Ctrl + Alt + Del       # Menu de logout/reiniciar/desligar`}
-      />
-
-      <h2>Configurações do Sistema</h2>
-      <p>
-        O aplicativo <strong>Configurações</strong> (Settings) é o painel de controle do Termux.
-        Acesse por: Activities → "Configurações" ou clique no menu do canto superior direito → ícone de chave.
-      </p>
-      <ul>
-        <li><strong>Aparência</strong>: Tema claro/escuro, cor de destaque, tamanho de ícones</li>
-        <li><strong>Monitores</strong>: Resolução, taxa de atualização, múltiplos monitores</li>
-        <li><strong>Teclado</strong>: Atalhos, layout de teclado, idioma de entrada</li>
-        <li><strong>Privacidade</strong>: Histórico de arquivos, rastreamento, câmera, microfone</li>
-        <li><strong>Energia</strong>: Suspensão, brilho, bateria (notebooks)</li>
-        <li><strong>Usuários</strong>: Gerenciar contas de usuário</li>
-        <li><strong>Sobre</strong>: Informações do sistema, versão do Termux, número de série do hardware</li>
-      </ul>
-
-      <h2>GNOME Tweaks: Personalizações Avançadas</h2>
-      <p>
-        O <strong>GNOME Tweaks</strong> (anteriormente chamado de GNOME Tweak Tool) expõe configurações
-        avançadas que não estão no painel de Configurações padrão.
-      </p>
-      <CodeBlock
-        title="Instalar GNOME Tweaks"
-        code={`pkg install gnome-tweaks
-
-# Abrir via Activities → "Tweaks" ou:
-gnome-tweaks`}
-      />
-      <p>O que você pode fazer com GNOME Tweaks:</p>
-      <ul>
-        <li><strong>Fontes</strong>: Mudar fonte do sistema, tamanho, renderização</li>
-        <li><strong>Extensões</strong>: Ativar/desativar extensões do GNOME</li>
-        <li><strong>Janelas</strong>: Comportamento de maximização, botões da barra de título</li>
-        <li><strong>Área de trabalho</strong>: Mostrar ícones na área de trabalho, lixeira</li>
-        <li><strong>Barra superior</strong>: Mostrar dia da semana, segundos no relógio</li>
-        <li><strong>Inicialização</strong>: Gerenciar aplicativos que iniciam com o sistema</li>
-      </ul>
-
-      <h2>Extensões do GNOME</h2>
-      <p>
-        As extensões do GNOME são pequenos complementos que adicionam funcionalidades ao shell.
-        Você pode gerenciá-las pelo site oficial ou pela linha de comando.
-      </p>
-      <CodeBlock
-        title="Gerenciar extensões"
-        code={`# Instalar o gerenciador de extensões via GUI
-pkg install gnome-shell-extensions
-pkg install gnome-shell-extension-manager
-
-# Ou instalar via snap:
-sudo snap install extension-manager
-
-# Extensões populares (instale pelo Extension Manager ou extensions.gnome.org):
-# - Dash to Dock: Barra de tarefas fixa como no Windows/macOS
-# - Blur my Shell: Efeito de desfoque na barra superior e Dash
-# - GSConnect: Integração com smartphone (compartilhar arquivos, notificações)
-# - Caffeine: Impede a tela de desligar quando você precisa (ex: vídeos)
-# - Grand Theft Focus: Corrige janelas que aparecem em segundo plano
-# - AppIndicator: Suporte a ícones de bandeja do sistema
-
-# Listar extensões instaladas via linha de comando:
-gnome-extensions list
-
-# Habilitar/desabilitar extensão:
-gnome-extensions enable nome-da-extensao@autor
-gnome-extensions disable nome-da-extensao@autor`}
-      />
-
-      <AlertBox type="info" title="Site de extensões GNOME">
-        Visite <code>extensions.gnome.org</code> para descobrir, instalar e gerenciar extensões
-        diretamente pelo navegador. Você precisa instalar a extensão do navegador
-        "GNOME Shell integration" e ter o <code>chrome-gnome-shell</code> instalado no sistema.
+      <AlertBox type="warning" title="Isto é EXPERIMENTAL">
+        O Termux roda em Android sem root. Ele <strong>não tem GNOME, Wayland nem X.org "de verdade"</strong>
+        como num PC. O que existe é um truque: o app companion <strong>Termux:X11</strong> renderiza
+        uma sessão X11 dentro de uma janela Android. Isso funciona, mas:
+        <ul>
+          <li>Consome <strong>muita bateria</strong> e esquenta o aparelho</li>
+          <li>Performance é limitada — não substitui um PC</li>
+          <li>Apps gráficos pesados (Chromium, LibreOffice, IDEs) podem travar</li>
+          <li>Não há aceleração gráfica garantida — depende do device/driver</li>
+        </ul>
+        Para uso casual de XFCE4 leve, funciona muito bem. Para produtividade séria, prefira o terminal puro.
       </AlertBox>
 
-      <h2>Temas Visuais</h2>
-      <CodeBlock
-        title="Mudar tema GTK e ícones"
-        code={`# Instalar coleção de temas populares
-pkg install gnome-themes-extra
-pkg install papirus-icon-theme
-pkg install arc-theme
-
-# Aplicar tema via GNOME Tweaks → Aparência
-# Ou via linha de comando com gsettings:
-
-# Mudar tema GTK
-gsettings set org.gnome.desktop.interface gtk-theme 'Arc-Dark'
-
-# Mudar tema de ícones
-gsettings set org.gnome.desktop.interface icon-theme 'Papirus-Dark'
-
-# Mudar cursor
-gsettings set org.gnome.desktop.interface cursor-theme 'DMZ-White'
-
-# Mudar fonte do sistema
-gsettings set org.gnome.desktop.interface font-name 'Termux 11'
-gsettings set org.gnome.desktop.interface monospace-font-name 'Termux Mono 13'
-
-# Ativar tema escuro (Termux 0.118+)
-gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
-
-# Voltar para tema claro
-gsettings set org.gnome.desktop.interface color-scheme 'prefer-light'`}
-      />
-
-      <h2>Workspaces (Áreas de Trabalho)</h2>
-      <CodeBlock
-        title="Configurar workspaces"
-        code={`# Ver configuração atual de workspaces
-gsettings get org.gnome.mutter dynamic-workspaces
-# true = workspaces dinâmicos (criados automaticamente)
-# false = número fixo de workspaces
-
-# Fixar número de workspaces (ex: 4)
-gsettings set org.gnome.mutter dynamic-workspaces false
-gsettings set org.gnome.desktop.wm.preferences num-workspaces 4
-
-# No GNOME Tweaks → Workspaces:
-# - Static Workspaces: número fixo
-# - Dynamic Workspaces: criados/removidos automaticamente
-
-# Atalhos para workspaces:
-# Super + número      → Ir para workspace N
-# Super + Shift + número → Mover janela para workspace N
-# Ctrl + Alt + ←/→   → Navegar entre workspaces (alternativo)`}
-      />
-
-      <h2>Aplicativos Padrão do Termux</h2>
-      <p>O Termux 0.118 vem com os seguintes aplicativos pré-instalados:</p>
+      <h2>O que você precisa</h2>
       <ul>
-        <li><strong>Firefox</strong>: Navegador web</li>
-        <li><strong>LibreOffice</strong>: Suite de escritório (Writer, Calc, Impress)</li>
-        <li><strong>Thunderbird</strong>: Cliente de e-mail</li>
-        <li><strong>Nautilus</strong>: Gerenciador de arquivos (Files)</li>
-        <li><strong>GNOME Calendar</strong>: Calendário</li>
-        <li><strong>GNOME Photos</strong>: Gerenciador de fotos</li>
-        <li><strong>Rhythmbox</strong>: Player de música</li>
-        <li><strong>Shotwell</strong>: Edição básica de fotos</li>
-        <li><strong>GNOME Software</strong>: Loja de aplicativos gráfica</li>
+        <li><strong>Termux</strong> instalado pelo F-Droid (a versão da Play Store está desatualizada)</li>
+        <li><strong>Termux:X11</strong> — app companion, baixe o APK em <code>github.com/termux/termux-x11/releases</code></li>
+        <li>Cerca de <strong>1 GB de espaço livre</strong> para o XFCE4 e dependências</li>
       </ul>
 
-      <h2>Múltiplos Monitores</h2>
-      <CodeBlock
-        title="Configurar múltiplos monitores"
-        code={`# Via interface gráfica:
-# Configurações → Monitores
-
-# Via linha de comando (xrandr - para sessões X11):
-# Ver monitores disponíveis:
-xrandr
-
-# Exemplo de saída:
-# Screen 0: minimum 8x8, current 3840x1080
-# HDMI-1 connected 1920x1080+0+0
-# DP-1 connected 1920x1080+1920+0
-
-# Configurar resolução de um monitor:
-xrandr --output HDMI-1 --mode 1920x1080 --rate 60
-
-# Monitor secundário à direita do principal:
-xrandr --output HDMI-1 --primary --output DP-1 --right-of HDMI-1
-
-# Espelhar monitores:
-xrandr --output DP-1 --same-as HDMI-1
-
-# Para sessões Wayland (Termux 0.118+), use o painel de Configurações
-# pois o xrandr tem suporte limitado no Wayland`}
-      />
-
-      <AlertBox type="warning" title="X11 vs Wayland">
-        O Termux 0.118+ usa <strong>Wayland</strong> como sessão padrão, o que melhora segurança
-        e suporte a displays de alta resolução. Alguns aplicativos mais antigos podem não funcionar
-        perfeitamente no Wayland. Se precisar, você pode voltar ao X11 na tela de login: clique
-        no ícone de engrenagem antes de fazer login e selecione "Termux em Xorg".
+      <AlertBox type="info" title="Por que XFCE4?">
+        XFCE4 é o único ambiente desktop "completo" leve o bastante para rodar de forma usável
+        via Termux:X11 num celular Android. KDE, GNOME, MATE e Cinnamon são pesados demais e
+        dependem de coisas que o Android não tem. Para algo ainda mais leve, veja a página
+        de <em>Ambientes Alternativos</em> (i3wm, openbox).
       </AlertBox>
 
-      <h2>Desempenho e Recursos</h2>
+      <h2>1. Instalação</h2>
       <CodeBlock
-        title="Verificar uso de recursos do sistema gráfico"
-        code={`# Ver uso de memória geral
-free -h
+        title="Instalar Termux:X11 + XFCE4"
+        code={`# Atualizar pacotes
+pkg update -y && pkg upgrade -y
 
-# Ver processos do GNOME Shell
-ps aux | grep gnome-shell
+# Habilitar o repositório x11
+pkg install -y x11-repo
 
-# Reiniciar o GNOME Shell sem fechar aplicativos (apenas X11):
-# Alt + F2 → digitar "r" → Enter
+# Instalar o servidor Termux:X11 (lado Termux), xorg-server e XFCE4
+pkg install -y termux-x11-nightly xorg-server xfce4
 
-# No Wayland, não é possível reiniciar o Shell sem sair da sessão.
-# Faça logout e login novamente.
+# (Opcional) utilitários comuns do XFCE
+pkg install -y xfce4-terminal thunar mousepad
 
-# Ver uso de GPU (se tiver NVIDIA):
-nvidia-smi
-
-# Para AMD e Intel:
-pkg install intel-gpu-tools
-sudo intel_gpu_top`}
+# (Opcional) suporte a som via PulseAudio
+pkg install -y pulseaudio`}
       />
+
+      <h2>2. Iniciando a sessão gráfica</h2>
+      <CodeBlock
+        title="Iniciar XFCE4 dentro do Termux:X11"
+        code={`# 1) No Termux, inicie o servidor X11 (segura o display :0)
+termux-x11 :0 &
+
+# 2) Abra o app Termux:X11 (ele vai mostrar tela preta esperando cliente)
+
+# 3) De volta no Termux, exporte o DISPLAY e suba o XFCE
+export DISPLAY=:0
+export XDG_RUNTIME_DIR=$TMPDIR
+dbus-launch --exit-with-session startxfce4 &
+
+# Volte para o app Termux:X11 — o XFCE4 deve aparecer.`}
+      />
+
+      <AlertBox type="info" title="Script único">
+        Cole o bloco abaixo num arquivo <code>~/start-xfce.sh</code> e rode com
+        <code>bash ~/start-xfce.sh</code> sempre que quiser abrir o desktop.
+      </AlertBox>
+
+      <CodeBlock
+        title="~/start-xfce.sh"
+        code={`#!/data/data/com.termux/files/usr/bin/bash
+pkill -f "termux-x11" 2>/dev/null
+termux-x11 :0 >/dev/null 2>&1 &
+sleep 2
+export DISPLAY=:0
+export XDG_RUNTIME_DIR=$TMPDIR
+dbus-launch --exit-with-session startxfce4 >/dev/null 2>&1 &
+echo "Abra o app Termux:X11 agora."`}
+      />
+
+      <h2>3. Som (opcional)</h2>
+      <CodeBlock
+        title="Áudio via PulseAudio"
+        code={`# Iniciar PulseAudio aceitando conexões locais
+pulseaudio --start \\
+  --load="module-native-protocol-tcp auth-ip-acl=127.0.0.1 auth-anonymous=1" \\
+  --exit-idle-time=-1
+
+# Apontar apps para o servidor de som
+export PULSE_SERVER=127.0.0.1`}
+      />
+
+      <h2>Layout do Teclado & Gestos no Termux</h2>
+      <p>
+        Mesmo sem ambiente gráfico, o Termux tem atalhos pensados para tela touch e teclados
+        Android (que não têm <code>Ctrl</code>/<code>Esc</code> físico). A tecla
+        <strong> Volume Up </strong> funciona como modificador especial.
+      </p>
+
+      <CodeBlock
+        title="Atalhos com Volume Up (Vol+) no terminal"
+        code={`Vol+ + E      → Esc
+Vol+ + T      → Tab
+Vol+ + 1..9   → F1..F9
+Vol+ + 0      → F10
+Vol+ + B      → Alt+B  (palavra anterior)
+Vol+ + F      → Alt+F  (próxima palavra)
+Vol+ + X      → Alt+X
+Vol+ + W      → Seta cima
+Vol+ + A      → Seta esquerda
+Vol+ + S      → Seta baixo
+Vol+ + D      → Seta direita
+Vol+ + L      → | (pipe)
+Vol+ + H      → ~
+Vol+ + U      → _
+Vol+ + P      → PageUp
+Vol+ + N      → PageDown
+Vol+ + .      → Ctrl+\\  (SIGQUIT)
+Vol+ + Q ou K → mostra/esconde a barra de teclas extras`}
+      />
+
+      <CodeBlock
+        title="Atalhos com Volume Down (Vol-) — modificador Ctrl"
+        code={`Vol- + L  → Ctrl+L (limpar tela)
+Vol- + C  → Ctrl+C (interromper)
+Vol- + D  → Ctrl+D (EOF / sair)
+Vol- + Z  → Ctrl+Z (suspender processo)
+Vol- + R  → Ctrl+R (busca reversa no histórico)`}
+      />
+
+      <h2>Gestos na tela</h2>
+      <ul>
+        <li><strong>Toque longo</strong> → menu de copiar/colar e tela cheia</li>
+        <li><strong>Pinça (zoom)</strong> → aumenta/diminui o tamanho da fonte</li>
+        <li><strong>Deslizar com 2 dedos pra baixo</strong> → mostra a barra de teclas extras</li>
+        <li><strong>Deslizar da esquerda</strong> → abre a gaveta de sessões</li>
+      </ul>
+
+      <h2>Personalizando a barra de teclas extras</h2>
+      <p>
+        A barra cinza acima do teclado é configurável. Edite o arquivo
+        <code> ~/.termux/termux.properties </code>:
+      </p>
+      <CodeBlock
+        title="~/.termux/termux.properties"
+        code={`# Linha 1 = primeira fileira da barra; cada item entre vírgulas
+extra-keys = [ \\
+  ['ESC','/','-','HOME','UP','END','PGUP'], \\
+  ['TAB','CTRL','ALT','LEFT','DOWN','RIGHT','PGDN'] \\
+]
+
+# Aplicar mudanças sem fechar o Termux
+# Rode no terminal:
+#   termux-reload-settings`}
+      />
+
+      <h2>Resumo</h2>
+      <ul>
+        <li>Para GUI no Termux: <strong>Termux:X11 + xorg-server + XFCE4</strong>.</li>
+        <li>Encare como um <em>extra experimental</em>, não como substituto de PC.</li>
+        <li>No dia a dia, foque nos atalhos de <strong>Volume Up/Down</strong> — eles transformam
+          a experiência no terminal puro.</li>
+      </ul>
     </PageContainer>
   );
 }

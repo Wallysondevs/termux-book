@@ -1,501 +1,222 @@
 import { PageContainer } from "@/components/layout/PageContainer";
-import { Terminal, Command, File } from "@/components/ui/Terminal";
-import { InfoBox } from "@/components/ui/InfoBox";
+import { CodeBlock } from "@/components/ui/CodeBlock";
+import { AlertBox } from "@/components/ui/AlertBox";
 
 export default function Netplan() {
   return (
     <PageContainer
-      title="Netplan — Configuração de Rede no Termux"
-      subtitle="O sistema declarativo YAML que controla toda a rede do Termux desde a 17.10. DHCP, IP estático, Wi-Fi, VLAN, bonding, bridges e troubleshooting."
+      title="Rede no Termux (esqueça o Netplan)"
+      subtitle="Quem manda na rede do seu celular é o Android. Veja o que dá pra fazer no Termux: leitura de IP, Termux:API Wi-Fi, hostname e os limites do não-root."
       difficulty="intermediario"
-      timeToRead="40 min"
-      category="Redes"
+      timeToRead="20 min"
     >
-      <p>
-        O <strong>Netplan</strong> é o sistema oficial de configuração de rede do
-        Termux desde a versão 17.10. Em vez de você editar diretamente os arquivos
-        de cada renderer (systemd-networkd ou NetworkManager), você descreve a
-        rede em <strong>YAML</strong> dentro de <code>/etc/netplan/</code> e
-        roda <code>netplan apply</code> — o Netplan gera as configurações nativas
-        no backend escolhido. É declarativo, idempotente e portável.
-      </p>
+      <AlertBox type="danger" title="Netplan NÃO existe no Android/Termux">
+        O <code>Netplan</code> é exclusivo do Ubuntu — ele só gera arquivos para{" "}
+        <code>systemd-networkd</code> ou <code>NetworkManager</code>, nenhum dos
+        dois existe no Android. No celular quem decide IP, gateway, DNS, Wi-Fi
+        e dados móveis é o próprio Android (via <code>ConnectivityService</code>{" "}
+        e o <code>wpa_supplicant</code> do sistema). O Termux roda como um
+        usuário comum e <strong>não pode</strong> alterar a configuração de
+        rede sem root. Os comandos abaixo são quase todos{" "}
+        <strong>somente leitura</strong>.
+      </AlertBox>
 
-      <Terminal title="wallyson@termux: ~">
-        <Command command="ls /etc/netplan/" output="50-cloud-init.yaml" />
-        <Command command="netplan --version" output="0.107.1" />
-        <Command command="netplan status" output={`     Online state: online
-    DNS Addresses: 127.0.0.53 (stub)
-       DNS Search: lan
-
-●  1: lo ethernet UNKNOWN/UP (unmanaged)
-      MAC Address: 00:00:00:00:00:00
-        Addresses: 127.0.0.1/8
-                   ::1/128
-
-●  2: enp3s0 ethernet UP (networkd: enp3s0)
-      MAC Address: 08:00:27:4b:89:1c (PCS Systemtechnik GmbH)
-        Addresses: 192.168.1.100/24 (dhcp)
-                   fe80::a00:27ff:fe4b:891c/64 (link)
-    DNS Addresses: 192.168.1.1
-       DNS Search: lan
-           Routes: default via 192.168.1.1 from 192.168.1.100 metric 100 (dhcp)
-                   192.168.1.0/24 from 192.168.1.100 metric 100 (link)`} />
-      </Terminal>
-
-      <h2>1. Arquitetura: Netplan + Renderer</h2>
-
-      <p>
-        O Netplan não é o serviço que coloca a rede no ar — ele apenas{" "}
-        <em>traduz</em> seu YAML para a configuração do <strong>renderer</strong>{" "}
-        que de fato gerencia as interfaces. Há dois renderers oficiais:
-      </p>
-
-      <table>
-        <thead>
-          <tr><th>Renderer</th><th>Quando usar</th><th>Configs geradas em</th></tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><code>networkd</code> (systemd-networkd)</td>
-            <td>Servidores Termux (padrão)</td>
-            <td>/run/systemd/network/</td>
-          </tr>
-          <tr>
-            <td><code>NetworkManager</code></td>
-            <td>Desktops Termux (GNOME, KDE)</td>
-            <td>/run/NetworkManager/system-connections/</td>
-          </tr>
-        </tbody>
-      </table>
-
-      <h2>2. Estrutura do diretório /etc/netplan/</h2>
-
-      <Terminal title="wallyson@termux: ~">
-        <Command command="ls -la /etc/netplan/" output={`total 16
-drwxr-xr-x   2 root root 4096 abr 12 14:42 .
-drwxr-xr-x 134 root root 4096 abr 12 14:30 ..
--rw-r--r--   1 root root  234 mar 15 10:11 50-cloud-init.yaml`} />
-        <Command command="cat /etc/netplan/50-cloud-init.yaml" output={`# This file is generated from information provided by the datasource. Changes
-# to it will not persist across an instance reboot.
-network:
-    ethernets:
-        enp3s0:
-            dhcp4: true
-    version: 2`} />
-      </Terminal>
-
-      <p>Os arquivos são processados em ordem alfabética. Convenção:</p>
+      <h2>1. Como o Android gerencia a rede</h2>
 
       <ul>
-        <li><code>00-installer-config.yaml</code> — gerado pelo instalador (Server)</li>
-        <li><code>01-network-manager-all.yaml</code> — gerado em Desktops com NM</li>
-        <li><code>50-cloud-init.yaml</code> — escrito pelo cloud-init</li>
-        <li><code>99-overrides.yaml</code> — sua configuração custom (sempre por cima)</li>
+        <li>
+          O serviço <code>ConnectivityService</code> (Java, dentro do{" "}
+          <code>system_server</code>) decide qual interface está ativa
+          (Wi-Fi vs móvel vs Ethernet USB) e roteia o tráfego.
+        </li>
+        <li>
+          Wi-Fi é controlado por <code>WifiManager</code> + um{" "}
+          <code>wpa_supplicant</code> proprietário do fabricante.
+        </li>
+        <li>
+          Dados móveis passam pelo <code>RIL</code> (Radio Interface Layer) e
+          pelo modem baseband — totalmente fora do alcance do Termux.
+        </li>
+        <li>
+          DNS é configurado por <code>netd</code> (daemon nativo) e geralmente
+          aponta para um resolver interno em <code>127.0.0.53</code> ou para
+          o gateway.
+        </li>
+        <li>
+          Não há <code>/etc/network/interfaces</code>, não há{" "}
+          <code>/etc/netplan/</code>, não há <code>/etc/resolv.conf</code>{" "}
+          editável (no Termux ele aponta para um stub que reflete o resolver
+          do Android).
+        </li>
       </ul>
 
-      <InfoBox type="warning" title="Permissões">
-        Desde Netplan 0.106 os arquivos devem ter permissão <code>600</code> (apenas
-        root pode ler). Caso contrário <code>netplan apply</code> emite um aviso.
-      </InfoBox>
-
-      <Terminal title="wallyson@termux: ~">
-        <Command root command="chmod 600 /etc/netplan/*.yaml" />
-      </Terminal>
-
-      <h2>3. Sintaxe geral do YAML</h2>
-
-      <File path="/etc/netplan/01-exemplo.yaml">
-{`network:
-  version: 2
-  renderer: networkd          # ou NetworkManager
-  ethernets:
-    NOME_INTERFACE:
-      dhcp4: true|false
-      dhcp6: true|false
-      addresses: [IP/CIDR, ...]
-      routes:
-        - to: DESTINO
-          via: GATEWAY
-      nameservers:
-        addresses: [DNS1, DNS2]
-        search: [dominio1, dominio2]
-  wifis:
-    NOME_WIFI:
-      access-points:
-        "SSID":
-          password: "senha"
-  vlans:
-    NOME_VLAN:
-      id: ID
-      link: INTERFACE_PAI
-  bonds:
-    NOME_BOND:
-      interfaces: [eth0, eth1]
-      parameters:
-        mode: active-backup
-  bridges:
-    NOME_BRIDGE:
-      interfaces: [eth0]
-`}
-      </File>
-
-      <h2>4. DHCP simples (caso mais comum)</h2>
-
-      <File path="/etc/netplan/01-dhcp.yaml">
-{`network:
-  version: 2
-  renderer: networkd
-  ethernets:
-    enp3s0:
-      dhcp4: true
-      dhcp6: true
-`}
-      </File>
-
-      <Terminal title="wallyson@termux: ~">
-        <Command root command="netplan apply" />
-        <Command command="ip -br a show enp3s0" output="enp3s0           UP             192.168.1.100/24 fe80::a00:27ff:fe4b:891c/64" />
-      </Terminal>
-
-      <h2>5. IP estático completo</h2>
-
-      <File path="/etc/netplan/02-static.yaml">
-{`network:
-  version: 2
-  renderer: networkd
-  ethernets:
-    enp3s0:
-      dhcp4: false
-      addresses:
-        - 192.168.1.100/24
-        - 192.168.1.101/24    # IP secundário
-      routes:
-        - to: default
-          via: 192.168.1.1
-          metric: 100
-      nameservers:
-        addresses: [1.1.1.1, 8.8.8.8, 8.8.4.4]
-        search: [casa.lan, lab.local]
-`}
-      </File>
-
-      <Terminal title="wallyson@termux: ~">
-        <Command root command="netplan generate" comment="Apenas gera configs no /run/, não aplica" />
-        <Command root command="netplan try" comment="Aplica e reverte em 120s se você não confirmar (Enter)" output={`Do you want to keep these settings?
-
-Press ENTER before the timeout to accept the new configuration
-
-Changes will revert in 120 seconds
-Configuration accepted.`} />
-        <Command root command="netplan apply" />
-        <Command command="ip route" output={`default via 192.168.1.1 dev enp3s0 proto static metric 100
-192.168.1.0/24 dev enp3s0 proto kernel scope link src 192.168.1.100
-192.168.1.0/24 dev enp3s0 proto kernel scope link src 192.168.1.101`} />
-      </Terminal>
-
-      <InfoBox type="tip" title="Sempre teste com netplan try">
-        <code>netplan try</code> aplica e te dá 120s para confirmar. Se você
-        ficou sem rede (e portanto sem SSH), em 2 minutos a configuração
-        anterior volta automaticamente — salva-vidas em servidores remotos.
-      </InfoBox>
-
-      <h2>6. Múltiplas interfaces</h2>
-
-      <File path="/etc/netplan/03-multi.yaml">
-{`network:
-  version: 2
-  renderer: networkd
-  ethernets:
-    enp3s0:                   # WAN — DHCP do provedor
-      dhcp4: true
-    enp4s0:                   # LAN interna — IP fixo
-      dhcp4: false
-      addresses: [10.10.0.1/24]
-    enp5s0:                   # Rede de gerência
-      dhcp4: false
-      addresses: [172.16.0.10/24]
-      routes:
-        - to: 172.16.0.0/16
-          via: 172.16.0.1
-`}
-      </File>
-
-      <h2>7. VLAN (802.1Q)</h2>
-
-      <File path="/etc/netplan/04-vlan.yaml">
-{`network:
-  version: 2
-  renderer: networkd
-  ethernets:
-    enp3s0:
-      dhcp4: false
-  vlans:
-    vlan10:
-      id: 10
-      link: enp3s0
-      addresses: [192.168.10.5/24]
-      routes:
-        - to: default
-          via: 192.168.10.1
-    vlan20:
-      id: 20
-      link: enp3s0
-      addresses: [192.168.20.5/24]
-`}
-      </File>
-
-      <Terminal title="wallyson@termux: ~">
-        <Command root command="netplan apply" />
-        <Command command="ip -br a" output={`lo               UNKNOWN        127.0.0.1/8 ::1/128
-enp3s0           UP
-vlan10@enp3s0    UP             192.168.10.5/24
-vlan20@enp3s0    UP             192.168.20.5/24`} />
-      </Terminal>
-
-      <h2>8. Bond (link aggregation)</h2>
-
-      <File path="/etc/netplan/05-bond.yaml">
-{`network:
-  version: 2
-  renderer: networkd
-  ethernets:
-    enp3s0:
-      dhcp4: false
-    enp4s0:
-      dhcp4: false
-  bonds:
-    bond0:
-      interfaces: [enp3s0, enp4s0]
-      addresses: [192.168.1.100/24]
-      routes:
-        - to: default
-          via: 192.168.1.1
-      nameservers:
-        addresses: [1.1.1.1]
-      parameters:
-        mode: 802.3ad           # LACP (precisa do switch)
-        lacp-rate: fast
-        mii-monitor-interval: 100
-        transmit-hash-policy: layer3+4
-`}
-      </File>
-
-      <table>
-        <thead><tr><th>Modo</th><th>O que faz</th></tr></thead>
-        <tbody>
-          <tr><td>active-backup</td><td>Apenas 1 escravo ativo; failover</td></tr>
-          <tr><td>balance-rr</td><td>Round-robin, agrega banda (sem switch)</td></tr>
-          <tr><td>balance-xor</td><td>Hash → escolhe escravo</td></tr>
-          <tr><td>broadcast</td><td>Envia em todos (raro)</td></tr>
-          <tr><td>802.3ad</td><td>LACP (precisa switch compatível)</td></tr>
-          <tr><td>balance-tlb</td><td>Balanceia transmissão</td></tr>
-          <tr><td>balance-alb</td><td>Balanceia tx + rx</td></tr>
-        </tbody>
-      </table>
-
-      <h2>9. Bridge (para VMs e contêineres)</h2>
-
-      <File path="/etc/netplan/06-bridge.yaml">
-{`network:
-  version: 2
-  renderer: networkd
-  ethernets:
-    enp3s0:
-      dhcp4: false
-  bridges:
-    br0:
-      interfaces: [enp3s0]
-      dhcp4: true
-      parameters:
-        stp: false
-        forward-delay: 0
-`}
-      </File>
+      <h2>2. Inspecionar a rede de dentro do Termux</h2>
 
       <p>
-        Útil para conectar VMs (KVM/libvirt) ou contêineres (LXD) na mesma rede
-        física da máquina host.
+        Sem root só dá pra <em>olhar</em>. As ferramentas comuns funcionam em
+        modo somente-leitura:
       </p>
 
-      <h2>10. Wi-Fi (WPA2/WPA3-PSK)</h2>
+      <CodeBlock
+        title="Pacotes úteis"
+        code={`pkg install iproute2 net-tools dnsutils inetutils termux-api`}
+      />
 
-      <File path="/etc/netplan/10-wifi.yaml">
-{`network:
-  version: 2
-  renderer: networkd
-  wifis:
-    wlp2s0:
-      dhcp4: true
-      access-points:
-        "MinhaRedeWiFi":
-          password: "senha-super-secreta"
-        "RedeAberta":
-          # Sem password
-        "EmpresaWPA3":
-          auth:
-            key-management: sae
-            password: "senhaWPA3"
-`}
-      </File>
+      <CodeBlock
+        title="IP, interfaces e rotas (read-only)"
+        code={`# Endereços por interface
+ip -br addr
+# Saída típica:
+# lo               UNKNOWN        127.0.0.1/8 ::1/128
+# wlan0            UP             192.168.0.42/24 fe80::.../64
+# rmnet_data0      UP             10.x.x.x/30  (dados móveis)
+
+# Rotas
+ip route
+# default via 192.168.0.1 dev wlan0
+
+# DNS atual (resolver do Android)
+getprop net.dns1
+getprop net.dns2
+
+# Gateway via Termux:API (mais confiável que getprop em Android moderno)
+termux-wifi-connectioninfo | jq .`}
+      />
+
+      <AlertBox type="warning" title="ifconfig/ip set NÃO funcionam">
+        Comandos como <code>ip addr add</code>, <code>ip link set up/down</code>,{" "}
+        <code>ip route add</code>, <code>ifconfig wlan0 ...</code> retornam{" "}
+        <em>Operation not permitted</em> sem root. Isso é proteção do kernel
+        Android (CAP_NET_ADMIN restrito).
+      </AlertBox>
+
+      <h2>3. Termux:API — Wi-Fi e conectividade</h2>
 
       <p>
-        Em desktops com NetworkManager, prefira <code>nmcli</code> ou o applet
-        gráfico — é mais prático.
+        O app companheiro <strong>Termux:API</strong> (F-Droid) expõe partes
+        do <em>WifiManager</em> e do <em>ConnectivityManager</em> do Android.
+        É o equivalente moderno (e o único legítimo) ao "configurar rede" sem
+        root.
       </p>
 
-      <h2>11. Comandos do Netplan</h2>
+      <CodeBlock
+        title="Comandos termux-wifi-* e companhia"
+        code={`pkg install termux-api
 
-      <Terminal title="wallyson@termux: ~">
-        <Command root command="netplan generate" comment="Renderiza YAMLs em /run/systemd/network/ ou /run/NetworkManager/" />
-        <Command root command="netplan apply" comment="Aplica de fato (reload do renderer)" />
-        <Command root command="netplan try" comment="Aplica com rollback automático em 120s" />
-        <Command root command="netplan try --timeout 60" comment="Customiza o timeout" />
-        <Command command="netplan status --all" comment="Mostra estado atual de todas interfaces" output={`     Online state: online
-    DNS Addresses: 127.0.0.53 (stub), 1.1.1.1
-       DNS Search: casa.lan
+# Info da conexão Wi-Fi atual: SSID, BSSID, RSSI, IP, frequência
+termux-wifi-connectioninfo
 
-●  2: enp3s0 ethernet UP (networkd: enp3s0)
-        Addresses: 192.168.1.100/24
-           Routes: default via 192.168.1.1`} />
-        <Command command="netplan get ethernets.enp3s0.dhcp4" comment="Lê valor específico do YAML" output="true" />
-        <Command root command="netplan set ethernets.enp3s0.dhcp4=false" comment="Edita por linha de comando" />
-        <Command root command="netplan ip leases enp3s0" comment="Mostra lease DHCP atual" output={`# This is private data. Do not parse.
-ADDRESS=192.168.1.100
-NETMASK=255.255.255.0
-ROUTER=192.168.1.1
-SERVER_ADDRESS=192.168.1.1
-NEXT_SERVER=192.168.1.1
-BROADCAST=192.168.1.255
-T1=43200
-T2=75600
-LIFETIME=86400
-DNS=192.168.1.1
-HOSTNAME=termux`} />
-      </Terminal>
+# Lista de redes que o último scan retornou
+termux-wifi-scaninfo
 
-      <h2>12. Validando YAML</h2>
+# Liga/desliga o rádio Wi-Fi (em Android < 10; em 10+ exige usuário aprovar via UI)
+termux-wifi-enable true
+termux-wifi-enable false
 
-      <Terminal title="wallyson@termux: ~">
-        <Command root command="netplan generate" comment="Erro de sintaxe será reportado aqui" output={`** (generate:2148): WARNING **: 14:51:02.412: Permissions for /etc/netplan/01-static.yaml are too open. Netplan configuration should NOT be accessible by others.
-Error in network definition /etc/netplan/01-static.yaml line 7 column 14: expected mapping`} />
-      </Terminal>
+# Estado geral de conectividade (tipo: WIFI / CELLULAR / NONE, métricas, captive portal)
+termux-telephony-deviceinfo
+termux-telephony-cellinfo`}
+      />
 
-      <InfoBox type="danger" title="YAML é sensível a indentação">
-        Use sempre <strong>2 espaços</strong> (nunca tab). Cada nível encadeia
-        com 2 espaços a mais. Listas começam com <code>- </code>. Erro muito
-        comum: misturar 4 espaços em um lugar e 2 em outro.
-      </InfoBox>
+      <CodeBlock
+        title="Exemplo: alertar quando trocar de Wi-Fi"
+        code={`#!/data/data/com.termux/files/usr/bin/sh
+LAST=""
+while true; do
+  CUR=$(termux-wifi-connectioninfo | jq -r .ssid)
+  if [ "$CUR" != "$LAST" ]; then
+    termux-notification --title "Wi-Fi" --content "Agora em: $CUR"
+    LAST="$CUR"
+  fi
+  sleep 10
+done`}
+      />
 
-      <h2>13. Trocando o renderer</h2>
+      <h2>4. Hostname, /etc/hosts e proxies</h2>
 
       <p>
-        Se você quer migrar do <code>NetworkManager</code> (desktop) para{" "}
-        <code>networkd</code> (servidor) ou vice-versa, basta trocar o{" "}
-        <code>renderer:</code> no YAML.
+        Algumas coisas <em>são</em> editáveis dentro do <code>$PREFIX</code> do
+        Termux porque ficam isoladas no seu sandbox:
       </p>
 
-      <Terminal title="wallyson@termux: ~">
-        <Command root command="systemctl status systemd-networkd" output={`● systemd-networkd.service - Network Configuration
-     Loaded: loaded (/lib/systemd/system/systemd-networkd.service; enabled)
-     Active: active (running) since Sat 2025-04-12 13:42:11 -03; 1h 10min ago
-       Docs: man:systemd-networkd.service(8)
-   Main PID: 421 (systemd-network)
-     Status: "Processing requests..."`} />
-        <Command root command="systemctl status NetworkManager" output={`Unit NetworkManager.service could not be found.`} />
-      </Terminal>
+      <CodeBlock
+        title="Coisas que VOCÊ controla"
+        code={`# /etc/hosts do Termux (afeta só processos rodando no Termux)
+echo "192.168.0.50  servidor.lan" >> $PREFIX/etc/hosts
 
-      <h2>14. Troubleshooting</h2>
+# Proxy via variáveis de ambiente
+export http_proxy=http://192.168.0.10:3128
+export https_proxy=$http_proxy
+export no_proxy=localhost,127.0.0.1
 
-      <table>
-        <thead><tr><th>Sintoma</th><th>Solução</th></tr></thead>
-        <tbody>
-          <tr>
-            <td>"netplan apply não fez nada"</td>
-            <td>Rode <code>netplan --debug apply</code> e veja o que está sendo gerado.</td>
-          </tr>
-          <tr>
-            <td>Servidor sem rede após apply</td>
-            <td>Acesse via console; remova/edite o YAML; rode <code>netplan apply</code>. Sempre prefira <code>netplan try</code>!</td>
-          </tr>
-          <tr>
-            <td>"Could not connect to system bus"</td>
-            <td><code>systemctl restart systemd-networkd</code> e cheque <code>journalctl -u systemd-networkd -e</code>.</td>
-          </tr>
-          <tr>
-            <td>Cloud-init sobrescreve sua config</td>
-            <td>
-              Crie <code>/etc/cloud/cloud.cfg.d/99-disable-network.cfg</code>{" "}
-              com <code>{`network: {config: disabled}`}</code>.
-            </td>
-          </tr>
-        </tbody>
-      </table>
+# Hostname visto por shell (não muda o do Android)
+hostname meu-termux`}
+      />
 
-      <Terminal title="wallyson@termux: ~">
-        <Command root command="netplan --debug apply" output={`** (generate:3211): DEBUG: 14:55:42.114: Processing input file /etc/netplan/50-cloud-init.yaml..
-** (generate:3211): DEBUG: 14:55:42.115: starting new processing pass
-** (generate:3211): DEBUG: 14:55:42.115: enp3s0: setting default backend to networkd
-** (generate:3211): DEBUG: 14:55:42.115: Generating output files..
-** (generate:3211): DEBUG: 14:55:42.116: networkd: definition enp3s0 is not for us (backend 1)
-DEBUG:netplan generated networkd configuration changed, restarting networkd
-DEBUG:no netplan generated NM configuration exists`} />
-        <Command root command="journalctl -u systemd-networkd -n 30 --no-pager" comment="Logs do networkd" output={`abr 12 14:55:42 termux systemd[1]: Reloading systemd-networkd...
-abr 12 14:55:42 termux systemd-networkd[421]: Loaded files: /run/systemd/network/10-netplan-enp3s0.network
-abr 12 14:55:42 termux systemd-networkd[421]: enp3s0: Configured IP address 192.168.1.100/24
-abr 12 14:55:42 termux systemd-networkd[421]: enp3s0: Gained carrier
-abr 12 14:55:42 termux systemd-networkd[421]: enp3s0: Configured DHCPv4 lease
-abr 12 14:55:42 termux systemd-networkd[421]: Reloaded.`} />
-      </Terminal>
+      <h2>5. Servidores no Termux: o que muda na prática</h2>
 
-      <h2>15. Caso prático completo: servidor com bridge para libvirt</h2>
+      <AlertBox type="warning" title="IP do celular muda o tempo todo">
+        Em rede móvel você está atrás de CGNAT — sem IP público. Em Wi-Fi o IP
+        é DHCP do roteador e troca quando você reconecta. Para servir algo
+        externamente use um túnel: <code>ssh -R</code>, Cloudflare Tunnel
+        (<code>cloudflared</code>), <code>tailscale</code> (via proot-distro)
+        ou <code>ngrok</code>.
+      </AlertBox>
 
-      <File path="/etc/netplan/99-server.yaml">
-{`network:
-  version: 2
-  renderer: networkd
-  ethernets:
-    enp3s0:
-      dhcp4: false
-      dhcp6: false
-  bridges:
-    br0:
-      interfaces: [enp3s0]
-      addresses: [192.168.1.100/24]
-      routes:
-        - to: default
-          via: 192.168.1.1
-      nameservers:
-        addresses: [1.1.1.1, 8.8.8.8]
-        search: [lab.local]
-      parameters:
-        stp: false
-        forward-delay: 0
-`}
-      </File>
+      <ul>
+        <li>
+          Portas abaixo de 1024 são privilegiadas — sem root, escute em{" "}
+          <code>8080</code>, <code>8443</code>, <code>2222</code> etc.
+        </li>
+        <li>
+          O <code>nginx</code>, <code>php-fpm</code>, <code>postgres</code>,{" "}
+          <code>node</code> etc. rodam normalmente — só não há{" "}
+          <code>systemd</code> nem <code>networkd</code> para "subir interface"
+          (não precisa, o Android já fez isso).
+        </li>
+        <li>
+          Para acessar do PC na mesma rede: pegue o IP via{" "}
+          <code>ip -br addr show wlan0</code> e conecte
+          <code> http://&lt;IP&gt;:8080</code>.
+        </li>
+      </ul>
 
-      <Terminal title="wallyson@termux: ~">
-        <Command root command="chmod 600 /etc/netplan/99-server.yaml" />
-        <Command root command="netplan try" output="Configuration accepted." />
-        <Command command="ip -br a" output={`lo               UNKNOWN        127.0.0.1/8 ::1/128
-enp3s0           UP
-br0              UP             192.168.1.100/24 fe80::a00:27ff:fe4b:891c/64`} />
-        <Command command="bridge link" output={`6: enp3s0@br0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 master br0 state forwarding priority 32 cost 4`} />
-      </Terminal>
+      <h2>6. VPN no Termux</h2>
 
       <p>
-        A partir daqui, KVM/libvirt ou LXD podem usar <code>br0</code> como rede
-        macvtap, dando IPs da LAN diretamente para as VMs/containers.
+        VPNs nativas (WireGuard, OpenVPN) <strong>precisam</strong> de{" "}
+        <code>tun/tap</code>, que o Android só permite via API{" "}
+        <em>VpnService</em>. Por isso instale o app correspondente
+        (<em>WireGuard</em>, <em>OpenVPN for Android</em>) — eles configuram a
+        VPN no Android inteiro, e o Termux herda automaticamente porque toda
+        sua conectividade passa pelo <code>ConnectivityService</code>.
       </p>
 
-      <InfoBox type="success" title="Resumo do Netplan">
+      <h2>7. Tabela: Netplan/Ubuntu × Termux</h2>
+
+      <CodeBlock
+        title="Equivalências"
+        code={`Ubuntu / Netplan                        Termux / Android
+--------------------------------------  ----------------------------------
+/etc/netplan/*.yaml                     (não existe — Android cuida)
+netplan apply                           Wi-Fi/Mobile pela UI do Android
+nmcli / NetworkManager                  termux-wifi-* (Termux:API)
+ip addr add / ip route add              negado (sem CAP_NET_ADMIN)
+/etc/resolv.conf editável               getprop net.dns1 (read-only)
+systemd-networkd                        ConnectivityService (sistema)
+ufw / iptables                          só com root + iptables do kernel
+WireGuard CLI                           App "WireGuard" + VpnService`}
+      />
+
+      <AlertBox type="success" title="Resumo">
         <ol>
-          <li>Edite YAML em <code>/etc/netplan/</code> (perm 600).</li>
-          <li>Sempre teste com <code>netplan try</code>.</li>
-          <li>Use <code>netplan generate --debug</code> para depurar.</li>
-          <li>Cuidado com indentação YAML.</li>
-          <li>Em desktops, prefira NetworkManager + nmcli.</li>
+          <li>Esqueça Netplan — quem manda é o Android.</li>
+          <li>Use <code>ip</code>/<code>ifconfig</code> só para LER o estado.</li>
+          <li>Para Wi-Fi: <code>termux-wifi-*</code> via Termux:API.</li>
+          <li>Para servir algo: porta &gt; 1024 + túnel reverso para sair do CGNAT.</li>
+          <li>Para VPN: app Android nativo, Termux herda automaticamente.</li>
         </ol>
-      </InfoBox>
+      </AlertBox>
     </PageContainer>
   );
 }
