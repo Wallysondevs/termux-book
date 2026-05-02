@@ -1,10 +1,10 @@
-@import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&family=Ubuntu+Mono:wght@400;700&family=Ubuntu+Sans:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
 @import "tailwindcss";
 
 @theme inline {
-  --font-sans: 'Ubuntu Sans', 'Ubuntu', system-ui, sans-serif;
-  --font-mono: 'Ubuntu Mono', 'Fira Code', monospace;
-  --font-display: 'Ubuntu', system-ui, sans-serif;
+  --font-sans: 'Inter', 'system-ui', sans-serif, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+  --font-display: 'Inter', system-ui, sans-serif;
 
   --color-background: hsl(var(--background));
   --color-foreground: hsl(var(--foreground));
@@ -26,15 +26,15 @@
   --color-input: hsl(var(--input));
   --color-ring: hsl(var(--ring));
 
-  /* Ubuntu Brand Colors (oficial palette) */
-  --color-ubuntu-orange: #5EBE5E;
-  --color-ubuntu-aubergine: #0D0D0D;
-  --color-ubuntu-mid-aubergine: #1F1F1F;
-  --color-ubuntu-light-aubergine: #2A2A2A;
-  --color-ubuntu-warm-grey: #AEA79F;
-  --color-ubuntu-cool-grey: #333333;
-  --color-ubuntu-text-grey: #111111;
-  --color-ubuntu-canonical: #3A8C3A;
+  /* Termux Brand Colors */
+  --color-termux-orange: #5EBE5E;
+  --color-termux-aubergine: #0D0D0D;
+  --color-termux-mid-aubergine: #1F1F1F;
+  --color-termux-light-aubergine: #2A2A2A;
+  --color-termux-warm-grey: #AEA79F;
+  --color-termux-cool-grey: #333333;
+  --color-termux-text-grey: #111111;
+  --color-termux-canonical: #3A8C3A;
   --color-terminal-bg: #000000;
   --color-terminal-prompt-user: #4E9A06;
   --color-terminal-prompt-host: #4E9A06;
@@ -50,9 +50,9 @@
   --card-foreground: 0 0% 95%;
   --popover: 290 50% 10%;
   --popover-foreground: 0 0% 95%;
-  --primary: 14 81% 52%;             /* Ubuntu Orange #5EBE5E */
+  --primary: 14 81% 52%;             /* Termux Green #5EBE5E */
   --primary-foreground: 0 0% 100%;
-  --secondary: 314 53% 30%;          /* Ubuntu Light Aubergine #2A2A2A */
+  --secondary: 314 53% 30%;          /* Termux Dark #2A2A2A */
   --secondary-foreground: 0 0% 100%;
   --muted: 290 30% 15%;
   --muted-foreground: 290 8% 65%;
@@ -99,12 +99,12 @@ body {
 }
 
 /* ===========================================================
-   SCROLLBAR CUSTOMIZADA — UBUNTU STYLE
+   SCROLLBAR CUSTOMIZADA — TERMUX STYLE
    =========================================================== */
 
 * {
   scrollbar-width: thin;
-  scrollbar-color: var(--color-ubuntu-orange) transparent;
+  scrollbar-color: var(--color-termux-orange) transparent;
 }
 
 *::-webkit-scrollbar {
@@ -139,7 +139,7 @@ body {
   background: hsl(290 50% 6%);
 }
 
-/* Scrollbar especial para o terminal — verde estilo Ubuntu */
+/* Scrollbar especial para o terminal — verde estilo Termux */
 .terminal-scroll::-webkit-scrollbar-thumb {
   background: linear-gradient(180deg, #4E9A06 0%, #3E7A05 100%);
   background-clip: padding-box;
@@ -154,7 +154,7 @@ body {
 }
 
 *:focus-visible {
-  outline: 2px solid var(--color-ubuntu-orange);
+  outline: 2px solid var(--color-termux-orange);
   outline-offset: 2px;
   border-radius: 4px;
 }
@@ -189,7 +189,7 @@ h2 {
 
 h2::before {
   content: "$ ";
-  color: var(--color-ubuntu-orange);
+  color: var(--color-termux-orange);
   font-family: var(--font-mono);
   font-weight: 400;
 }
@@ -198,7 +198,7 @@ h3 {
   font-size: 1.5rem;
   margin-top: 2rem;
   margin-bottom: 0.75rem;
-  color: var(--color-ubuntu-orange);
+  color: var(--color-termux-orange);
 }
 
 h3::before {
@@ -221,14 +221,14 @@ p {
 
 @layer base {
   a {
-    color: var(--color-ubuntu-orange);
+    color: var(--color-termux-orange);
     text-decoration: none;
     border-bottom: 1px dashed transparent;
     transition: all 0.15s ease;
   }
 
   a:hover {
-    border-bottom-color: var(--color-ubuntu-orange);
+    border-bottom-color: var(--color-termux-orange);
   }
 }
 
@@ -238,7 +238,7 @@ strong {
 }
 
 em {
-  color: var(--color-ubuntu-orange);
+  color: var(--color-termux-orange);
   font-style: normal;
   font-weight: 500;
 }
@@ -247,7 +247,7 @@ code:not(pre code) {
   font-family: var(--font-mono);
   font-size: 0.875em;
   background: hsl(290 40% 12%);
-  color: var(--color-ubuntu-orange);
+  color: var(--color-termux-orange);
   padding: 0.15rem 0.45rem;
   border-radius: 4px;
   border: 1px solid hsl(var(--border));
@@ -275,7 +275,7 @@ ul li::before {
   content: "▸";
   position: absolute;
   left: 0;
-  color: var(--color-ubuntu-orange);
+  color: var(--color-termux-orange);
   font-weight: 700;
 }
 
@@ -291,7 +291,7 @@ ol li {
 }
 
 ol li::marker {
-  color: var(--color-ubuntu-orange);
+  color: var(--color-termux-orange);
   font-weight: 700;
 }
 
@@ -321,7 +321,7 @@ th {
   font-weight: 600;
   color: white;
   font-family: var(--font-display);
-  border-bottom: 2px solid var(--color-ubuntu-orange);
+  border-bottom: 2px solid var(--color-termux-orange);
 }
 
 td {
@@ -395,7 +395,7 @@ input::placeholder, textarea::placeholder {
   content: "▊";
   display: inline-block;
   margin-left: 2px;
-  color: var(--color-ubuntu-orange);
+  color: var(--color-termux-orange);
   animation: blink 1s step-start infinite;
 }
 
@@ -419,8 +419,8 @@ input::placeholder, textarea::placeholder {
   margin-top: 3.5rem;
 }
 
-/* Background decorativo Ubuntu — pequenos pontos */
-.ubuntu-dots {
+/* Background decorativo Termux — pequenos pontos */
+.termux-dots {
   background-image: radial-gradient(circle, hsl(var(--border)) 1px, transparent 1px);
   background-size: 24px 24px;
 }

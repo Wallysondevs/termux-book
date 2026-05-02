@@ -14,7 +14,7 @@ interface TerminalProps {
 export function Terminal({
   title,
   user = "wallyson",
-  host = "ubuntu",
+  host = "termux",
   path = "~",
   children,
   height,
@@ -23,9 +23,9 @@ export function Terminal({
   const finalTitle = title || `${user}@${host}: ${path}`;
 
   return (
-    <div className="my-6 rounded-lg overflow-hidden border border-[#1e0314] shadow-2xl bg-[#000000] ring-1 ring-white/5">
+    <div className="my-6 rounded-lg overflow-hidden border border-[#1A1A1A] shadow-2xl bg-[#000000] ring-1 ring-white/5">
       {showWindowChrome && (
-        <div className="flex items-center justify-between px-3 py-2 bg-gradient-to-b from-[#3C0F2D] to-[#2A0820] border-b border-black/40 select-none">
+        <div className="flex items-center justify-between px-3 py-2 bg-gradient-to-b from-[#1F1F1F] to-[#0D0D0D] border-b border-black/40 select-none">
           <div className="flex items-center gap-1.5">
             <button
               className="w-3.5 h-3.5 rounded-full bg-[#C75050] hover:bg-[#E06060] transition-colors flex items-center justify-center group"
@@ -85,7 +85,7 @@ interface CommandProps {
 
 export function Command({
   user = "wallyson",
-  host = "ubuntu",
+  host = "termux",
   path = "~",
   command,
   output,
@@ -157,7 +157,7 @@ export function Output({ children, className = "" }: OutputProps) {
 }
 
 /* ====================================================
-   COMMENT — Comentário em linha (verde Ubuntu)
+   COMMENT — Comentário em linha (verde Termux)
    ==================================================== */
 
 export function Comment({ children }: { children: ReactNode }) {

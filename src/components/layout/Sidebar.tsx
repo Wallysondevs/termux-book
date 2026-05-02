@@ -190,7 +190,7 @@ const NAVIGATION = [
       { path: "/gaming", label: "Gaming (RetroArch, ScummVM)", icon: Gamepad2 },
       { path: "/wine", label: "Wine (x86 via Box86)", icon: Gamepad2 },
       { path: "/gnome-extensions", label: "Termux:X11 (XFCE no Android)", icon: Monitor },
-      { path: "/ambientes-alternativos", label: "proot-distro (Ubuntu, Arch)", icon: Monitor },
+      { path: "/ambientes-alternativos", label: "proot-distro (Debian, Arch, Alpine)", icon: Monitor },
     ],
   },
   {
